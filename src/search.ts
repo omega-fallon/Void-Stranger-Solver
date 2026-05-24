@@ -3,6 +3,7 @@ import {
   applyAction,
   isGoal,
   renderBoard,
+  replayPath,
   stateKey,
 } from "./gameState";
 import { heuristic } from "./heuristic";
@@ -14,12 +15,23 @@ export interface SearchResult {
   nodesExplored: number;
 }
 
+export function countFloorTiles(board: Board) {
+  return board
+    .flat()
+    .map((cell): number => {
+      return ["floor", "wall", "glass"].includes(cell) ? 1 : 0;
+    })
+    .reduce((a, v) => a + v);
+}
+
 export async function aStar(
   initial: GameState,
   target: Board,
   verbose = false,
   slow = false,
 ): Promise<SearchResult> {
+  const numFloorTilesInSolution = countFloorTiles(target);
+
   const open = new MinHeap();
   const closed = new Set<string>();
 
@@ -31,18 +43,38 @@ export async function aStar(
     parent: null,
   });
 
+  let nodesExplored = 0;
+  let duplicateNodes = 0;
+  const start = performance.now();
   while (open.size > 0) {
     const current = open.pop()!;
+
+    const elapsedMs = performance.now() - start;
+    nodesExplored++;
+    const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
+
     const key = stateKey(current.state);
-    if (closed.has(key)) continue;
+    if (closed.has(key)) {
+      duplicateNodes++;
+      continue;
+    }
     closed.add(key);
 
-    if (verbose) {
+    if (verbose && Math.random() < 0.0001) {
       const action = current.action ?? "start";
       console.log(
-        `Explored: ${closed.size} states | Path length: ${
+        `Explored: ${closed.size} states + ${duplicateNodes} duplicates, ${
+          open.size
+        } open | ${elapsedMs.toFixed(
+          1,
+        )}ms | ${nodesPerSec} nodes/sec\nPath length: ${
           current.gCost
-        } | Action: ${action}\n${renderBoard(current.state)}`,
+        } | Cost: ${current.gCost + current.hCost} = ${current.gCost}g + ${
+          current.hCost
+        }h | Action: ${action}\n${renderBoard(
+          current.state,
+          numFloorTilesInSolution,
+        )}`,
       );
     }
 
@@ -54,6 +86,12 @@ export async function aStar(
     // Player has stepped into the void — no further moves are meaningful.
     const { row, col } = current.state.player;
     if (current.state.board[row]?.[col] === "empty") continue;
+
+    // Check if we've consumed too many tiles for the solution to be possible
+    const numFloorTilesRemaining =
+      countFloorTiles(current.state.board) +
+      (["floor", "glass"].includes(current.state.player.staffContent) ? 1 : 0);
+    if (numFloorTilesRemaining < numFloorTilesInSolution) continue;
 
     for (const action of ACTIONS) {
       const next = applyAction(current.state, action);

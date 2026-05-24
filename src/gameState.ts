@@ -114,7 +114,23 @@ export function isGoal(state: GameState, target: Board): boolean {
   );
 }
 
-export function renderBoard(state: GameState): string {
+export function replayPath(
+  initial: GameState,
+  path: Action[],
+  target: Board,
+): void {
+  console.log("\n--- Solution replay ---");
+  let state = initial;
+  console.log(`\nStep 0 (initial):\n${renderBoard(state)}\n`);
+  for (let i = 0; i < path.length; i++) {
+    const action = path[i]!;
+    state = applyAction(state, action)!;
+    console.log(`Step ${i + 1}: ${action}\n${renderBoard(state)}\n`);
+    if (isGoal(state, target)) console.log("Goal reached!");
+  }
+}
+
+export function renderBoard(state: GameState, requiredTiles?: number): string {
   const { board, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
     if (player.row === r && player.col === c) {
@@ -142,5 +158,16 @@ export function renderBoard(state: GameState): string {
   const rows = board.map(
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
   );
-  return ["┌────────────┐", ...rows, "└────────────┘"].join("\n");
+  const numFloorTilesRemaining =
+    board
+      .flat()
+      .map((cell): number => {
+        return ["floor", "wall", "glass"].includes(cell) ? 1 : 0;
+      })
+      .reduce((a, v) => a + v) +
+    (["floor", "glass"].includes(state.player.staffContent) ? 1 : 0);
+  return (
+    `${numFloorTilesRemaining} floor tiles remain out of a necessary ${requiredTiles}\n` +
+    ["┌────────────┐", ...rows, "└────────────┘"].join("\n")
+  );
 }

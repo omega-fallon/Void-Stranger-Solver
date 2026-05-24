@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { aStar } from "./search";
+import { replayPath } from "./gameState";
 import { parseBoard } from "./solve";
 import type { RawLevel } from "./levels";
 
@@ -86,7 +87,8 @@ for (const level of TEST_LEVELS) {
       player: level.initial.player,
     };
     const target = parseBoard(level.target);
-    const { path } = await aStar(initial, target, true);
+    const { path } = await aStar(initial, target);
+    if (path) replayPath(initial, path, target);
     assert.ok(path !== null, "No solution found");
   });
 }

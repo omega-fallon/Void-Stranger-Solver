@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "node:util";
-import { applyAction, isGoal, renderBoard } from "./gameState";
+import { replayPath } from "./gameState";
 import { LEVELS } from "./levels";
 import { aStar } from "./search";
 import { parseBoard } from "./solve";
@@ -72,17 +72,7 @@ async function main() {
   console.log(`Solution found in ${path.length} steps (${perf}):`);
   console.log(path.join(", "));
 
-  if (values.verbose) {
-    console.log("\n--- Solution replay ---");
-    let state = INITIAL_STATE;
-    console.log(`\nStep 0 (initial):\n${renderBoard(state)}\n`);
-    for (let i = 0; i < path.length; i++) {
-      const action = path[i]!;
-      state = applyAction(state, action)!;
-      console.log(`Step ${i + 1}: ${action}\n${renderBoard(state)}\n`);
-      if (isGoal(state, TARGET_BOARD)) console.log("Goal reached!");
-    }
-  }
+  if (values.verbose) replayPath(INITIAL_STATE, path, TARGET_BOARD);
 }
 
 main();
