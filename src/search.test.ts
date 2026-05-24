@@ -5,7 +5,7 @@ import { replayPath } from "./gameState";
 import { parseBoard } from "./solve";
 import type { RawLevel } from "./levels";
 
-const TEST_LEVELS: RawLevel[] = [
+const TEST_LEVELS: (RawLevel & { solutionLength?: number })[] = [
   {
     name: "Solves Add's brand",
     initial: {
@@ -29,6 +29,7 @@ const TEST_LEVELS: RawLevel[] = [
       " ##   ",
       "#    #",
     ],
+    solutionLength: 5,
   },
   {
     name: "Walks over glass",
@@ -88,6 +89,9 @@ for (const level of TEST_LEVELS) {
     };
     const target = parseBoard(level.target);
     const { path } = await aStar(initial, target);
+    if (level.solutionLength) {
+      assert.equal(level.solutionLength, path?.length);
+    }
     if (path) replayPath(initial, path, target);
     assert.ok(path !== null, "No solution found");
   });

@@ -7,7 +7,7 @@ import type {
   StaffContent,
 } from "./types";
 
-export const ACTIONS: Action[] = ["up", "down", "left", "right", "staff"];
+export const ACTIONS: Action[] = ["staff", "up", "down", "left", "right"];
 
 const DELTAS: Record<Direction, { dr: number; dc: number }> = {
   up: { dr: -1, dc: 0 },
@@ -167,7 +167,8 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       .reduce((a, v) => a + v) +
     (["floor", "glass"].includes(state.player.staffContent) ? 1 : 0);
   return (
-    `${numFloorTilesRemaining} floor tiles remain out of a necessary ${requiredTiles}\n` +
-    ["┌────────────┐", ...rows, "└────────────┘"].join("\n")
+    `${numFloorTilesRemaining} floor tiles remain${
+      requiredTiles ? ` out of a necessary ${requiredTiles}` : ""
+    }\n` + ["┌────────────┐", ...rows, "└────────────┘"].join("\n")
   );
 }

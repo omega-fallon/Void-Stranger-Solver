@@ -3,25 +3,23 @@ import {
   applyAction,
   isGoal,
   renderBoard,
-  replayPath,
   stateKey,
 } from "./gameState";
 import { heuristic } from "./heuristic";
-import { MinHeap } from "./priorityQueue";
-import type { Action, Board, GameState, SearchNode } from "./types";
+import type { Action, Board, GameState } from "./types";
 
 export interface SearchResult {
   path: Action[] | null;
   nodesExplored: number;
 }
 
-export function countFloorTiles(board: Board) {
+export function countFloorTiles(board: Board): number {
   return board
     .flat()
-    .map((cell): number => {
-      return ["floor", "wall", "glass"].includes(cell) ? 1 : 0;
-    })
-    .reduce((a, v) => a + v);
+    .reduce(
+      (n, cell) => n + (["floor", "wall", "glass"].includes(cell) ? 1 : 0),
+      0,
+    );
 }
 
 export async function aStar(
@@ -32,90 +30,127 @@ export async function aStar(
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
-  const open = new MinHeap();
-  const closed = new Set<string>();
-
-  open.push({
-    state: initial,
-    gCost: 0,
-    hCost: heuristic(initial, target),
-    action: null,
-    parent: null,
-  });
-
+  let threshold = heuristic(initial, target);
   let nodesExplored = 0;
-  let duplicateNodes = 0;
+  let loopsPrevented = 0;
   const start = performance.now();
-  while (open.size > 0) {
-    const current = open.pop()!;
 
-    const elapsedMs = performance.now() - start;
+  // Per-path visited set — prevents cycles within a single DFS path.
+  // Memory is O(depth), never grows beyond the path length.
+  const visited = new Set<string>();
+  visited.add(stateKey(initial));
+
+  // DEBUG
+  let maxCorrectSoFar = 0;
+  const eusSolutionPath = "LRURDRZLLZLZRRZRDLZDZDZLDR".split("").map((l) => {
+    return {
+      L: "left",
+      R: "right",
+      U: "up",
+      D: "down",
+      Z: "staff",
+    }[l];
+  });
+  // END DEBUG
+
+  // Returns "found" on success, Infinity if this subtree is unsolvable, or the
+  // minimum f-cost that exceeded the current threshold (next threshold to try).
+  async function search(
+    state: GameState,
+    g: number,
+    path: Action[],
+  ): Promise<"found" | number> {
+    const h = heuristic(state, target);
+    const f = g + h;
+    if (f > threshold) return f;
+
     nodesExplored++;
-    const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
 
-    const key = stateKey(current.state);
-    if (closed.has(key)) {
-      duplicateNodes++;
-      continue;
-    }
-    closed.add(key);
+    const amountOfPathFound = (() => {
+      for (let i = 0; i < eusSolutionPath.length; i++) {
+        if (eusSolutionPath[i] != path[i]) {
+          return i;
+        }
+      }
+      return eusSolutionPath.length;
+    })();
+    maxCorrectSoFar = Math.max(amountOfPathFound, maxCorrectSoFar);
 
-    if (verbose && Math.random() < 0.0001) {
-      const action = current.action ?? "start";
+    if (verbose && Math.random() < 0.00001) {
+      const elapsedMs = performance.now() - start;
+      const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
+      const action = path.at(-1) ?? "start";
+
+      // console.log(path);
+      // console.log(eusSolutionPath);
       console.log(
-        `Explored: ${closed.size} states + ${duplicateNodes} duplicates, ${
-          open.size
-        } open | ${elapsedMs.toFixed(
-          1,
-        )}ms | ${nodesPerSec} nodes/sec\nPath length: ${
-          current.gCost
-        } | Cost: ${current.gCost + current.hCost} = ${current.gCost}g + ${
-          current.hCost
-        }h | Action: ${action}\n${renderBoard(
-          current.state,
-          numFloorTilesInSolution,
-        )}`,
+        `Threshold: ${threshold} | Explored: ${nodesExplored} | ${loopsPrevented} loops prevented | ` +
+          `${elapsedMs.toFixed(1)}ms | ${nodesPerSec} nodes/sec\n` +
+          `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct | Action: ${action}\n` +
+          `${renderBoard(state, numFloorTilesInSolution)}`,
       );
     }
 
     if (slow) await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
-    if (isGoal(current.state, target))
-      return { path: reconstructPath(current), nodesExplored: closed.size };
+    if (isGoal(state, target)) return "found";
 
-    // Player has stepped into the void — no further moves are meaningful.
-    const { row, col } = current.state.player;
-    if (current.state.board[row]?.[col] === "empty") continue;
+    // Exit step: player is in the void but not at goal — dead end.
+    const { row, col } = state.player;
+    if (state.board[row]?.[col] === "empty") return Infinity;
 
-    // Check if we've consumed too many tiles for the solution to be possible
-    const numFloorTilesRemaining =
-      countFloorTiles(current.state.board) +
-      (["floor", "glass"].includes(current.state.player.staffContent) ? 1 : 0);
-    if (numFloorTilesRemaining < numFloorTilesInSolution) continue;
+    // Pruning: not enough floor tiles remaining to satisfy the target.
+    const floorInStaff = ["floor", "glass"].includes(state.player.staffContent)
+      ? 1
+      : 0;
+    if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
+      return Infinity;
+    }
+
+    let min = Infinity;
 
     for (const action of ACTIONS) {
-      const next = applyAction(current.state, action);
+      const next = applyAction(state, action);
       if (!next) continue;
-      if (closed.has(stateKey(next))) continue;
-      open.push({
-        state: next,
-        gCost: current.gCost + 1,
-        hCost: heuristic(next, target),
-        action,
-        parent: current,
-      });
+
+      const nextKey = stateKey(next);
+      if (visited.has(nextKey)) {
+        loopsPrevented++;
+        continue;
+      }
+
+      visited.add(nextKey);
+      path.push(action);
+
+      const result = await search(next, g + 1, path);
+
+      if (result === "found") return "found"; // path is intact — don't pop
+
+      path.pop();
+      visited.delete(nextKey);
+
+      if (result < min) min = result;
     }
+
+    return min;
   }
 
-  return { path: null, nodesExplored: closed.size };
-}
+  while (true) {
+    const path: Action[] = [];
+    const result = await search(initial, 0, path);
 
-function reconstructPath(node: SearchNode): Action[] {
-  const path: Action[] = [];
-  let cur: SearchNode | null = node;
-  while (cur?.action) {
-    path.push(cur.action);
-    cur = cur.parent;
+    if (result === "found") return { path, nodesExplored };
+    if (result === Infinity) return { path: null, nodesExplored };
+
+    if (verbose) {
+      const elapsedMs = performance.now() - start;
+      console.log(
+        `--- Threshold ${threshold} → ${result} | ${nodesExplored} nodes so far | ${elapsedMs.toFixed(
+          1,
+        )}ms ---`,
+      );
+    }
+
+    threshold = result;
   }
-  return path.reverse();
 }
