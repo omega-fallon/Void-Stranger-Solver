@@ -19,6 +19,6 @@ export function parseBoard(rows: string[]): Board {
       if (cell === undefined)
         throw new Error(`Unknown tile character: "${ch}"`);
       return cell;
-    })
+    }),
   );
 }

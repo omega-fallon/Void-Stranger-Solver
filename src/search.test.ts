@@ -25,7 +25,7 @@ test("aStar finds optimal path through glass to collect stairs", async () => {
   // Initial board:          Target board:
   //   ┌────────────┐         ┌────────────┐
   //   │⇒ ░░██      │         │██  ██      │
-  //   │    ██      │         │    ██      │
+  //   │  ████████  │         │  ████████  │
   //   │    S       │         │            │
   //   │            │         │            │
   //   │            │         │            │
@@ -33,24 +33,30 @@ test("aStar finds optimal path through glass to collect stairs", async () => {
   //   └────────────┘         └────────────┘
   //   ⇒ player (arrow shows facing direction)  █ floor  ░ glass  S stairs  (space) empty
   //
-  // The player must walk right twice (breaking the glass on departure),
-  // then down, then use the staff to collect the stairs.
-  // Optimal: right, right, down, staff (4 steps).
+  // The player walks right twice (breaking the glass on departure), then
+  // down, collects the stairs with staff, then steps down into the now-empty
+  // (2,2) cell to exit. Floor tiles at (1,1) and (1,3) block left/right exits
+  // so only the "down" exit is valid, making the path deterministic.
+  // Optimal: right, right, down, staff, down (5 steps).
 
   const initial = makeState(0, 0, "right", "empty", [
     [0, 0, "floor"],
     [0, 1, "glass"],
     [0, 2, "floor"],
+    [1, 1, "floor"],
     [1, 2, "floor"],
+    [1, 3, "floor"],
     [2, 2, "stairs"],
   ]);
 
   const target = makeBoard([
     [0, 0, "floor"],
     [0, 2, "floor"],
+    [1, 1, "floor"],
     [1, 2, "floor"],
+    [1, 3, "floor"],
   ]);
 
   const path = await aStar(initial, target);
-  assert.deepEqual(path, ["right", "right", "down", "staff"]);
+  assert.deepEqual(path, ["right", "right", "down", "staff", "down"]);
 });

@@ -8,7 +8,7 @@ function makeState(
   col: number,
   facing: Direction,
   staffContent: StaffContent,
-  cells: Array<[number, number, Cell]> = []
+  cells: Array<[number, number, Cell]> = [],
 ): GameState {
   const board = Array.from({ length: 6 }, () => Array<Cell>(6).fill("empty"));
   for (const [r, c, v] of cells) board[r]![c] = v;
@@ -29,9 +29,12 @@ test("move into floor updates position and facing", () => {
   assert.equal(r.board[1]![0], "floor"); // origin cell unchanged
 });
 
-test("move into empty returns null", () => {
+test("move into empty moves player there (exit step)", () => {
   const s = makeState(1, 0, "down", "empty", [[1, 0, "floor"]]);
-  assert.equal(applyAction(s, "up"), null);
+  const r = applyAction(s, "up")!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.board[0]![0], "empty"); // destination cell stays empty
 });
 
 test("move out of bounds returns null", () => {

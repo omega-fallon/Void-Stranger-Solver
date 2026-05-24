@@ -45,6 +45,10 @@ export async function aStar(
 
     if (isGoal(current.state, target)) return reconstructPath(current);
 
+    // Player has stepped into the void — no further moves are meaningful.
+    const { row, col } = current.state.player;
+    if (current.state.board[row]?.[col] === "empty") continue;
+
     for (const action of ACTIONS) {
       const next = applyAction(current.state, action);
       if (!next) continue;

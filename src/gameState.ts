@@ -43,7 +43,7 @@ export function applyAction(
     const newCol = col + dc;
     if (!inBounds(newRow, newCol)) return null;
     const dest = getCell(board, newRow, newCol);
-    if (dest === "empty" || dest === "wall") return null;
+    if (dest === "wall") return null;
 
     const newBoard =
       getCell(board, row, col) === "glass"
@@ -86,27 +86,30 @@ export function stateKey(state: GameState): string {
     c === "empty"
       ? "0"
       : c === "floor"
-        ? "1"
-        : c === "glass"
-          ? "G"
-          : c === "wall"
-            ? "W"
-            : "S";
+      ? "1"
+      : c === "glass"
+      ? "G"
+      : c === "wall"
+      ? "W"
+      : "S";
   const boardStr = state.board.flat().map(cellChar).join("");
   const { row, col, facing, staffContent } = state.player;
   const staffStr =
     staffContent === "empty"
       ? "e"
       : staffContent === "floor"
-        ? "t"
-        : staffContent === "glass"
-          ? "g"
-          : "s";
+      ? "t"
+      : staffContent === "glass"
+      ? "g"
+      : "s";
   return `${boardStr}|${row},${col},${facing},${staffStr}`;
 }
 
 export function isGoal(state: GameState, target: Board): boolean {
   if (state.player.staffContent !== "stairs") return false;
+  if (getCell(state.board, state.player.row, state.player.col) !== "empty")
+    return false;
+  // TODO: Check if stairs are in the staff? See if this improves performance.
   return state.board.every((row, r) =>
     row.every((cell, c) => cell === getCell(target, r, c)),
   );
