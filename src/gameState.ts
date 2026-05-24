@@ -43,7 +43,7 @@ export function applyAction(
     const newCol = col + dc;
     if (!inBounds(newRow, newCol)) return null;
     const dest = getCell(board, newRow, newCol);
-    if (dest === "wall") return null;
+    if (dest === "wall" || dest === "stairs") return null;
 
     const newBoard =
       getCell(board, row, col) === "glass"

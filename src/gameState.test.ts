@@ -42,14 +42,12 @@ test("move out of bounds returns null", () => {
   assert.equal(applyAction(s, "up"), null);
 });
 
-test("move onto stairs is valid (stairs is walkable)", () => {
+test("move onto stairs returns null (stairs is not walkable)", () => {
   const s = makeState(1, 0, "down", "empty", [
     [0, 0, "stairs"],
     [1, 0, "floor"],
   ]);
-  const r = applyAction(s, "up")!;
-  assert.equal(r.player.row, 0);
-  assert.equal(r.board[0]![0], "stairs"); // stairs not consumed by walking
+  assert.equal(applyAction(s, "up"), null);
 });
 
 // Glass
