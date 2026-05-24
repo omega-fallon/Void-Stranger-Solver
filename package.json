@@ -1,0 +1,23 @@
+{
+  "name": "void_stranger_brand_solver",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "bin": {
+    "void-stranger-brand-solver": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "node --require ts-node/register --test src/gameState.test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
