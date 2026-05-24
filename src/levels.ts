@@ -9,7 +9,7 @@ export interface RawLevel {
   target: string[];
 }
 
-// Board encoding: " " empty  "#" floor  "G" glass  "S" stairs
+// Board encoding: " " empty  "#" floor  "G" glass  "S" stairs  "W" wall
 export const LEVELS: RawLevel[] = [
   {
     name: "Add",

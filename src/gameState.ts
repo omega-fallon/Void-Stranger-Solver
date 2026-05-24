@@ -26,13 +26,13 @@ function getCell(board: Board, r: number, c: number): Cell {
 
 function setCell(board: Board, r: number, c: number, val: Cell): Board {
   return board.map((row, ri) =>
-    ri === r ? row.map((cell, ci) => (ci === c ? val : cell)) : row
+    ri === r ? row.map((cell, ci) => (ci === c ? val : cell)) : row,
   );
 }
 
 export function applyAction(
   state: GameState,
-  action: Action
+  action: Action,
 ): GameState | null {
   const { board, player } = state;
   const { row, col, facing, staffContent } = player;
@@ -42,7 +42,8 @@ export function applyAction(
     const newRow = row + dr;
     const newCol = col + dc;
     if (!inBounds(newRow, newCol)) return null;
-    if (getCell(board, newRow, newCol) === "empty") return null;
+    const dest = getCell(board, newRow, newCol);
+    if (dest === "empty" || dest === "wall") return null;
 
     const newBoard =
       getCell(board, row, col) === "glass"
@@ -63,7 +64,7 @@ export function applyAction(
 
   const front = getCell(board, fr, fc);
 
-  if (staffContent === "empty" && front !== "empty") {
+  if (staffContent === "empty" && front !== "empty" && front !== "wall") {
     return {
       board: setCell(board, fr, fc, "empty"),
       player: { row, col, facing, staffContent: front as StaffContent },
@@ -82,24 +83,32 @@ export function applyAction(
 
 export function stateKey(state: GameState): string {
   const cellChar = (c: Cell) =>
-    c === "empty" ? "0" : c === "floor" ? "1" : c === "glass" ? "G" : "S";
+    c === "empty"
+      ? "0"
+      : c === "floor"
+        ? "1"
+        : c === "glass"
+          ? "G"
+          : c === "wall"
+            ? "W"
+            : "S";
   const boardStr = state.board.flat().map(cellChar).join("");
   const { row, col, facing, staffContent } = state.player;
   const staffStr =
     staffContent === "empty"
       ? "e"
       : staffContent === "floor"
-      ? "t"
-      : staffContent === "glass"
-      ? "g"
-      : "s";
+        ? "t"
+        : staffContent === "glass"
+          ? "g"
+          : "s";
   return `${boardStr}|${row},${col},${facing},${staffStr}`;
 }
 
 export function isGoal(state: GameState, target: Board): boolean {
   if (state.player.staffContent !== "stairs") return false;
   return state.board.every((row, r) =>
-    row.every((cell, c) => cell === getCell(target, r, c))
+    row.every((cell, c) => cell === getCell(target, r, c)),
   );
 }
 
@@ -122,12 +131,14 @@ export function renderBoard(state: GameState): string {
         return "░░";
       case "stairs":
         return "S ";
+      case "wall":
+        return "▓▓";
       case "empty":
         return "  ";
     }
   };
   const rows = board.map(
-    (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│"
+    (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
   );
   return ["┌────────────┐", ...rows, "└────────────┘"].join("\n");
 }
