@@ -9,12 +9,17 @@ import { heuristic } from "./heuristic";
 import { MinHeap } from "./priorityQueue";
 import type { Action, Board, GameState, SearchNode } from "./types";
 
+export interface SearchResult {
+  path: Action[] | null;
+  nodesExplored: number;
+}
+
 export async function aStar(
   initial: GameState,
   target: Board,
   verbose = false,
   slow = false,
-): Promise<Action[] | null> {
+): Promise<SearchResult> {
   const open = new MinHeap();
   const closed = new Set<string>();
 
@@ -43,7 +48,8 @@ export async function aStar(
 
     if (slow) await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
-    if (isGoal(current.state, target)) return reconstructPath(current);
+    if (isGoal(current.state, target))
+      return { path: reconstructPath(current), nodesExplored: closed.size };
 
     // Player has stepped into the void — no further moves are meaningful.
     const { row, col } = current.state.player;
@@ -63,7 +69,7 @@ export async function aStar(
     }
   }
 
-  return null;
+  return { path: null, nodesExplored: closed.size };
 }
 
 function reconstructPath(node: SearchNode): Action[] {

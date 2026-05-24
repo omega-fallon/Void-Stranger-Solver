@@ -51,19 +51,25 @@ const TARGET_BOARD: Board = parseBoard(rawLevel.target);
 
 async function main() {
   console.log("Searching for solution...");
-  const path = await aStar(
+  const start = performance.now();
+  const { path, nodesExplored } = await aStar(
     INITIAL_STATE,
     TARGET_BOARD,
     values.verbose,
     values.slow,
   );
+  const elapsedMs = performance.now() - start;
+  const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
+  const perf = `${elapsedMs.toFixed(
+    1,
+  )}ms | ${nodesExplored} nodes | ${nodesPerSec} nodes/sec`;
 
   if (!path) {
-    console.log("No solution found.");
+    console.log(`No solution found. (${perf})`);
     return;
   }
 
-  console.log(`Solution found in ${path.length} steps:`);
+  console.log(`Solution found in ${path.length} steps (${perf}):`);
   console.log(path.join(", "));
 
   if (values.verbose) {
