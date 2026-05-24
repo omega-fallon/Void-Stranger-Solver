@@ -23,15 +23,15 @@ function makeBoard(cells: Array<[number, number, Cell]> = []): Board {
 
 test("aStar finds optimal path through glass to collect stairs", () => {
   // Initial board:          Target board:
-  //   ┌──────┐               ┌──────┐
-  //   │@░█   │               │█ █   │
-  //   │  █   │               │  █   │
-  //   │  S   │               │      │
-  //   │      │               │      │
-  //   │      │               │      │
-  //   │      │               │      │
-  //   └──────┘               └──────┘
-  //   @ player  █ floor  ░ glass  S stairs  (space) empty
+  //   ┌────────────┐         ┌────────────┐
+  //   │⇒ ░░██      │         │██  ██      │
+  //   │    ██      │         │    ██      │
+  //   │    S       │         │            │
+  //   │            │         │            │
+  //   │            │         │            │
+  //   │            │         │            │
+  //   └────────────┘         └────────────┘
+  //   ⇒ player (arrow shows facing direction)  █ floor  ░ glass  S stairs  (space) empty
   //
   // The player must walk right twice (breaking the glass on departure),
   // then down, then use the staff to collect the stairs.

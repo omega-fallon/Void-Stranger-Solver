@@ -1,9 +1,9 @@
-import type { Action, Board, GameState, SearchNode } from "./types";
-import { ACTIONS, applyAction, isGoal, stateKey } from "./gameState";
+import { ACTIONS, applyAction, isGoal, renderBoard, stateKey } from "./gameState";
 import { heuristic } from "./heuristic";
 import { MinHeap } from "./priorityQueue";
+import type { Action, Board, GameState, SearchNode } from "./types";
 
-export function aStar(initial: GameState, target: Board): Action[] | null {
+export function aStar(initial: GameState, target: Board, verbose = false): Action[] | null {
   const open = new MinHeap();
   const closed = new Set<string>();
 
@@ -20,6 +20,11 @@ export function aStar(initial: GameState, target: Board): Action[] | null {
     const key = stateKey(current.state);
     if (closed.has(key)) continue;
     closed.add(key);
+
+    if (verbose) {
+      const action = current.action ?? "start";
+      console.log(`Explored: ${closed.size} states | Path length: ${current.gCost} | Action: ${action}\n${renderBoard(current.state)}`);
+    }
 
     if (isGoal(current.state, target)) return reconstructPath(current);
 

@@ -89,34 +89,22 @@ export function isGoal(state: GameState, target: Board): boolean {
   );
 }
 
-export function renderBoard(state: GameState, target: Board): string {
+export function renderBoard(state: GameState): string {
   const { board, player } = state;
-  const cellChar = (cell: Cell) => {
+  const cellChar = (cell: Cell, r: number, c: number): string => {
+    if (player.row === r && player.col === c) {
+      const arrows: Record<Direction, string> = { up: "⇑ ", down: "⇓ ", left: "⇐ ", right: "⇒ " };
+      return arrows[player.facing];
+    }
     switch (cell) {
-      case "floor": return "#";
-      case "glass": return "G";
-      case "stairs": return "S";
-      case "empty": return ".";
+      case "floor": return "██";
+      case "glass": return "░░";
+      case "stairs": return "S ";
+      case "empty": return "  ";
     }
   };
-
-  const lines: string[] = [];
-  for (let r = 0; r < 6; r++) {
-    const row = Array.from({ length: 6 }, (_, c) => {
-      const isPlayer = player.row === r && player.col === c;
-      const cell = getCell(board, r, c);
-      const char = isPlayer ? "@" : cellChar(cell);
-      const mismatch = !isPlayer && cell !== getCell(target, r, c);
-      return char + (mismatch ? "!" : " ");
-    });
-    lines.push(row.join(""));
-  }
-
-  const staffStr = player.staffContent === "empty" ? "empty" : player.staffContent;
-  const mismatches = board.reduce(
-    (n, row, r) => n + row.filter((cell, c) => cell !== getCell(target, r, c)).length,
-    0
+  const rows = board.map((row, r) =>
+    "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│"
   );
-  lines.push(`Staff: ${staffStr}  Facing: ${player.facing}  Mismatches: ${mismatches}`);
-  return lines.join("\n");
+  return ["┌────────────┐", ...rows, "└────────────┘"].join("\n");
 }
