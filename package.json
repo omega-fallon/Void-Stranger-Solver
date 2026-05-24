@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/index.ts",
+    "dev": "node --max_old_space_size=16384 -r ts-node/register src/index.ts",
     "start": "node dist/index.js",
     "solve": "ts-node src/solve.ts",
     "test": "node --require ts-node/register --test src/gameState.test.ts src/search.test.ts",
