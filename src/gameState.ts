@@ -109,7 +109,6 @@ export function isGoal(state: GameState, target: Board): boolean {
   if (state.player.staffContent !== "stairs") return false;
   if (getCell(state.board, state.player.row, state.player.col) !== "empty")
     return false;
-  // TODO: Check if stairs are in the staff? See if this improves performance.
   return state.board.every((row, r) =>
     row.every((cell, c) => cell === getCell(target, r, c)),
   );
