@@ -9,7 +9,7 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "test": "node --require ts-node/register --test src/gameState.test.ts"
+    "test": "node --require ts-node/register --test src/gameState.test.ts src/search.test.ts"
   },
   "keywords": [],
   "author": "",
