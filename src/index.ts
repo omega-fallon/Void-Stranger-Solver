@@ -2,50 +2,51 @@
 
 import { parseArgs } from "node:util";
 import { applyAction, isGoal, renderBoard } from "./gameState";
+import { LEVELS } from "./levels";
 import { aStar } from "./search";
+import { parseBoard } from "./solve";
 import type { Board, GameState } from "./types";
-
-const TARGET_BOARD: Board = [
-  ["floor",  "empty", "empty", "empty", "empty", "floor" ],
-  ["empty",  "empty", "empty", "floor", "floor", "empty" ],
-  ["empty",  "floor", "floor", "floor", "floor", "floor" ],
-  ["floor",  "floor", "floor", "floor", "floor", "empty" ],
-  ["empty",  "floor", "floor", "empty", "empty", "empty" ],
-  ["floor",  "empty", "empty", "empty", "empty", "floor" ],
-];
-
-const INITIAL_STATE: GameState = {
-  board: [
-    ["floor",  "empty", "empty", "stairs", "empty", "floor" ],
-    ["empty",  "empty", "empty", "floor",  "floor", "empty" ],
-    ["empty",  "floor", "floor", "floor",  "floor", "floor" ],
-    ["floor",  "floor", "floor", "floor",  "floor", "empty" ],
-    ["empty",  "floor", "floor", "empty",  "empty", "empty" ],
-    ["floor",  "empty", "empty", "empty",  "empty", "floor" ],
-  ],
-  player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
-};
 
 const { values } = parseArgs({
   args: process.argv.slice(2),
   options: {
     help: { type: "boolean", short: "h" },
+    brand: { type: "string", short: "b" },
     verbose: { type: "boolean", short: "v" },
   },
 });
 
 if (values.help) {
+  const list = LEVELS.map((l) => `  ${l.name}`).join("\n");
   console.log(`Usage: void-stranger-brand-solver [options]
 
 Options:
-  -h, --help     Show this help message
-  -v, --verbose  Print each board state during solution replay
+  -h, --help           Show this help message
+  -b, --brand <name>   Level to solve (default: Add)
+  -v, --verbose        Print each board state during solution replay
 
-Board legend: # floor  G glass  S stairs  @ player  . empty
-Mismatch marker: ! (cell differs from target)
+Available levels:
+${list}
+
+Board encoding: " " empty  "#" floor  "G" glass  "S" stairs
 `);
   process.exit(0);
 }
+
+const rawLevel = values.brand
+  ? LEVELS.find((l) => l.name === values.brand)
+  : LEVELS[0];
+
+if (!rawLevel) {
+  console.error(`Unknown brand: "${values.brand}"`);
+  process.exit(1);
+}
+
+const INITIAL_STATE: GameState = {
+  board: parseBoard(rawLevel.initial.board),
+  player: rawLevel.initial.player,
+};
+const TARGET_BOARD: Board = parseBoard(rawLevel.target);
 
 function main() {
   console.log("Searching for solution...");

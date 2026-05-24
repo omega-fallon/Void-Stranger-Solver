@@ -9,6 +9,7 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
+    "solve": "ts-node src/solve.ts",
     "test": "node --require ts-node/register --test src/gameState.test.ts src/search.test.ts",
     "test:watch": "node --require ts-node/register --test --watch src/gameState.test.ts src/search.test.ts"
   },
