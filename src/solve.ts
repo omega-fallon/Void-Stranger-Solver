@@ -9,13 +9,14 @@ export function parseBoard(rows: string[]): Board {
   const charToCell: Record<string, Cell> = {
     " ": "empty",
     "#": "floor",
-    "G": "glass",
-    "S": "stairs",
+    G: "glass",
+    S: "stairs",
   };
-  return rows.map(row =>
-    Array.from(row).map(ch => {
+  return rows.map((row) =>
+    Array.from(row).map((ch) => {
       const cell = charToCell[ch];
-      if (cell === undefined) throw new Error(`Unknown tile character: "${ch}"`);
+      if (cell === undefined)
+        throw new Error(`Unknown tile character: "${ch}"`);
       return cell;
     })
   );
@@ -25,14 +26,14 @@ if (require.main === module) {
   const { values } = parseArgs({
     args: process.argv.slice(2),
     options: {
-      help:    { type: "boolean", short: "h" },
-      level:   { type: "string",  short: "l" },
+      help: { type: "boolean", short: "h" },
+      level: { type: "string", short: "l" },
       verbose: { type: "boolean", short: "v" },
     },
   });
 
   if (values.help) {
-    const list = LEVELS.map(l => `  ${l.name}`).join("\n");
+    const list = LEVELS.map((l) => `  ${l.name}`).join("\n");
     console.log(`Usage: solve [options]
 
 Options:
@@ -47,7 +48,7 @@ ${list}
   }
 
   const levelsToRun = values.level
-    ? LEVELS.filter(l => l.name === values.level)
+    ? LEVELS.filter((l) => l.name === values.level)
     : LEVELS;
 
   if (values.level && levelsToRun.length === 0) {
@@ -56,7 +57,10 @@ ${list}
   }
 
   for (const raw of levelsToRun) {
-    const initial = { board: parseBoard(raw.initial.board), player: raw.initial.player };
+    const initial = {
+      board: parseBoard(raw.initial.board),
+      player: raw.initial.player,
+    };
     const target = parseBoard(raw.target);
 
     console.log(`\n=== ${raw.name} ===`);

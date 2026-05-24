@@ -1,4 +1,11 @@
-import type { Action, Board, Cell, Direction, GameState, StaffContent } from "./types";
+import type {
+  Action,
+  Board,
+  Cell,
+  Direction,
+  GameState,
+  StaffContent,
+} from "./types";
 
 export const ACTIONS: Action[] = ["up", "down", "left", "right", "staff"];
 
@@ -23,7 +30,10 @@ function setCell(board: Board, r: number, c: number, val: Cell): Board {
   );
 }
 
-export function applyAction(state: GameState, action: Action): GameState | null {
+export function applyAction(
+  state: GameState,
+  action: Action
+): GameState | null {
   const { board, player } = state;
   const { row, col, facing, staffContent } = player;
 
@@ -34,9 +44,10 @@ export function applyAction(state: GameState, action: Action): GameState | null 
     if (!inBounds(newRow, newCol)) return null;
     if (getCell(board, newRow, newCol) === "empty") return null;
 
-    const newBoard = getCell(board, row, col) === "glass"
-      ? setCell(board, row, col, "empty")
-      : board;
+    const newBoard =
+      getCell(board, row, col) === "glass"
+        ? setCell(board, row, col, "empty")
+        : board;
 
     return {
       board: newBoard,
@@ -75,10 +86,13 @@ export function stateKey(state: GameState): string {
   const boardStr = state.board.flat().map(cellChar).join("");
   const { row, col, facing, staffContent } = state.player;
   const staffStr =
-    staffContent === "empty" ? "e"
-    : staffContent === "floor" ? "t"
-    : staffContent === "glass" ? "g"
-    : "s";
+    staffContent === "empty"
+      ? "e"
+      : staffContent === "floor"
+      ? "t"
+      : staffContent === "glass"
+      ? "g"
+      : "s";
   return `${boardStr}|${row},${col},${facing},${staffStr}`;
 }
 
@@ -93,18 +107,27 @@ export function renderBoard(state: GameState): string {
   const { board, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
     if (player.row === r && player.col === c) {
-      const arrows: Record<Direction, string> = { up: "⇑ ", down: "⇓ ", left: "⇐ ", right: "⇒ " };
+      const arrows: Record<Direction, string> = {
+        up: "⇑ ",
+        down: "⇓ ",
+        left: "⇐ ",
+        right: "⇒ ",
+      };
       return arrows[player.facing];
     }
     switch (cell) {
-      case "floor": return "██";
-      case "glass": return "░░";
-      case "stairs": return "S ";
-      case "empty": return "  ";
+      case "floor":
+        return "██";
+      case "glass":
+        return "░░";
+      case "stairs":
+        return "S ";
+      case "empty":
+        return "  ";
     }
   };
-  const rows = board.map((row, r) =>
-    "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│"
+  const rows = board.map(
+    (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│"
   );
   return ["┌────────────┐", ...rows, "└────────────┘"].join("\n");
 }

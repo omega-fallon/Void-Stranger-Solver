@@ -14,6 +14,7 @@ export const LEVELS: RawLevel[] = [
   {
     name: "Add",
     initial: {
+      // prettier-ignore
       board: [
         "#  S #",
         "   ## ",
@@ -24,6 +25,7 @@ export const LEVELS: RawLevel[] = [
       ],
       player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
     },
+    // prettier-ignore
     target: [
       "#    #",
       "   ## ",
@@ -36,6 +38,7 @@ export const LEVELS: RawLevel[] = [
   {
     name: "Eus",
     initial: {
+      // prettier-ignore
       board: [
         "GGGGGG",
         "GG##GG",
@@ -46,6 +49,7 @@ export const LEVELS: RawLevel[] = [
       ],
       player: { row: 2, col: 3, facing: "down", staffContent: "empty" },
     },
+    // prettier-ignore
     target: [
       "GG  GG",
       "  ##  ",

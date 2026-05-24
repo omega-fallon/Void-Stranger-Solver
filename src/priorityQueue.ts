@@ -42,12 +42,21 @@ export class MinHeap {
       let smallest = i;
       const left = 2 * i + 1;
       const right = 2 * i + 2;
-      if (left < n && this.fCost(this.heap[left]!) < this.fCost(this.heap[smallest]!))
+      if (
+        left < n &&
+        this.fCost(this.heap[left]!) < this.fCost(this.heap[smallest]!)
+      )
         smallest = left;
-      if (right < n && this.fCost(this.heap[right]!) < this.fCost(this.heap[smallest]!))
+      if (
+        right < n &&
+        this.fCost(this.heap[right]!) < this.fCost(this.heap[smallest]!)
+      )
         smallest = right;
       if (smallest === i) break;
-      [this.heap[i], this.heap[smallest]] = [this.heap[smallest]!, this.heap[i]!];
+      [this.heap[i], this.heap[smallest]] = [
+        this.heap[smallest]!,
+        this.heap[i]!,
+      ];
       i = smallest;
     }
   }
