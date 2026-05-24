@@ -13,6 +13,7 @@ const { values } = parseArgs({
     help: { type: "boolean", short: "h" },
     brand: { type: "string", short: "b" },
     verbose: { type: "boolean", short: "v" },
+    slow: { type: "boolean", short: "s" },
   },
 });
 
@@ -48,9 +49,14 @@ const INITIAL_STATE: GameState = {
 };
 const TARGET_BOARD: Board = parseBoard(rawLevel.target);
 
-function main() {
+async function main() {
   console.log("Searching for solution...");
-  const path = aStar(INITIAL_STATE, TARGET_BOARD, values.verbose);
+  const path = await aStar(
+    INITIAL_STATE,
+    TARGET_BOARD,
+    values.verbose,
+    values.slow,
+  );
 
   if (!path) {
     console.log("No solution found.");

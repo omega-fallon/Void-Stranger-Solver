@@ -8,7 +8,7 @@ function makeState(
   col: number,
   facing: Direction,
   staffContent: StaffContent,
-  cells: Array<[number, number, Cell]> = []
+  cells: Array<[number, number, Cell]> = [],
 ): GameState {
   const board = Array.from({ length: 6 }, () => Array<Cell>(6).fill("empty"));
   for (const [r, c, v] of cells) board[r]![c] = v;
@@ -21,7 +21,7 @@ function makeBoard(cells: Array<[number, number, Cell]> = []): Board {
   return board;
 }
 
-test("aStar finds optimal path through glass to collect stairs", () => {
+test("aStar finds optimal path through glass to collect stairs", async () => {
   // Initial board:          Target board:
   //   ┌────────────┐         ┌────────────┐
   //   │⇒ ░░██      │         │██  ██      │
@@ -51,6 +51,6 @@ test("aStar finds optimal path through glass to collect stairs", () => {
     [1, 2, "floor"],
   ]);
 
-  const path = aStar(initial, target);
+  const path = await aStar(initial, target);
   assert.deepEqual(path, ["right", "right", "down", "staff"]);
 });

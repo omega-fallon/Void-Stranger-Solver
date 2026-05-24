@@ -9,11 +9,12 @@ import { heuristic } from "./heuristic";
 import { MinHeap } from "./priorityQueue";
 import type { Action, Board, GameState, SearchNode } from "./types";
 
-export function aStar(
+export async function aStar(
   initial: GameState,
   target: Board,
-  verbose = false
-): Action[] | null {
+  verbose = false,
+  slow = false,
+): Promise<Action[] | null> {
   const open = new MinHeap();
   const closed = new Set<string>();
 
@@ -36,9 +37,11 @@ export function aStar(
       console.log(
         `Explored: ${closed.size} states | Path length: ${
           current.gCost
-        } | Action: ${action}\n${renderBoard(current.state)}`
+        } | Action: ${action}\n${renderBoard(current.state)}`,
       );
     }
+
+    if (slow) await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
     if (isGoal(current.state, target)) return reconstructPath(current);
 
