@@ -155,21 +155,19 @@ export async function aStar(
     const path: Action[] = [];
     const result = await search(initial, 0, path);
 
-    console.log(
-      `Done with search step at threshold ${result}, found path of length ${path.length}`,
-    );
-
-    if (result === "found") return { path, nodesExplored };
-    if (result === Infinity) return { path: null, nodesExplored };
-
     if (verbose) {
       const elapsedMs = performance.now() - start;
       console.log(
-        `--- Threshold ${threshold} → ${result} | ${nodesExplored} nodes so far | ${elapsedMs.toFixed(
-          1,
-        )}ms ---`,
+        `--- Threshold ${threshold} | ${nodesExplored} nodes so far | ${elapsedMs.toFixed(
+          0,
+        )}ms | ${(nodesExplored / (elapsedMs / 1000)).toFixed(
+          0,
+        )} nodes/sec ---`,
       );
     }
+
+    if (result === "found") return { path, nodesExplored };
+    if (result === Infinity) return { path: null, nodesExplored };
 
     threshold = result;
   }
