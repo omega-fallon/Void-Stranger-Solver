@@ -135,7 +135,7 @@ export async function search(
         loopsPrevented++;
         continue;
       }
-      // visited.add(nextKey);
+      visited.add(nextKey);
 
       path.push(action);
 
