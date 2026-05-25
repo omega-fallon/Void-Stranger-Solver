@@ -11,6 +11,7 @@ import type { Action, Board, GameState } from "./types";
 export interface SearchResult {
   path: Action[] | null;
   nodesExplored: number;
+  elapsedMs: number;
 }
 
 export function countFloorTiles(board: Board): number {
@@ -25,14 +26,14 @@ export function countFloorTiles(board: Board): number {
 export async function search(
   initial: GameState,
   target: Board,
-  verbose = false,
+  verbose: boolean | number = false,
   slow = false,
   requireFinalJump = true,
   initialThreshold?: number,
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
-  if (verbose && initialThreshold)
+  if (verbose == 2 && initialThreshold)
     console.log(`Searching with initial threshold ${initialThreshold}`);
 
   let threshold = initialThreshold ?? heuristic(initial, target);
@@ -81,7 +82,7 @@ export async function search(
     })();
     maxCorrectSoFar = Math.max(amountOfPathFound, maxCorrectSoFar);
 
-    if (verbose && Math.random() < 0.00001) {
+    if (verbose == 2 && Math.random() < 0.00001) {
       const elapsedMs = performance.now() - start;
       const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
       const action = path.at(-1) ?? "start";
@@ -156,8 +157,8 @@ export async function search(
     const path: Action[] = [];
     const result = await searchWithThreshold(initial, 0, path);
 
+    const elapsedMs = performance.now() - start;
     if (verbose) {
-      const elapsedMs = performance.now() - start;
       console.log(
         `--- Threshold ${threshold} | ${nodesExplored} nodes so far | ${elapsedMs.toFixed(
           0,
@@ -167,8 +168,8 @@ export async function search(
       );
     }
 
-    if (result === "found") return { path, nodesExplored };
-    if (result === Infinity) return { path: null, nodesExplored };
+    if (result === "found") return { path, nodesExplored, elapsedMs };
+    if (result === Infinity) return { path: null, nodesExplored, elapsedMs };
 
     threshold = result;
   }

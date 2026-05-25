@@ -4,7 +4,7 @@ import { parseArgs } from "node:util";
 import { replayPath } from "./gameState";
 import { LEVELS } from "./levels";
 import { search } from "./search";
-import { parseBoard } from "./solve";
+import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
 import type { Board, GameState } from "./types";
 
 const { values } = parseArgs({
@@ -45,6 +45,9 @@ if (!rawLevel) {
 
 const INITIAL_STATE: GameState = {
   board: parseBoard(rawLevel.initial.board),
+  entities: rawLevel.initial.entities
+    ? parseEntities(rawLevel.initial.entities)
+    : emptyEntityGrid(),
   player: rawLevel.initial.player,
 };
 const TARGET_BOARD: Board = parseBoard(rawLevel.target);

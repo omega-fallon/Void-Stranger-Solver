@@ -7,6 +7,10 @@ export type Cell = "empty" | "floor" | "glass" | "stairs" | "wall";
 // [row][col], row 0 = top row, col 0 = left column
 export type Board = Cell[][];
 
+// Entity layer — overlaid on the board, tracks objects/enemies
+export type Entity = "empty" | "rock";
+export type EntityGrid = Entity[][];
+
 // Staff can hold nothing, a floor, a glass, or the stairs
 export type StaffContent = "empty" | "floor" | "glass" | "stairs";
 
@@ -19,6 +23,7 @@ export interface PlayerState {
 
 export interface GameState {
   board: Board;
+  entities: EntityGrid;
   player: PlayerState;
 }
 

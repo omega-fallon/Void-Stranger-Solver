@@ -5,6 +5,8 @@ import type {
   Board,
   Cell,
   Direction,
+  Entity,
+  EntityGrid,
   GameState,
   StaffContent,
 } from "./types";
@@ -32,11 +34,26 @@ function setCell(board: Board, r: number, c: number, val: Cell): Board {
   );
 }
 
+function getEntity(entities: EntityGrid, r: number, c: number): Entity {
+  return entities[r]![c]!;
+}
+
+function setEntity(
+  entities: EntityGrid,
+  r: number,
+  c: number,
+  val: Entity,
+): EntityGrid {
+  return entities.map((row, ri) =>
+    ri === r ? row.map((e, ci) => (ci === c ? val : e)) : row,
+  );
+}
+
 export function applyAction(
   state: GameState,
   action: Action,
 ): GameState | null {
-  const { board, player } = state;
+  const { board, entities, player } = state;
   const { row, col, facing, staffContent } = player;
 
   if (action !== "staff") {
@@ -47,6 +64,36 @@ export function applyAction(
     const dest = getCell(board, newRow, newCol);
     if (dest === "wall" || dest === "stairs") return null;
 
+    // Rock-push: if there is a rock in the destination cell, attempt to push it.
+    if (getEntity(entities, newRow, newCol) === "rock") {
+      const rockDestRow = newRow + dr;
+      const rockDestCol = newCol + dc;
+      // Rock cannot be pushed out of bounds, into a wall, or into another rock.
+      if (!inBounds(rockDestRow, rockDestCol)) return null;
+      if (getCell(board, rockDestRow, rockDestCol) === "wall") return null;
+      if (getEntity(entities, rockDestRow, rockDestCol) === "rock") return null;
+
+      // Push succeeds: rock moves, player stays in place (facing updates).
+      // Glass does not break because the player did not step off their current cell.
+      const newEntities = setEntity(
+        setEntity(entities, newRow, newCol, "empty"),
+        rockDestRow,
+        rockDestCol,
+        getCell(board, rockDestRow, rockDestCol) === "empty" ? "empty" : "rock",
+      );
+      // Break any glass the rock was on
+      const newBoard =
+        getCell(board, newRow, newCol) === "glass"
+          ? setCell(board, newRow, newCol, "empty")
+          : board;
+      return {
+        board: newBoard,
+        entities: newEntities,
+        player: { row, col, facing: action, staffContent },
+      };
+    }
+
+    // Normal move — no rock in the way.
     const newBoard =
       getCell(board, row, col) === "glass"
         ? setCell(board, row, col, "empty")
@@ -54,6 +101,7 @@ export function applyAction(
 
     return {
       board: newBoard,
+      entities,
       player: { row: newRow, col: newCol, facing: action, staffContent },
     };
   }
@@ -69,6 +117,7 @@ export function applyAction(
   if (staffContent === "empty" && front !== "empty" && front !== "wall") {
     return {
       board: setCell(board, fr, fc, "empty"),
+      entities,
       player: { row, col, facing, staffContent: front as StaffContent },
     };
   }
@@ -76,6 +125,7 @@ export function applyAction(
   if (staffContent !== "empty" && front === "empty") {
     return {
       board: setCell(board, fr, fc, staffContent as Cell),
+      entities,
       player: { row, col, facing, staffContent: "empty" },
     };
   }
@@ -95,6 +145,10 @@ export function stateKey(state: GameState): string {
       ? "W"
       : "S";
   const boardStr = state.board.flat().map(cellChar).join("");
+  const entityStr = state.entities
+    .flat()
+    .map((e) => (e === "rock" ? "R" : "0"))
+    .join("");
   const { row, col, facing, staffContent } = state.player;
   const staffStr =
     staffContent === "empty"
@@ -104,7 +158,7 @@ export function stateKey(state: GameState): string {
       : staffContent === "glass"
       ? "g"
       : "s";
-  return `${boardStr}|${row},${col},${facing},${staffStr}`;
+  return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr}`;
 }
 
 // Glass and floor are interchangeable for goal satisfaction — the brand only
@@ -153,9 +207,10 @@ export function replayPath(
 }
 
 export function renderBoard(state: GameState, requiredTiles?: number): string {
-  const { board, player } = state;
+  const { board, entities, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
-    let playerChar = null;
+    // Priority: player arrow > rock > board cell
+    let overlayChar: string | null = null;
     if (player.row === r && player.col === c) {
       const arrows: Record<Direction, string> = {
         up: "⇑",
@@ -163,7 +218,9 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
         left: "⇐",
         right: "⇒",
       };
-      playerChar = arrows[player.facing];
+      overlayChar = arrows[player.facing];
+    } else if (entities[r]?.[c] === "rock") {
+      overlayChar = "R";
     }
     let floorChar = "  ";
     switch (cell) {
@@ -183,7 +240,7 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
         floorChar = "  ";
         break;
     }
-    return playerChar ? playerChar + floorChar.slice(1) : floorChar;
+    return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
   };
   const rows = board.map(
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",

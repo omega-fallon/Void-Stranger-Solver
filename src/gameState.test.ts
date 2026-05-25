@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyAction } from "./gameState";
-import type { Cell, Direction, GameState, StaffContent } from "./types";
+import { emptyEntityGrid } from "./utils";
+import type { Cell, Direction, Entity, GameState, StaffContent } from "./types";
 
 function makeState(
   row: number,
@@ -9,10 +10,13 @@ function makeState(
   facing: Direction,
   staffContent: StaffContent,
   cells: Array<[number, number, Cell]> = [],
+  entityCells: Array<[number, number, Entity]> = [],
 ): GameState {
   const board = Array.from({ length: 6 }, () => Array<Cell>(6).fill("empty"));
   for (const [r, c, v] of cells) board[r]![c] = v;
-  return { board, player: { row, col, facing, staffContent } };
+  const entities = emptyEntityGrid();
+  for (const [r, c, v] of entityCells) entities[r]![c] = v;
+  return { board, entities, player: { row, col, facing, staffContent } };
 }
 
 // Movement
