@@ -142,7 +142,6 @@ const TEST_LEVELS: (RawLevel & {
   },
   {
     name: "Move a piece of glass",
-    // Real full solution is LRURDRZLLZLZRRZRDLZDZDZLDR
     initial: {
       // prettier-ignore
       board: [
