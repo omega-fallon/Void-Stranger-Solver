@@ -12,6 +12,9 @@ export function parseBoard(rows: string[]): Board {
     G: "glass",
     S: "stairs",
     W: "wall",
+    B: "button",
+    T: "inactive_trap",
+    A: "active_trap",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {

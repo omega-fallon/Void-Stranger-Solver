@@ -56,6 +56,9 @@ const CELL_CHARS: Record<Cell, string> = {
   glass: "G",
   stairs: "S",
   wall: "W",
+  button: "B",
+  inactive_trap: "T",
+  active_trap: "A",
 };
 
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
