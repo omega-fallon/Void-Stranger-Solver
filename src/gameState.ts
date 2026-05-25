@@ -1,3 +1,4 @@
+import { heuristic } from "./heuristic";
 import { countFloorTiles } from "./search";
 import type {
   Action,
@@ -133,7 +134,11 @@ export function replayPath(
   for (let i = 0; i < path.length; i++) {
     const action = path[i]!;
     state = applyAction(state, action)!;
-    console.log(`Step ${i + 1}: ${action}\n${renderBoard(state)}\n`);
+    console.log(
+      `Step ${i + 1}: ${action} | h: ${heuristic(state, target)}\n${renderBoard(
+        state,
+      )}\n`,
+    );
     if (isGoal(state, target, requireFinalJump)) console.log("Goal reached!");
   }
 }
