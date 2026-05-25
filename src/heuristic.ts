@@ -39,7 +39,9 @@ export function heuristic(state: GameState, target: Board): number {
     const sources = excess.filter(([, , etype]) => etype === dtype);
     if (sources.length > 0) {
       extraCost += Math.min(
-        ...sources.map(([er, ec]) => Math.max(0, manhattan(er, ec, dr, dc) - 2)),
+        ...sources.map(([er, ec]) =>
+          Math.max(0, manhattan(er, ec, dr, dc) - 2),
+        ),
       );
     }
   }
@@ -48,11 +50,14 @@ export function heuristic(state: GameState, target: Board): number {
   // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
   const holding = player.staffContent !== "empty";
 
+  // NOTE: The tile matching part of the heuristic only works when we know which tile types end up where, which is not necessary in the general case.
   if (holding) {
     // Player is carrying a tile; they need to reach a deficit that accepts it.
     // If no same-type deficit exists, the held tile will be placed temporarily
     // or destroyed — we can't charge any travel cost without overestimating.
-    const matchingDeficits = deficit.filter(([, , dtype]) => dtype === player.staffContent);
+    const matchingDeficits = deficit.filter(
+      ([, , dtype]) => dtype === player.staffContent,
+    );
     if (matchingDeficits.length > 0) {
       extraCost += Math.min(
         ...matchingDeficits.map(([dr, dc]) =>
