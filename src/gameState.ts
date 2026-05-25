@@ -9,7 +9,7 @@ import type {
   StaffContent,
 } from "./types";
 
-export const ACTIONS: Action[] = ["left", "up", "down", "right", "staff"];
+export const ACTIONS: Action[] = ["left", "up", "right", "down", "staff"];
 
 const DELTAS: Record<Direction, { dr: number; dc: number }> = {
   up: { dr: -1, dc: 0 },
