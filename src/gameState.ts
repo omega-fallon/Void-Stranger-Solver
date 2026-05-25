@@ -141,27 +141,35 @@ export function replayPath(
 export function renderBoard(state: GameState, requiredTiles?: number): string {
   const { board, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
+    let playerChar = null;
     if (player.row === r && player.col === c) {
       const arrows: Record<Direction, string> = {
-        up: "⇑ ",
-        down: "⇓ ",
-        left: "⇐ ",
-        right: "⇒ ",
+        up: "⇑",
+        down: "⇓",
+        left: "⇐",
+        right: "⇒",
       };
-      return arrows[player.facing];
+      playerChar = arrows[player.facing];
     }
+    let floorChar = "  ";
     switch (cell) {
       case "floor":
-        return "██";
+        floorChar = "██";
+        break;
       case "glass":
-        return "░░";
+        floorChar = "░░";
+        break;
       case "stairs":
-        return "S ";
+        floorChar = "S ";
+        break;
       case "wall":
-        return "▓▓";
+        floorChar = "▓▓";
+        break;
       case "empty":
-        return "  ";
+        floorChar = "  ";
+        break;
     }
+    return playerChar ? playerChar + floorChar.slice(1) : floorChar;
   };
   const rows = board.map(
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
