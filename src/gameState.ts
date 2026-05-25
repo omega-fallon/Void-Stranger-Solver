@@ -191,7 +191,7 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       case "empty":
         floorChar = "  ";
         break;
-      case _:
+      default:
         floorChar = "??";
         break;
     }
