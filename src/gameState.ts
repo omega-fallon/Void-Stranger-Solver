@@ -150,6 +150,8 @@ export function replayPath(
     );
     if (isGoal(state, target, requireFinalJump)) console.log("Goal reached!");
   }
+  
+  console.log(path);
 }
 
 export function renderBoard(state: GameState, requiredTiles?: number): string {
