@@ -27,6 +27,7 @@ export async function aStar(
   target: Board,
   verbose = false,
   slow = false,
+  requireFinalJump = true,
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
@@ -93,7 +94,7 @@ export async function aStar(
 
     if (slow) await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
-    if (isGoal(state, target)) return "found";
+    if (isGoal(state, target, requireFinalJump)) return "found";
 
     // Exit step: player is in the void but not at goal — dead end.
     const { row, col } = state.player;
@@ -148,8 +149,6 @@ export async function aStar(
 
   while (true) {
     const path: Action[] = [];
-    console.log("Doing search, path is length", path.length);
-
     const result = await search(initial, 0, path);
 
     console.log(

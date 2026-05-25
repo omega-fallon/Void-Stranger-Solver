@@ -105,10 +105,16 @@ export function stateKey(state: GameState): string {
   return `${boardStr}|${row},${col},${facing},${staffStr}`;
 }
 
-export function isGoal(state: GameState, target: Board): boolean {
-  if (state.player.staffContent !== "stairs") return false;
-  if (getCell(state.board, state.player.row, state.player.col) !== "empty")
-    return false;
+export function isGoal(
+  state: GameState,
+  target: Board,
+  requireFinalJump = true,
+): boolean {
+  if (requireFinalJump) {
+    if (state.player.staffContent !== "stairs") return false;
+    if (getCell(state.board, state.player.row, state.player.col) !== "empty")
+      return false;
+  }
   return state.board.every((row, r) =>
     row.every((cell, c) => cell === getCell(target, r, c)),
   );
@@ -118,6 +124,7 @@ export function replayPath(
   initial: GameState,
   path: Action[],
   target: Board,
+  requireFinalJump = true,
 ): void {
   console.log("\n--- Solution replay ---");
   let state = initial;
@@ -126,7 +133,7 @@ export function replayPath(
     const action = path[i]!;
     state = applyAction(state, action)!;
     console.log(`Step ${i + 1}: ${action}\n${renderBoard(state)}\n`);
-    if (isGoal(state, target)) console.log("Goal reached!");
+    if (isGoal(state, target, requireFinalJump)) console.log("Goal reached!");
   }
 }
 

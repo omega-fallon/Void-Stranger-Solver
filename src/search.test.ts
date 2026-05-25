@@ -63,7 +63,10 @@ export function boardToStrings(board: Board): string[] {
   return board.map((row) => row.map((cell) => CELL_CHARS[cell]).join(""));
 }
 
-const TEST_LEVELS: (RawLevel & { solutionLength?: number })[] = [
+const TEST_LEVELS: (RawLevel & {
+  solutionLength?: number;
+  requireFinalJump?: boolean;
+})[] = [
   {
     name: "Solves Add's brand",
     initial: {
@@ -223,31 +226,38 @@ for (const level of TEST_LEVELS) {
       player: level.initial.player,
     };
     const target = parseBoard(level.target);
-    const { path } = await aStar(initial, target);
+    const requireFinalJump = level.requireFinalJump ?? true;
+    const { path } = await aStar(
+      initial,
+      target,
+      false,
+      false,
+      requireFinalJump,
+    );
     if (level.solutionLength) {
       assert.equal(level.solutionLength, path?.length);
     }
-    if (path) replayPath(initial, path, target);
+    if (path) replayPath(initial, path, target, requireFinalJump);
     assert.ok(path !== null, "No solution found");
   });
 }
-//
-// const states = applyPath(
-//   {
-//     // prettier-ignore
-//     board: [
-//       "GGGGGG",
-//       "GG##GG",
-//       "GG#GGG",
-//       "GGGGGG",
-//       "GGG GG",
-//       "GGGSGW"
-//     ],
-//     player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
-//   },
-//   "LRURDRZLLZLZRRZRDLZDZDZLDR",
-// );
-// console.dir(
-//   states.map((state) => ({ ...state, board: boardToStrings(state.board) })),
-//   { depth: null },
-// );
+
+const states = applyPath(
+  {
+    // prettier-ignore
+    board: [
+      "GGGGGG",
+      "GG##GG",
+      "GG#GGG",
+      "GGGGGG",
+      "GGG GG",
+      "GGGSGW"
+    ],
+    player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
+  },
+  "LRURDRZLLZLZRRZRDLZDZDZLDR",
+);
+console.dir(
+  states.map((state) => ({ ...state, board: boardToStrings(state.board) })),
+  { depth: null },
+);
