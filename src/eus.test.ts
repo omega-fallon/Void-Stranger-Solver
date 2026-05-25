@@ -5,14 +5,15 @@ import { RawLevel } from "./levels";
 import { aStar } from "./search";
 import { parseBoard } from "./solve";
 import { PARTIAL_EUS_STATES } from "./data/PARTIAL_EUS_STATES";
+const VERBOSE = !!process.env.VERBOSE;
 
 const TEST_LEVELS: (RawLevel & {
   solutionLength?: number;
   requireFinalJump?: boolean;
 })[] = [];
 
-let FOCUS_ONE_TEST = true;
-let DEBUG_MAX_STEPS = 21; // 20 requires only 16 steps ignoring final player position, but 21 requires 21 steps
+let FOCUS_ONE_TEST = false;
+let DEBUG_MAX_STEPS = 26; // 20 requires only 16 steps ignoring final player position, but 21 requires 21 steps
 
 for (
   let i = FOCUS_ONE_TEST ? DEBUG_MAX_STEPS - 1 : 0;
@@ -25,10 +26,9 @@ for (
     name: endState.name,
     initial: startState,
     target: endState.board,
+    requireFinalJump: endState.requireFinalJump,
   } as RawLevel);
 }
-
-console.log(TEST_LEVELS);
 
 for (const level of TEST_LEVELS) {
   test(`${level.name}`, async () => {
@@ -41,18 +41,23 @@ for (const level of TEST_LEVELS) {
     const { path } = await aStar(
       initial,
       target,
-      false,
+      VERBOSE,
       false,
       requireFinalJump,
-      //Number(level.name.replace(/\D*/, "")),
+      Number(level.name.replace(/\D*/, "")),
     );
     if (level.solutionLength) {
       assert.equal(level.solutionLength, path?.length);
     }
-    if (path) replayPath(initial, path, target, requireFinalJump);
     assert.ok(path !== null, "No solution found");
-    console.log(
-      `Solved level "${level.name}" with a path of length ${path.length}`,
-    );
+    if (VERBOSE) {
+      if (path) replayPath(initial, path, target, requireFinalJump);
+      console.log(
+        `Solved level "${level.name}" with a path of length ${path.length} ${
+          requireFinalJump ? "and jumped into the void" : ""
+        }`,
+      );
+      console.log(level);
+    }
   });
 }

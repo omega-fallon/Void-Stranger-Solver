@@ -349,5 +349,6 @@ export const PARTIAL_EUS_STATES = [
       "GG  GW"
     ],
     player: { row: 5, col: 3, facing: "right", staffContent: "stairs" },
+    requireFinalJump: true,
   },
 ];

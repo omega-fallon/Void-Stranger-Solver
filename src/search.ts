@@ -32,7 +32,7 @@ export async function aStar(
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
-  if (initialThreshold)
+  if (verbose && initialThreshold)
     console.log(`Searching with initial threshold ${initialThreshold}`);
 
   let threshold = initialThreshold ?? heuristic(initial, target);
