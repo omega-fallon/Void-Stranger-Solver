@@ -6,7 +6,7 @@ function manhattan(r1: number, c1: number, r2: number, c2: number): number {
 
 // Glass and floor are interchangeable for goal satisfaction.
 // Defined locally to avoid a circular import with gameState.ts.
-const isSolid = (c: Cell) => c === "floor" || c === "glass";
+const isSolid = (c: Cell) => c === "floor" || c === "glass" || c === "wall" || c === "button" || c === "trap_inactive" || c === "trap_active";
 const cellMatchesTarget = (cur: Cell, tgt: Cell) =>
   isSolid(tgt) ? isSolid(cur) : cur === tgt;
 
@@ -26,17 +26,28 @@ export function heuristic(state: GameState, target: Board): number {
     for (let c = 0; c < 6; c++) {
       const cur = board[r]![c]!;
       const tgt = target[r]![c]!;
-      if (!cellMatchesTarget(cur, tgt)) {
-        // Glass the player is standing on will break for free on their next move.
-        // If the target wants that cell empty, the mismatch resolves at no extra cost.
-        if (
-          r === player.row &&
-          c === player.col &&
-          cur === "glass" &&
-          tgt === "empty"
-        ) {
-          continue;
-        }
+      // Glass the player is standing on will break for free on their next move.
+      // If the target wants that cell empty, the mismatch resolves at no extra cost.
+      if (
+        r === player.row &&
+        c === player.col &&
+        cur === "glass" &&
+        tgt === "empty"
+      ) {
+        continue;
+      }
+      // Same as above but reverse. If the stood tile is glass and the target wants a solid tile, the glass is doomed and should be treated as non-existent.
+      else if (
+        r === player.row &&
+        c === player.col &&
+        cur === "glass" &&
+        cellMatchesTarget(cur, tgt)
+      ) {
+        mismatches++;
+        if (cur !== "empty") excess.push([r, c, cur]);
+        if (tgt !== "empty") deficit.push([r, c, tgt]);
+      }
+      else if (!cellMatchesTarget(cur, tgt)) {
         mismatches++;
         if (cur !== "empty") excess.push([r, c, cur]);
         if (tgt !== "empty") deficit.push([r, c, tgt]);

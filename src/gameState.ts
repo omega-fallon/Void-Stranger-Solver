@@ -179,8 +179,20 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       case "wall":
         floorChar = "▓▓";
         break;
+      case "button":
+        floorChar = "█B";
+        break;
+      case "trap_inactive":
+        floorChar = "ΘΘ";
+        break;
+      case "trap_active":
+        floorChar = "ϴϴ";
+        break;
       case "empty":
         floorChar = "  ";
+        break;
+      case _:
+        floorChar = "??";
         break;
     }
     return playerChar ? playerChar + floorChar.slice(1) : floorChar;
