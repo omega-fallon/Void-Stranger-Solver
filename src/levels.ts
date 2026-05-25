@@ -85,21 +85,21 @@ export const LEVELS: RawLevel[] = [
     initial: {
       // prettier-ignore
       board: [
-        "######",
+        "#####W",
         "#GGGG#",
         "#G#GG#",
         "#GG#G#",
         "#GGGG#",
-        "######",
+        "W#####",
       ],
       // prettier-ignore
       entities: [
-        "     R",
+        "      ",
         "      ",
         "      ",
         "      ",
         "    R ",
-        "R     ",
+        "      ",
       ],
       player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
     },
