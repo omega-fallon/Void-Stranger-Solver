@@ -47,7 +47,7 @@ export const LEVELS: RawLevel[] = [
         "GGG GG",
         "GGGSGW",
       ],
-      player: { row: 2, col: 3, facing: "down", staffContent: "empty" },
+      player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
     target: [

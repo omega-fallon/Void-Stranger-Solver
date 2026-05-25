@@ -111,7 +111,18 @@ export async function aStar(
 
     for (const action of ACTIONS) {
       const next = applyAction(state, action);
-      if (!next) continue;
+      // console.log(
+      //   "Trying action:",
+      //   action,
+      //   "path is:",
+      //   path,
+      //   "next state is:",
+      //   next && renderBoard(next!),
+      // );
+      if (!next) {
+        // console.log("No next state returned, skipping");
+        continue;
+      }
 
       const nextKey = stateKey(next);
       if (visited.has(nextKey)) {
@@ -137,7 +148,13 @@ export async function aStar(
 
   while (true) {
     const path: Action[] = [];
+    console.log("Doing search, path is length", path.length);
+
     const result = await search(initial, 0, path);
+
+    console.log(
+      `Done with search step at threshold ${result}, found path of length ${path.length}`,
+    );
 
     if (result === "found") return { path, nodesExplored };
     if (result === Infinity) return { path: null, nodesExplored };
