@@ -16,6 +16,16 @@ export function heuristic(state: GameState, target: Board): number {
       const cur = board[r]![c]!;
       const tgt = target[r]![c]!;
       if (cur !== tgt) {
+        // Glass the player is standing on will break for free on their next move.
+        // If the target wants that cell empty, the mismatch resolves at no extra cost.
+        if (
+          r === player.row &&
+          c === player.col &&
+          cur === "glass" &&
+          tgt === "empty"
+        ) {
+          continue;
+        }
         mismatches++;
         if (cur !== "empty") excess.push([r, c, cur]);
         if (tgt !== "empty") deficit.push([r, c, tgt]);
