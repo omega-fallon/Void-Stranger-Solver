@@ -3,7 +3,7 @@
 import { parseArgs } from "node:util";
 import { replayPath } from "./gameState";
 import { LEVELS } from "./levels";
-import { aStar } from "./search";
+import { search } from "./search";
 import { parseBoard } from "./solve";
 import type { Board, GameState } from "./types";
 
@@ -52,7 +52,7 @@ const TARGET_BOARD: Board = parseBoard(rawLevel.target);
 async function main() {
   console.log("Searching for solution...");
   const start = performance.now();
-  const { path, nodesExplored } = await aStar(
+  const { path, nodesExplored } = await search(
     INITIAL_STATE,
     TARGET_BOARD,
     values.verbose,

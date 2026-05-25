@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { aStar } from "./search";
+import { search } from "./search";
 import { applyAction, replayPath } from "./gameState";
 import { parseBoard } from "./solve";
 import type { RawLevel } from "./levels";
@@ -227,7 +227,7 @@ for (const level of TEST_LEVELS) {
     };
     const target = parseBoard(level.target);
     const requireFinalJump = level.requireFinalJump ?? true;
-    const { path } = await aStar(
+    const { path } = await search(
       initial,
       target,
       false,

@@ -2,7 +2,7 @@ import assert from "assert";
 import test from "node:test";
 import { replayPath } from "./gameState";
 import { RawLevel } from "./levels";
-import { aStar } from "./search";
+import { search } from "./search";
 import { parseBoard } from "./solve";
 import { PARTIAL_EUS_STATES } from "./data/PARTIAL_EUS_STATES";
 const VERBOSE = !!process.env.VERBOSE;
@@ -38,7 +38,7 @@ for (const level of TEST_LEVELS) {
     };
     const target = parseBoard(level.target);
     const requireFinalJump = level.requireFinalJump ?? false;
-    const { path } = await aStar(
+    const { path } = await search(
       initial,
       target,
       VERBOSE,

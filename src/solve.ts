@@ -3,7 +3,7 @@
 import { parseArgs } from "node:util";
 import type { Board, Cell } from "./types";
 import { LEVELS } from "./levels";
-import { aStar } from "./search";
+import { search } from "./search";
 
 export function parseBoard(rows: string[]): Board {
   const charToCell: Record<string, Cell> = {

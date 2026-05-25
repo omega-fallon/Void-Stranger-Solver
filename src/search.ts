@@ -22,7 +22,7 @@ export function countFloorTiles(board: Board): number {
     );
 }
 
-export async function aStar(
+export async function search(
   initial: GameState,
   target: Board,
   verbose = false,
@@ -60,7 +60,7 @@ export async function aStar(
 
   // Returns "found" on success, Infinity if this subtree is unsolvable, or the
   // minimum f-cost that exceeded the current threshold (next threshold to try).
-  async function search(
+  async function searchWithThreshold(
     state: GameState,
     g: number,
     path: Action[],
@@ -129,17 +129,17 @@ export async function aStar(
         continue;
       }
 
-      // Loop prevention speeds up searches by about 6x at threshold 20, more at higher thresholds
+      // Loop prevention speeds up searches by about 6x at threshold 20, 4x at threshold 26
       const nextKey = stateKey(next);
       if (visited.has(nextKey)) {
         loopsPrevented++;
         continue;
       }
-      visited.add(nextKey);
+      // visited.add(nextKey);
 
       path.push(action);
 
-      const result = await search(next, g + 1, path);
+      const result = await searchWithThreshold(next, g + 1, path);
 
       if (result === "found") return "found"; // path is intact — don't pop
 
@@ -154,7 +154,7 @@ export async function aStar(
 
   while (true) {
     const path: Action[] = [];
-    const result = await search(initial, 0, path);
+    const result = await searchWithThreshold(initial, 0, path);
 
     if (verbose) {
       const elapsedMs = performance.now() - start;
