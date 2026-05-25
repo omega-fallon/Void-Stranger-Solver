@@ -13,7 +13,7 @@ const TEST_LEVELS: (RawLevel & {
 })[] = [];
 
 let FOCUS_ONE_TEST = false;
-let DEBUG_MAX_STEPS = 100;
+let DEBUG_MAX_STEPS = 100; // solving to step 32 takes about 10 minutes
 
 for (
   let i = FOCUS_ONE_TEST ? DEBUG_MAX_STEPS - 1 : 0;
