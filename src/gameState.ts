@@ -107,6 +107,15 @@ export function stateKey(state: GameState): string {
   return `${boardStr}|${row},${col},${facing},${staffStr}`;
 }
 
+// Glass and floor are interchangeable for goal satisfaction — the brand only
+// requires "solid tile present" or "empty", not a specific solid type.
+export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
+  if (target === "floor" || target === "glass") {
+    return cell === "floor" || cell === "glass";
+  }
+  return cell === target;
+}
+
 export function isGoal(
   state: GameState,
   target: Board,
@@ -118,7 +127,7 @@ export function isGoal(
       return false;
   }
   return state.board.every((row, r) =>
-    row.every((cell, c) => cell === getCell(target, r, c)),
+    row.every((cell, c) => cellMatchesTarget(cell, getCell(target, r, c))),
   );
 }
 

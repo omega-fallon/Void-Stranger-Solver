@@ -4,18 +4,29 @@ function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
 }
 
+// Glass and floor are interchangeable for goal satisfaction.
+// Defined locally to avoid a circular import with gameState.ts.
+const isSolid = (c: Cell) => c === "floor" || c === "glass";
+const cellMatchesTarget = (cur: Cell, tgt: Cell) =>
+  isSolid(tgt) ? isSolid(cur) : cur === tgt;
+
+// A held or excess tile can fill a deficit if both are solid, or if they are
+// the same non-solid type (e.g. stairs → stairs).
+const canFill = (source: Cell, deficitType: Cell) =>
+  isSolid(source) && isSolid(deficitType) ? true : source === deficitType;
+
 export function heuristic(state: GameState, target: Board): number {
   const { board, player } = state;
 
   let mismatches = 0;
-  const excess: [number, number, Cell][] = []; // cells with wrong/extra tiles
-  const deficit: [number, number, Cell][] = []; // cells that need a specific tile
+  const excess: [number, number, Cell][] = []; // cells with tiles that shouldn't be there
+  const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
 
   for (let r = 0; r < 6; r++) {
     for (let c = 0; c < 6; c++) {
       const cur = board[r]![c]!;
       const tgt = target[r]![c]!;
-      if (cur !== tgt) {
+      if (!cellMatchesTarget(cur, tgt)) {
         // Glass the player is standing on will break for free on their next move.
         // If the target wants that cell empty, the mismatch resolves at no extra cost.
         if (
@@ -37,16 +48,17 @@ export function heuristic(state: GameState, target: Board): number {
 
   let extraCost = 0;
 
-  // --- Transportation lower bound (type-aware) ---
-  // Each deficit cell needs a tile of its specific type delivered to it.
-  // For each deficit, find the nearest excess tile of the same type.
+  // --- Transportation lower bound ---
+  // Each deficit cell needs a compatible tile delivered to it.
+  // Solid deficits (floor/glass) can be filled by any solid excess tile.
+  // For each deficit, find the nearest compatible excess tile.
   // Min movement to carry a tile from S to D: max(0, manhattan(S, D) − 2).
   // Proof: player starts adjacent to S (dist 1) and ends adjacent to D (dist 1),
   // so movement ≥ manhattan(S, D) − 2. Matching each deficit to its nearest
-  // same-type source is admissible: the optimal assignment can only pair it to
+  // compatible source is admissible: the optimal assignment can only pair it to
   // a same-or-farther source.
   for (const [dr, dc, dtype] of deficit) {
-    const sources = excess.filter(([, , etype]) => etype === dtype);
+    const sources = excess.filter(([, , etype]) => canFill(etype, dtype));
     if (sources.length > 0) {
       extraCost += Math.min(
         ...sources.map(([er, ec]) =>
@@ -56,17 +68,15 @@ export function heuristic(state: GameState, target: Board): number {
     }
   }
 
-  // --- Player travel to first work item (type-aware) ---
+  // --- Player travel to first work item ---
   // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
   const holding = player.staffContent !== "empty";
 
-  // NOTE: The tile matching part of the heuristic only works when we know which tile types end up where, which is not necessary in the general case.
   if (holding) {
-    // Player is carrying a tile; they need to reach a deficit that accepts it.
-    // If no same-type deficit exists, the held tile will be placed temporarily
-    // or destroyed — we can't charge any travel cost without overestimating.
-    const matchingDeficits = deficit.filter(
-      ([, , dtype]) => dtype === player.staffContent,
+    // Player is carrying a tile; find the nearest deficit it can fill.
+    // If none exists, the tile will be placed temporarily — no travel cost charged.
+    const matchingDeficits = deficit.filter(([, , dtype]) =>
+      canFill(player.staffContent as Cell, dtype),
     );
     if (matchingDeficits.length > 0) {
       extraCost += Math.min(
