@@ -28,10 +28,14 @@ export async function aStar(
   verbose = false,
   slow = false,
   requireFinalJump = true,
+  initialThreshold?: number,
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
-  let threshold = heuristic(initial, target);
+  if (initialThreshold)
+    console.log(`Searching with initial threshold ${initialThreshold}`);
+
+  let threshold = initialThreshold ?? heuristic(initial, target);
   let nodesExplored = 0;
   let loopsPrevented = 0;
   const start = performance.now();
