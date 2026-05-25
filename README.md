@@ -8,9 +8,9 @@ Install dependencies:
 pnpm i
 ```
 
-Solve a brand by name:
+Solve a brane/brand combo by name:
 ```
-pnpm run dev --brand Eus --verbose
+pnpm run dev --brane Eus --brand Cif --verbose
 ```
 
 Run all the fast tests:

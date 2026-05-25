@@ -2,7 +2,7 @@
 
 import { parseArgs } from "node:util";
 import type { Board, Cell } from "./types";
-import { LEVELS } from "./levels";
+import { BRANES, BRANDS } from "./levels";
 import { search } from "./search";
 
 export function parseBoard(rows: string[]): Board {
@@ -13,8 +13,8 @@ export function parseBoard(rows: string[]): Board {
     S: "stairs",
     W: "wall",
     B: "button",
-    T: "inactive_trap",
-    A: "active_trap",
+    T: "trap_inactive",
+    A: "trap_active",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {
