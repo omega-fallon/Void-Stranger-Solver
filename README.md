@@ -1,6 +1,8 @@
 # Void Stranger Solver
 For now, just for solving brands.
 
+This uses pnpm, but you can probably use npm basically interchangeably.
+
 Install dependencies:
 ```
 pnpm i
