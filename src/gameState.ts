@@ -1,3 +1,4 @@
+import { countFloorTiles } from "./search";
 import type {
   Action,
   Board,
@@ -166,12 +167,7 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
   );
   const numFloorTilesRemaining =
-    board
-      .flat()
-      .map((cell): number => {
-        return ["floor", "wall", "glass"].includes(cell) ? 1 : 0;
-      })
-      .reduce((a, v) => a + v) +
+    countFloorTiles(board) +
     (["floor", "glass"].includes(state.player.staffContent) ? 1 : 0);
   return (
     `${numFloorTilesRemaining} floor tiles remain${
