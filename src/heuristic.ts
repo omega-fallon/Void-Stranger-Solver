@@ -44,8 +44,7 @@ export function heuristic(state: GameState, target: Board): number {
         cellMatchesTarget(cur, tgt)
       ) {
         mismatches++;
-        if (cur !== "empty") excess.push([r, c, cur]);
-        if (tgt !== "empty") deficit.push([r, c, tgt]);
+        deficit.push([r, c, cur]);
       }
       else if (!cellMatchesTarget(cur, tgt)) {
         mismatches++;
