@@ -1,10 +1,10 @@
 import assert from "assert";
 import test from "node:test";
-import { replayPath } from "./gameState";
-import { RawLevel } from "./levels";
-import { search } from "./search";
-import { parseBoard } from "./solve";
-import { PARTIAL_EUS_STATES } from "./data/PARTIAL_EUS_STATES";
+import { replayPath } from "../../gameState";
+import { RawLevel } from "../../levels";
+import { search } from "../../search";
+import { emptyEntityGrid, parseBoard } from "../../utils";
+import { PARTIAL_MON_STATES } from "../../data/PARTIAL_MON_STATES";
 const VERBOSE = !!process.env.VERBOSE;
 
 const TEST_LEVELS: (RawLevel & {
@@ -13,15 +13,15 @@ const TEST_LEVELS: (RawLevel & {
 })[] = [];
 
 let FOCUS_ONE_TEST = false;
-let DEBUG_MAX_STEPS = 26; // 20 requires only 16 steps ignoring final player position, but 21 requires 21 steps
+let DEBUG_MAX_STEPS = 100; // solving to step 32 takes about 10 minutes
 
 for (
   let i = FOCUS_ONE_TEST ? DEBUG_MAX_STEPS - 1 : 0;
-  i < Math.min(DEBUG_MAX_STEPS, PARTIAL_EUS_STATES.length - 1);
+  i < Math.min(DEBUG_MAX_STEPS, PARTIAL_MON_STATES.length - 1);
   i++
 ) {
-  let startState = PARTIAL_EUS_STATES[0]!;
-  let endState = PARTIAL_EUS_STATES[i + 1]!;
+  let startState = PARTIAL_MON_STATES[0]!;
+  let endState = PARTIAL_MON_STATES[i + 1]!;
   TEST_LEVELS.push({
     name: endState.name,
     initial: startState,
@@ -34,11 +34,12 @@ for (const level of TEST_LEVELS) {
   test(`${level.name}`, async () => {
     const initial = {
       board: parseBoard(level.initial.board),
+      entities: emptyEntityGrid(),
       player: level.initial.player,
     };
     const target = parseBoard(level.target);
     const requireFinalJump = level.requireFinalJump ?? false;
-    const { path } = await search(
+    const { path, elapsedMs } = await search(
       initial,
       target,
       VERBOSE,
@@ -52,12 +53,11 @@ for (const level of TEST_LEVELS) {
     assert.ok(path !== null, "No solution found");
     if (VERBOSE) {
       if (path) replayPath(initial, path, target, requireFinalJump);
-      console.log(
-        `Solved level "${level.name}" with a path of length ${path.length} ${
-          requireFinalJump ? "and jumped into the void" : ""
-        }`,
-      );
-      console.log(level);
     }
+    console.log(
+      `Solved level "${level.name}" with a path of length ${path.length}${
+        requireFinalJump ? " and jumped into the void" : ""
+      } in ${(elapsedMs / 1000).toFixed(0)}sec`,
+    );
   });
 }

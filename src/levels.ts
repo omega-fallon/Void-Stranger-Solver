@@ -3,21 +3,13 @@ import type { PlayerState } from "./types";
 export interface RawBraneInitial {
     name: string;
     board: string[];
+    entities: string[];
     player: PlayerState;
 }
 
 export interface RawBrand {
     name: string;
     board: string[];
-}
-
-export interface RawLevel {
-  name: string;
-  initial: {
-    board: string[];
-    player: PlayerState;
-  };
-  target: string[];
 }
 
 // Board encoding: " " empty  "#" floor  "G" glass  "S" stairs  "W" wall  "B" button  "T" inactive trap  "A" active trap
@@ -33,6 +25,15 @@ export const BRANES: RawBraneInitial[] = [
         " ##   ",
         "#    #",
       ],
+      // prettier-ignore
+      entities: [
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+      ],
       player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
     },
     {
@@ -45,6 +46,15 @@ export const BRANES: RawBraneInitial[] = [
         "GGGGGG",
         "GGG GG",
         "GGGSGW",
+      ],
+      // prettier-ignore
+      entities: [
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
       ],
       player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
     },
@@ -61,19 +71,28 @@ export const BRANES: RawBraneInitial[] = [
     //  ],
     //  player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
     //},
-    //{
-    //  name: "Mon",
-    //  // prettier-ignore
-    //  board: [
-    //    "B####W",
-    //    "#GGGG#",
-    //    "#G#GG#",
-    //    "#GG#G#",
-    //    "#GGGG#",
-    //    "W####S",
-    //  ],
-    //  player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
-    //},
+    {
+      name: "Mon",
+      // prettier-ignore
+      board: [
+        "B####W",
+        "#GGGG#",
+        "#G#GG#",
+        "#GG#G#",
+        "#GGGG#",
+        "W####S",
+      ],
+      // prettier-ignore
+      entities: [
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "    R ",
+        "      ",
+      ],
+      player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
+    },
     //{
     //  name: "Tan",
     //  // prettier-ignore
@@ -123,6 +142,15 @@ export const BRANES: RawBraneInitial[] = [
         "# #   ",
         "#  #  ",
         "W# S W",
+      ],
+      // prettier-ignore
+      entities: [
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
       ],
       player: { row: 4, col: 3, facing: "down", staffContent: "empty" },
     },

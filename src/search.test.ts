@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { search } from "./search";
-import { applyAction, replayPath } from "./gameState";
-import { parseBoard } from "./solve";
-import type { RawLevel } from "./levels";
+import { replayPath } from "./gameState";
+import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
+import type { BRANES, BRANDS } from "./levels";
 import type { Action, Board, Cell, GameState, PlayerState } from "./types";
 
 const PATH_CHARS: Record<string, Action> = {
@@ -24,13 +24,14 @@ const PATH_CHARS: Record<string, Action> = {
  * (e.g. moving into a wall), so call-site mistakes surface immediately.
  */
 export function applyPath(
-  initial: { board: string[]; player: PlayerState },
+  initial: { board: string[]; player: PlayerState, entities: string[] },
   pathStr: string,
 ): GameState[] {
   const states: GameState[] = [];
   let state: GameState = {
     board: parseBoard(initial.board),
     player: initial.player,
+    entities: initial.entities,
   };
 
   for (let i = 0; i < pathStr.length; i++) {
@@ -225,6 +226,9 @@ for (const level of TEST_LEVELS) {
   test(`${level.name}`, async () => {
     const initial = {
       board: parseBoard(level.initial.board),
+      entities: level.initial.entities
+        ? parseEntities(level.initial.entities)
+        : emptyEntityGrid(),
       player: level.initial.player,
     };
     const target = parseBoard(level.target);
