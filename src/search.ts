@@ -36,7 +36,7 @@ export async function search(
   if (verbose == 2 && initialThreshold)
     console.log(`Searching with initial threshold ${initialThreshold}`);
 
-  let threshold = initialThreshold ?? heuristic(initial, target);
+  let threshold = initialThreshold ?? heuristic(initial, target, requireFinalJump).total;
   let nodesExplored = 0;
   let loopsPrevented = 0;
   const start = performance.now();
@@ -66,7 +66,7 @@ export async function search(
     g: number,
     path: Action[],
   ): Promise<"found" | number> {
-    const h = heuristic(state, target);
+    const h = heuristic(state, target, requireFinalJump).total;
     const f = g + h;
     if (f > threshold) return f;
 

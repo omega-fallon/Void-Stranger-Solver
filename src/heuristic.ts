@@ -22,7 +22,22 @@ const cellMatchesTarget = (cur: Cell, tgt: Cell) =>
 const canFill = (source: Cell, deficitType: Cell) =>
   isSolid(source) && isSolid(deficitType) ? true : source === deficitType;
 
-export function heuristic(state: GameState, target: Board): number {
+export interface HeuristicResult {
+  /** Sum of all three components. */
+  total: number;
+  /** Number of board cells that don't yet match the target. */
+  mismatches: number;
+  /** Transportation lower bound: cost to carry misplaced tiles to their destinations. */
+  transportCost: number;
+  /** Player travel lower bound: cost to reach the first excess or deficit tile. */
+  travelCost: number;
+}
+
+export function heuristic(
+  state: GameState,
+  target: Board,
+  requireFinalJump: boolean,
+): HeuristicResult {
   const { board, player } = state;
 
   let mismatches = 0;
@@ -34,7 +49,10 @@ export function heuristic(state: GameState, target: Board): number {
       const cur = board[r]![c]!;
       const tgt = target[r]![c]!;
       // Glass the player is standing on will break for free on their next move.
-      // If the target wants that cell empty, the mismatch resolves at no extra cost.
+      // If the target wants that cell empty, the mismatch resolves at no extra cost —
+      // and crucially, the glass cannot be transported (it simply breaks), so it must
+      // not be added to excess. This is always correct: if the target wants empty here,
+      // the player must have moved away by then, and the break is free.
       if (
         r === player.row &&
         c === player.col &&
@@ -43,8 +61,12 @@ export function heuristic(state: GameState, target: Board): number {
       ) {
         continue;
       }
-      // Same as above but reverse. If the stood tile is glass and the target wants a solid tile, the glass is doomed and should be treated as non-existent.
+      // The occupied tile is glass but the target wants a solid tile. The glass is doomed
+      // to break whenever the player leaves, so the cell will need a replacement. Only
+      // apply for full solves (requireFinalJump): in intermediate tests the player may
+      // legitimately still be standing on that glass in the target state.
       else if (
+        requireFinalJump &&
         r === player.row &&
         c === player.col &&
         cur === "glass" &&
@@ -60,9 +82,10 @@ export function heuristic(state: GameState, target: Board): number {
     }
   }
 
-  if (mismatches === 0) return 0;
+  if (mismatches === 0)
+    return { total: 0, mismatches: 0, transportCost: 0, travelCost: 0 };
 
-  let extraCost = 0;
+  let transportCost = 0;
 
   // --- Transportation lower bound ---
   // Each deficit cell needs a compatible tile delivered to it.
@@ -76,7 +99,7 @@ export function heuristic(state: GameState, target: Board): number {
   for (const [dr, dc, dtype] of deficit) {
     const sources = excess.filter(([, , etype]) => canFill(etype, dtype));
     if (sources.length > 0) {
-      extraCost += Math.min(
+      transportCost += Math.min(
         ...sources.map(([er, ec]) =>
           Math.max(0, manhattan(er, ec, dr, dc) - 2),
         ),
@@ -88,6 +111,7 @@ export function heuristic(state: GameState, target: Board): number {
   // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
   const holding = player.staffContent !== "empty";
 
+  let travelCost = 0;
   if (holding) {
     // Player is carrying a tile; find the nearest deficit it can fill.
     // If none exists, the tile will be placed temporarily — no travel cost charged.
@@ -95,7 +119,7 @@ export function heuristic(state: GameState, target: Board): number {
       canFill(player.staffContent as Cell, dtype),
     );
     if (matchingDeficits.length > 0) {
-      extraCost += Math.min(
+      travelCost += Math.min(
         ...matchingDeficits.map(([dr, dc]) =>
           Math.max(0, manhattan(player.row, player.col, dr, dc) - 1),
         ),
@@ -103,12 +127,17 @@ export function heuristic(state: GameState, target: Board): number {
     }
   } else if (excess.length > 0) {
     // Player needs to reach an excess tile to start picking up.
-    extraCost += Math.min(
+    travelCost += Math.min(
       ...excess.map(([er, ec]) =>
         Math.max(0, manhattan(player.row, player.col, er, ec) - 1),
       ),
     );
   }
 
-  return mismatches + extraCost;
+  return {
+    total: mismatches + transportCost + travelCost,
+    mismatches,
+    transportCost: transportCost,
+    travelCost: travelCost,
+  };
 }

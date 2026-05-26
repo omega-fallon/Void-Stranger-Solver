@@ -198,7 +198,7 @@ export function replayPath(
     const action = path[i]!;
     state = applyAction(state, action)!;
     console.log(
-      `Step ${i + 1}: ${action} | h: ${heuristic(state, target)}\n${renderBoard(
+      `Step ${i + 1}: ${action} | h: ${heuristic(state, target, requireFinalJump).total}\n${renderBoard(
         state,
       )}\n`,
     );
