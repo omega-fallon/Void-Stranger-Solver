@@ -40,18 +40,14 @@ Board encoding: " " empty  "#" floor  "G" glass  "S" stairs
   process.exit(0);
 }
 
-const rawLevel = values.brane
-  ? BRANES.find((l) => l.name === values.brane)
-  : BRANES[0];
+const rawLevel = BRANES.find((l) => l.name === values.brane);
 
 if (!rawLevel) {
   console.error(`Unknown brane: "${values.brane}"`);
   process.exit(1);
 }
 
-const rawBrand = values.brand
-  ? BRANDS.find((l) => l.name === values.brand)
-  : BRANDS[0];
+const rawBrand = BRANDS.find((l) => l.name === values.brand);
 
 if (!rawBrand) {
   console.error(`Unknown brand: "${values.brand}"`);
