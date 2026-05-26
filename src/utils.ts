@@ -62,6 +62,9 @@ const CELL_CHARS: Record<Cell, string> = {
   glass: "G",
   stairs: "S",
   wall: "W",
+  button: "B",
+  trap_inactive: "T",
+  trap_active: "A",
 };
 const ENTITY_CHARS: Record<Entity, string> = {
   empty: " ",
