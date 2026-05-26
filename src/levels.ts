@@ -58,7 +58,7 @@ export const BRANES: RawBraneInitial[] = [
       "GG#GGG",
       "GGGGGG",
       "GGG GG",
-      "GGGSGW",
+      "GGGSG#",
     ],
     // prettier-ignore
     entities: [
@@ -67,7 +67,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "      ",
       "      ",
-      "      ",
+      "     R",
     ],
     player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
   },
