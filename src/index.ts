@@ -2,10 +2,15 @@
 
 import { parseArgs } from "node:util";
 import { replayPath } from "./gameState";
-import { BRANES, BRANDS } from "./levels";
+import { BRANES, BRANDS, KNOWN_CORRECT_PATHS } from "./levels";
 import { search } from "./search";
-import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
-import type { Board, GameState } from "./types";
+import {
+  actionsToString,
+  emptyEntityGrid,
+  parseBoard,
+  parseEntities,
+} from "./utils";
+import type { Action, Board, GameState } from "./types";
 
 const { values } = parseArgs({
   args: process.argv.slice(2),
@@ -69,8 +74,25 @@ const initialThreshold = values.initialThreshold
   ? Number(values.initialThreshold)
   : undefined;
 
+const scenarioName = `${values.brane}/${values.brand}${
+  values.wings ? " wings" : ""
+}`;
+const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
+  .split("")
+  .map((l) => {
+    return {
+      L: "left",
+      R: "right",
+      U: "up",
+      D: "down",
+      Z: "staff",
+    }[l] as Action;
+  });
+
 async function main() {
-  console.log("Searching for solution...");
+  console.log(
+    `Searching for solution... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
+  );
   const start = performance.now();
   const { path, nodesExplored } = await search(
     INITIAL_STATE,
@@ -79,6 +101,7 @@ async function main() {
     values.slow,
     true,
     initialThreshold,
+    knownCorrectPath,
     values.wings,
   );
   const elapsedMs = performance.now() - start;
@@ -93,7 +116,7 @@ async function main() {
   }
 
   console.log(`Solution found in ${path.length} steps (${perf}):`);
-  console.log(path.join(", "));
+  console.log(actionsToString(path));
 
   if (values.verbose) replayPath(INITIAL_STATE, path, TARGET_BOARD);
 }

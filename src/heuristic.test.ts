@@ -4,13 +4,13 @@ import { PARTIAL_EUS_STATES } from "./data/PARTIAL_EUS_STATES";
 import { applyAction, renderBoard } from "./gameState";
 import { heuristic } from "./heuristic";
 import type { Action, GameState } from "./types";
-import { emptyEntityGrid, parseBoard } from "./utils";
+import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
 
 // Tests that h(after) ≤ h(before) + 1 for a single action (consistency).
 // Each action costs 1, so a consistent heuristic must not increase by more than 1.
 const CONSISTENCY_CASES: {
   name: string;
-  before: GameState;
+  initial: GameState;
   action: Action;
   target: string[];
   solutionLength?: number;
@@ -18,7 +18,7 @@ const CONSISTENCY_CASES: {
 }[] = [
   {
     name: "picking up glass",
-    before: {
+    initial: {
       // prettier-ignore
       board: parseBoard([
         " ###GG",
@@ -45,7 +45,7 @@ const CONSISTENCY_CASES: {
   },
   {
     name: "Mangled Eus step 6 -> 7",
-    before: {
+    initial: {
       // prettier-ignore
       board: parseBoard([
         "GG  GG",
@@ -53,9 +53,53 @@ const CONSISTENCY_CASES: {
         "GG#GGG",
         "GGGGGG",
         "GGG GG",
-        "GGGSGW"
+        "GGGSGG"
       ]),
-      entities: emptyEntityGrid(),
+      // prettier-ignore
+      entities: parseEntities([
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "     R",
+      ]),
+      player: { row: 1, col: 4, facing: "right", staffContent: "empty" },
+    },
+    solutionLength: 1,
+    action: "staff",
+    // TODO: Make this consistent with using parseBoard above, I
+    // prettier-ignore
+    target: [
+      "GG  GG",
+      "G ##G ",
+      "GG#GGG",
+      "GGGGGG",
+      "GGG GG",
+      "GGGSGG"
+    ],
+  },
+  {
+    name: "Eus step 6 -> 7",
+    initial: {
+      // prettier-ignore
+      board: parseBoard([
+        "GG  GG",
+        "G ##GG",
+        "GG#GGG",
+        "GGGGGG",
+        "GGG GG",
+        "GGGSGG"
+      ]),
+      // prettier-ignore
+      entities: parseEntities([
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "     R",
+      ]),
       player: { row: 1, col: 4, facing: "right", staffContent: "empty" },
     },
     solutionLength: 1,
@@ -72,38 +116,51 @@ const CONSISTENCY_CASES: {
     ],
   },
   {
-    name: "Eus step 6 -> 7",
-    before: {
+    name: "Eus/Eus search correctness regression",
+    initial: {
       // prettier-ignore
-      board: parseBoard([
+      "board": parseBoard([
         "GG  GG",
-        "G ##GG",
-        "GG#GGG",
+        "  ##  ",
+        "GG G G",
         "GGGGGG",
         "GGG GG",
-        "GGGSGW"
+        "GGGSGG"
       ]),
-      entities: emptyEntityGrid(),
-      player: { row: 1, col: 4, facing: "right", staffContent: "empty" },
+      // prettier-ignore
+      entities: parseEntities([
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "     R",
+      ]),
+      player: {
+        row: 2,
+        col: 3,
+        facing: "left",
+        staffContent: "floor",
+        wingsActive: false,
+      },
     },
-    solutionLength: 1,
-    action: "staff",
-    // TODO: Make this consistent with using parseBoard above, I
+    action: "down",
     // prettier-ignore
     target: [
       "GG  GG",
-      "G ##G ",
-      "GG#GGG",
-      "GGGGGG",
+      "  ##  ",
+      "GG   G",
       "GGG GG",
-      "GGGSGW"
+      "GG #GG",
+      "GG  GG"
     ],
+    solutionLength: 7,
   },
 ];
 
 for (const {
   name,
-  before,
+  initial: before,
   action,
   target,
   solutionLength,
@@ -124,7 +181,7 @@ for (const {
 }
 for (const {
   name,
-  before,
+  initial: before,
   action,
   target,
   requireFinalJump = false,

@@ -23,6 +23,7 @@ export function countFloorTiles(board: Board): number {
     );
 }
 
+// TODO: Convert to object arguments
 export async function search(
   initial: GameState,
   target: Board,
@@ -30,6 +31,7 @@ export async function search(
   slow = false,
   requireFinalJump = true,
   initialThreshold?: number,
+  knownCorrectPath: Action[] = [], // DEBUG
   hasWings = false,
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
@@ -51,17 +53,6 @@ export async function search(
 
   // DEBUG
   let maxCorrectSoFar = 0;
-  const eusTanSolutionPath = "LLRZUDDRDDLRZDURZRLZULUURZRLZRZUDDLDDUZDZ"
-    .split("")
-    .map((l) => {
-      return {
-        L: "left",
-        R: "right",
-        U: "up",
-        D: "down",
-        Z: "staff",
-      }[l];
-    });
   // END DEBUG
 
   // Returns "found" on success, Infinity if this subtree is unsolvable, or the
@@ -73,6 +64,16 @@ export async function search(
   ): Promise<"found" | number> {
     const h = heuristic(state, target, requireFinalJump).total;
     const f = g + h;
+
+    const amountOfPathFound = (() => {
+      for (let i = 0; i < knownCorrectPath.length; i++) {
+        if (knownCorrectPath[i] != path[i]) {
+          return i;
+        }
+      }
+      return knownCorrectPath.length;
+    })();
+
     if (f > threshold) {
       pathsTrimmed++;
       return f;
@@ -80,23 +81,11 @@ export async function search(
 
     nodesExplored++;
 
-    const amountOfPathFound = (() => {
-      for (let i = 0; i < eusTanSolutionPath.length; i++) {
-        if (eusTanSolutionPath[i] != path[i]) {
-          return i;
-        }
-      }
-      return eusTanSolutionPath.length;
-    })();
-    maxCorrectSoFar = Math.max(amountOfPathFound, maxCorrectSoFar);
-
     if (verbose >= 2 && (verbose >= 3 || Math.random() < 0.00001)) {
       const elapsedMs = performance.now() - start;
       const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
       const action = path.at(-1) ?? "start";
 
-      // console.log(path);
-      // console.log(eusSolutionPath);
       console.log(
         `Threshold: ${threshold} | Explored: ${nodesExplored} | ${loopsPrevented} loops prevented | ${pathsTrimmed} paths trimmed | ` +
           `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +

@@ -311,11 +311,11 @@ export function replayPath(
     const action = path[i]!;
     state = applyAction(state, action)!;
     console.log(
-      `Step ${i + 1}: ${action} | h: ${heuristic(state, target, requireFinalJump).total}\n${renderBoard(
-        state,
-      )}\n`,
+      `Step ${i + 1}: ${action} | h: ${
+        heuristic(state, target, requireFinalJump).total
+      }\n${renderBoard(state)}\n`,
     );
-    if (isGoal(state, target, requireFinalJump)) {  
+    if (isGoal(state, target, requireFinalJump)) {
       console.log("Goal reached!");
       console.log(path);
     }

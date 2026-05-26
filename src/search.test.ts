@@ -260,6 +260,46 @@ const TEST_LEVELS: (RawLevel & {
     ],
     solutionLength: 8,
   },
+  {
+    name: "Eus/Eus search correctness regression",
+    initial: {
+      // prettier-ignore
+      "board": ([
+        "GG  GG",
+        "  ##  ",
+        "GG G G",
+        "GGGGGG",
+        "GGG GG",
+        "GGGSGG"
+      ]),
+      // prettier-ignore
+      entities: [
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "     R",
+      ],
+      player: {
+        row: 2,
+        col: 3,
+        facing: "left",
+        staffContent: "floor",
+        wingsActive: false,
+      },
+    },
+    // prettier-ignore
+    target: [
+      "GG  GG",
+      "  ##  ",
+      "GG   G",
+      "GGG GG",
+      "GG #GG",
+      "GG  GG"
+    ],
+    solutionLength: 7,
+  },
 ];
 
 for (const level of TEST_LEVELS) {
@@ -279,6 +319,7 @@ for (const level of TEST_LEVELS) {
       0,
       false,
       requireFinalJump,
+      undefined,
       undefined,
       level.hasWings ?? false,
     );

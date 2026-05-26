@@ -16,6 +16,19 @@ const PATH_CHARS: Record<string, Action> = {
   R: "right",
   Z: "staff",
 };
+
+const ACTION_CHARS: Record<Action, string> = {
+  up: "U",
+  down: "D",
+  left: "L",
+  right: "R",
+  staff: "Z",
+};
+
+/** Converts a list of actions back to the compact path string. Inverse of applyPath's input. */
+export function actionsToString(actions: Action[]): string {
+  return actions.map((a) => ACTION_CHARS[a]).join("");
+}
 /**
  * Applies a compact path string to an initial board state and returns the
  * resulting GameState after each step.
