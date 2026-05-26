@@ -13,7 +13,7 @@ const { values } = parseArgs({
     help: { type: "boolean", short: "h" },
     brane: { type: "string", short: "e" },
     brand: { type: "string", short: "d" },
-    verbose: { type: "boolean", short: "v" },
+    verbose: { type: "string", short: "v" },
     slow: { type: "boolean", short: "s" },
   },
 });
@@ -69,7 +69,7 @@ async function main() {
   const { path, nodesExplored } = await search(
     INITIAL_STATE,
     TARGET_BOARD,
-    values.verbose,
+    Number(values.verbose),
     values.slow,
   );
   const elapsedMs = performance.now() - start;

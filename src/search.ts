@@ -26,7 +26,7 @@ export function countFloorTiles(board: Board): number {
 export async function search(
   initial: GameState,
   target: Board,
-  verbose: boolean | number = false,
+  verbose: number = 0,
   slow = false,
   requireFinalJump = true,
   initialThreshold?: number,
@@ -36,7 +36,8 @@ export async function search(
   if (verbose == 2 && initialThreshold)
     console.log(`Searching with initial threshold ${initialThreshold}`);
 
-  let threshold = initialThreshold ?? heuristic(initial, target, requireFinalJump).total;
+  let threshold =
+    initialThreshold ?? heuristic(initial, target, requireFinalJump).total;
   let nodesExplored = 0;
   let loopsPrevented = 0;
   const start = performance.now();
@@ -82,7 +83,7 @@ export async function search(
     })();
     maxCorrectSoFar = Math.max(amountOfPathFound, maxCorrectSoFar);
 
-    if (verbose == 2 && Math.random() < 0.00001) {
+    if (verbose >= 2 && (verbose >= 3 || Math.random() < 0.00001)) {
       const elapsedMs = performance.now() - start;
       const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
       const action = path.at(-1) ?? "start";
@@ -160,7 +161,7 @@ export async function search(
     const elapsedMs = performance.now() - start;
     if (verbose) {
       console.log(
-        `--- Threshold ${threshold} | ${nodesExplored} nodes so far | ${elapsedMs.toFixed(
+        `--- Threshold ${threshold}, result: ${result} | ${nodesExplored} nodes so far | ${elapsedMs.toFixed(
           0,
         )}ms | ${(nodesExplored / (elapsedMs / 1000)).toFixed(
           0,
