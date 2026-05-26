@@ -6,7 +6,14 @@ function manhattan(r1: number, c1: number, r2: number, c2: number): number {
 
 // Glass and floor are interchangeable for goal satisfaction.
 // Defined locally to avoid a circular import with gameState.ts.
-const isSolid = (c: Cell) => c === "floor" || c === "glass" || c === "wall" || c === "button" || c === "trap_inactive" || c === "trap_active";
+const isSolid = (c: Cell) =>
+  c === "floor" ||
+  c === "glass" ||
+  c === "wall" ||
+  c === "button" ||
+  c === "trap_inactive" ||
+  c === "trap_active";
+
 const cellMatchesTarget = (cur: Cell, tgt: Cell) =>
   isSolid(tgt) ? isSolid(cur) : cur === tgt;
 
@@ -45,8 +52,7 @@ export function heuristic(state: GameState, target: Board): number {
       ) {
         mismatches++;
         deficit.push([r, c, cur]);
-      }
-      else if (!cellMatchesTarget(cur, tgt)) {
+      } else if (!cellMatchesTarget(cur, tgt)) {
         mismatches++;
         if (cur !== "empty") excess.push([r, c, cur]);
         if (tgt !== "empty") deficit.push([r, c, tgt]);

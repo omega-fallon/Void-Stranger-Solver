@@ -1,10 +1,17 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
+import { applyAction, replayPath } from "./gameState";
 import { search } from "./search";
-import { replayPath } from "./gameState";
+import type {
+  Action,
+  Board,
+  Cell,
+  EntityGrid,
+  GameState,
+  PlayerState,
+} from "./types";
 import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
-import type { BRANES, BRANDS } from "./levels";
-import type { Action, Board, Cell, GameState, PlayerState } from "./types";
+import { RawLevel } from "./levels";
 
 const PATH_CHARS: Record<string, Action> = {
   U: "up",
@@ -24,7 +31,7 @@ const PATH_CHARS: Record<string, Action> = {
  * (e.g. moving into a wall), so call-site mistakes surface immediately.
  */
 export function applyPath(
-  initial: { board: string[]; player: PlayerState, entities: string[] },
+  initial: { board: string[]; player: PlayerState; entities: EntityGrid },
   pathStr: string,
 ): GameState[] {
   const states: GameState[] = [];
@@ -58,8 +65,8 @@ const CELL_CHARS: Record<Cell, string> = {
   stairs: "S",
   wall: "W",
   button: "B",
-  inactive_trap: "T",
-  active_trap: "A",
+  trap_inactive: "T",
+  trap_active: "A",
 };
 
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
