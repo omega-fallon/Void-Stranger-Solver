@@ -5,7 +5,7 @@ import { RawLevel } from "../../levels";
 import { search } from "../../search";
 import { emptyEntityGrid, parseBoard } from "../../utils";
 import { PARTIAL_MON_STATES } from "../../data/PARTIAL_MON_STATES";
-const VERBOSE = !!process.env.VERBOSE;
+const VERBOSE = Number(process.env.VERBOSE);
 
 const TEST_LEVELS: (RawLevel & {
   solutionLength?: number;
@@ -14,9 +14,10 @@ const TEST_LEVELS: (RawLevel & {
 
 let FOCUS_ONE_TEST = false;
 let DEBUG_MAX_STEPS = 100; // solving to step 32 takes about 10 minutes
+let DEBUG_MIN_STEPS = 41; // we solved up to here already
 
 for (
-  let i = FOCUS_ONE_TEST ? DEBUG_MAX_STEPS - 1 : 0;
+  let i = FOCUS_ONE_TEST ? DEBUG_MAX_STEPS - 1 : DEBUG_MIN_STEPS;
   i < Math.min(DEBUG_MAX_STEPS, PARTIAL_MON_STATES.length - 1);
   i++
 ) {

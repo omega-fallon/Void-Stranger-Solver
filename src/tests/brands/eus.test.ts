@@ -5,7 +5,7 @@ import { RawLevel } from "../../levels";
 import { search } from "../../search";
 import { emptyEntityGrid, parseBoard } from "../../utils";
 import { PARTIAL_EUS_STATES } from "../../data/PARTIAL_EUS_STATES";
-const VERBOSE = !!process.env.VERBOSE;
+const VERBOSE = Number(process.env.VERBOSE);
 
 const TEST_LEVELS: (RawLevel & {
   solutionLength?: number;
