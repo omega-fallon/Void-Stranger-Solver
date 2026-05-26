@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyAction } from "./gameState";
+import { applyAction, renderBoard, replayPath } from "./gameState";
 import { emptyEntityGrid } from "./utils";
 import type { Cell, Direction, Entity, GameState, StaffContent } from "./types";
 
@@ -253,4 +253,200 @@ test("staff action preserves wingsActive state", () => {
   assert.equal(r.player.wingsActive, true); // still airborne
   assert.equal(r.player.staffContent, "floor");
   assert.equal(r.board[1]![0], "empty");
+});
+
+// Ground rock-push (lines 162-187) — no wings
+
+test("ground push rock succeeds: rock moves one step, player stays in place", () => {
+  const s = makeState(
+    2, 0, "down", "empty",
+    [[0, 0, "floor"], [1, 0, "floor"], [2, 0, "floor"]],
+    [[1, 0, "rock"]],
+  );
+  const r = applyAction(s, "up")!;
+  assert.equal(r.player.row, 2);            // player did NOT advance
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.facing, "up");      // facing updated
+  assert.equal(r.entities[1]![0], "empty"); // rock left its cell
+  assert.equal(r.entities[0]![0], "rock");  // rock arrived at destination
+});
+
+test("ground push rock out of bounds returns null", () => {
+  // Rock at row 0 — pushing up would send it to row -1
+  const s = makeState(
+    1, 0, "up", "empty",
+    [[0, 0, "floor"], [1, 0, "floor"]],
+    [[0, 0, "rock"]],
+  );
+  assert.equal(applyAction(s, "up"), null);
+});
+
+test("ground push rock into wall returns null", () => {
+  const s = makeState(
+    2, 0, "up", "empty",
+    [[0, 0, "wall"], [1, 0, "floor"], [2, 0, "floor"]],
+    [[1, 0, "rock"]],
+  );
+  assert.equal(applyAction(s, "up"), null);
+});
+
+test("ground push rock into another rock returns null", () => {
+  const s = makeState(
+    2, 0, "up", "empty",
+    [[0, 0, "floor"], [1, 0, "floor"], [2, 0, "floor"]],
+    [[0, 0, "rock"], [1, 0, "rock"]],
+  );
+  assert.equal(applyAction(s, "up"), null);
+});
+
+test("ground push rock off glass: glass at rock origin breaks", () => {
+  const s = makeState(
+    2, 0, "up", "empty",
+    [[0, 0, "floor"], [1, 0, "glass"], [2, 0, "floor"]],
+    [[1, 0, "rock"]],
+  );
+  const r = applyAction(s, "up")!;
+  assert.equal(r.board[1]![0], "empty");    // glass broke where rock stood
+  assert.equal(r.entities[1]![0], "empty"); // rock vacated
+  assert.equal(r.entities[0]![0], "rock");  // rock arrived at floor
+  assert.equal(r.player.row, 2);            // player stayed
+});
+
+test("ground push rock into void: rock disappears", () => {
+  // (0,0) is empty (void) — the rock falls in and is removed
+  const s = makeState(
+    2, 0, "up", "empty",
+    [[1, 0, "floor"], [2, 0, "floor"]], // row 0 left as empty/void
+    [[1, 0, "rock"]],
+  );
+  const r = applyAction(s, "up")!;
+  assert.equal(r.entities[0]![0], "empty"); // rock gone into void
+  assert.equal(r.entities[1]![0], "empty"); // original spot also clear
+  assert.equal(r.player.row, 2);            // player stayed
+});
+
+// renderBoard (lines 325-386)
+
+test("renderBoard returns a string with top and bottom borders", () => {
+  const s = makeState(0, 0, "right", "empty");
+  const result = renderBoard(s);
+  assert.equal(typeof result, "string");
+  assert.ok(result.includes("┌────────────┐"));
+  assert.ok(result.includes("└────────────┘"));
+  assert.ok(result.includes("│"));
+});
+
+test("renderBoard shows correct player arrow for each facing direction", () => {
+  const cases: Array<[Direction, string]> = [
+    ["up", "⇑"],
+    ["down", "⇓"],
+    ["left", "⇐"],
+    ["right", "⇒"],
+  ];
+  for (const [dir, arrow] of cases) {
+    const s = makeState(0, 0, dir, "empty");
+    assert.ok(renderBoard(s).includes(arrow), `Expected arrow "${arrow}" for direction "${dir}"`);
+  }
+});
+
+test("renderBoard shows floor tile as solid block chars", () => {
+  // Player at (5,5), floor at (1,1) — no overlay conflict
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "floor"]]);
+  assert.ok(renderBoard(s).includes("██"));
+});
+
+test("renderBoard shows glass tile as light-shade chars", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "glass"]]);
+  assert.ok(renderBoard(s).includes("░░"));
+});
+
+test("renderBoard shows wall tile", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "wall"]]);
+  assert.ok(renderBoard(s).includes("▓▓"));
+});
+
+test("renderBoard shows stairs tile", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "stairs"]]);
+  assert.ok(renderBoard(s).includes("S "));
+});
+
+test("renderBoard shows button tile", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "button"]]);
+  assert.ok(renderBoard(s).includes("█B"));
+});
+
+test("renderBoard shows trap_inactive tile", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "trap_inactive"]]);
+  assert.ok(renderBoard(s).includes("ΘΘ"));
+});
+
+test("renderBoard shows trap_active tile", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "trap_active"]]);
+  assert.ok(renderBoard(s).includes("ϴϴ"));
+});
+
+test("renderBoard shows rock entity as R", () => {
+  const s = makeState(5, 5, "right", "empty", [[1, 1, "floor"]], [[1, 1, "rock"]]);
+  assert.ok(renderBoard(s).includes("R"));
+});
+
+test("renderBoard shows wings indicator when player is airborne", () => {
+  const s = withWings(makeState(0, 0, "right", "empty"));
+  assert.ok(renderBoard(s).includes("🦋"));
+});
+
+test("renderBoard omits wings indicator when player is grounded", () => {
+  const s = makeState(0, 0, "right", "empty");
+  assert.ok(!renderBoard(s).includes("🦋"));
+});
+
+test("renderBoard first line reports floor tile count (floor + glass combined)", () => {
+  const s = makeState(5, 5, "right", "empty", [
+    [0, 0, "floor"],
+    [0, 1, "glass"],
+    [0, 2, "floor"],
+  ]);
+  const firstLine = renderBoard(s).split("\n")[0]!;
+  assert.ok(firstLine.startsWith("3 floor tiles remain"), `Got: "${firstLine}"`);
+});
+
+test("renderBoard counts floor tile held in staff toward total", () => {
+  const s = makeState(5, 5, "right", "floor", [[0, 0, "floor"]]);
+  const firstLine = renderBoard(s).split("\n")[0]!;
+  assert.ok(firstLine.startsWith("2 floor tiles remain"), `Got: "${firstLine}"`);
+});
+
+test("renderBoard counts glass tile held in staff toward total", () => {
+  const s = makeState(5, 5, "right", "glass", [[0, 0, "floor"]]);
+  const firstLine = renderBoard(s).split("\n")[0]!;
+  assert.ok(firstLine.startsWith("2 floor tiles remain"), `Got: "${firstLine}"`);
+});
+
+test("renderBoard shows requiredTiles in first line when provided", () => {
+  const s = makeState(0, 0, "right", "empty", [[1, 0, "floor"]]);
+  assert.ok(renderBoard(s, 10).includes("out of a necessary 10"));
+});
+
+test("renderBoard omits requiredTiles phrase when not provided", () => {
+  const s = makeState(0, 0, "right", "empty");
+  assert.ok(!renderBoard(s).includes("out of a necessary"));
+});
+
+// replayPath (lines 301-323)
+
+test("replayPath with empty path does not throw", () => {
+  const initial = makeState(1, 0, "up", "empty", [
+    [0, 0, "floor"],
+    [1, 0, "floor"],
+  ]);
+  assert.doesNotThrow(() => replayPath(initial, [], initial.board));
+});
+
+test("replayPath with one valid step does not throw", () => {
+  // Player at (1,0) facing up, moves to floor at (0,0)
+  const initial = makeState(1, 0, "up", "empty", [
+    [0, 0, "floor"],
+    [1, 0, "floor"],
+  ]);
+  assert.doesNotThrow(() => replayPath(initial, ["up"], initial.board));
 });
