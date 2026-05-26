@@ -202,7 +202,10 @@ export function replayPath(
         state,
       )}\n`,
     );
-    if (isGoal(state, target, requireFinalJump)) console.log("Goal reached!");
+    if (isGoal(state, target, requireFinalJump)) {  
+      console.log("Goal reached!");
+      console.log(path);
+    }
   }
 }
 
