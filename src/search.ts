@@ -99,7 +99,7 @@ export async function search(
       // console.log(eusSolutionPath);
       console.log(
         `Threshold: ${threshold} | Explored: ${nodesExplored} | ${loopsPrevented} loops prevented | ${pathsTrimmed} paths trimmed | ` +
-          `${elapsedMs.toFixed(1)}ms | ${nodesPerSec} nodes/sec\n` +
+          `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
           `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct | Action: ${action}\n` +
           `${renderBoard(state, numFloorTilesInSolution)}`,
       );
