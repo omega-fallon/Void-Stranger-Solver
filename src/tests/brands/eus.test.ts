@@ -39,14 +39,13 @@ for (const level of TEST_LEVELS) {
     };
     const target = parseBoard(level.target);
     const requireFinalJump = level.requireFinalJump ?? false;
-    const { path } = await search(
+    const { path } = await search({
       initial,
       target,
-      VERBOSE,
-      false,
+      verbose: VERBOSE,
       requireFinalJump,
-      Number(level.name.replace(/\D*/, "")),
-    );
+      initialThreshold: Number(level.name.replace(/\D*/, "")),
+    });
     if (level.solutionLength) {
       assert.equal(level.solutionLength, path?.length);
     }

@@ -313,16 +313,12 @@ for (const level of TEST_LEVELS) {
     };
     const target = parseBoard(level.target);
     const requireFinalJump = level.requireFinalJump ?? true;
-    const { path } = await search(
+    const { path } = await search({
       initial,
       target,
-      0,
-      false,
       requireFinalJump,
-      undefined,
-      undefined,
-      level.hasWings ?? false,
-    );
+      hasWings: level.hasWings ?? false,
+    });
     if (level.solutionLength) {
       assert.equal(level.solutionLength, path?.length);
     }

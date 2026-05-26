@@ -94,16 +94,16 @@ async function main() {
     `Searching for solution... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
   );
   const start = performance.now();
-  const { path, nodesExplored } = await search(
-    INITIAL_STATE,
-    TARGET_BOARD,
-    Number(values.verbose),
-    values.slow,
-    true,
+  const { path, nodesExplored } = await search({
+    initial: INITIAL_STATE,
+    target: TARGET_BOARD,
+    verbose: Number(values.verbose),
+    slow: values.slow ?? false,
+    requireFinalJump: true,
     initialThreshold,
     knownCorrectPath,
-    values.wings,
-  );
+    hasWings: values.wings ?? false,
+  });
   const elapsedMs = performance.now() - start;
   const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
   const perf = `${elapsedMs.toFixed(

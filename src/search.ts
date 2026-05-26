@@ -23,17 +23,27 @@ export function countFloorTiles(board: Board): number {
     );
 }
 
-// TODO: Convert to object arguments
-export async function search(
-  initial: GameState,
-  target: Board,
-  verbose: number = 0,
+export interface SearchOptions {
+  initial: GameState;
+  target: Board;
+  verbose?: number;
+  slow?: boolean;
+  requireFinalJump?: boolean;
+  initialThreshold?: number | undefined;
+  knownCorrectPath?: Action[] | undefined; // DEBUG
+  hasWings?: boolean;
+}
+
+export async function search({
+  initial,
+  target,
+  verbose = 0,
   slow = false,
   requireFinalJump = true,
-  initialThreshold?: number,
-  knownCorrectPath: Action[] = [], // DEBUG
+  initialThreshold,
+  knownCorrectPath = [],
   hasWings = false,
-): Promise<SearchResult> {
+}: SearchOptions): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
   if (verbose == 2 && initialThreshold)
