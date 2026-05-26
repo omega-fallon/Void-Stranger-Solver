@@ -16,9 +16,16 @@
     "perf": "node --cpu-prof --cpu-prof-dir=profiles -r ts-node/register src/index.ts"
   },
   "c8": {
-    "include": ["src/**/*.ts"],
-    "exclude": ["src/**/*.test.ts", "src/tests/**"],
-    "extension": [".ts"],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/**/*.test.ts",
+      "src/tests/**"
+    ],
+    "extension": [
+      ".ts"
+    ],
     "all": true,
     "src": "src"
   },
