@@ -10,6 +10,7 @@ import type {
   GameState,
   StaffContent,
 } from "./types";
+import { actionsToString } from "./utils";
 
 export const ACTIONS: Action[] = ["left", "up", "right", "down", "staff"];
 
@@ -340,7 +341,7 @@ export function replayPath(
     );
     if (isGoal(state, target, requireFinalJump)) {
       console.log("Goal reached!");
-      console.log(path);
+      console.log(actionsToString(path));
     }
   }
 }
