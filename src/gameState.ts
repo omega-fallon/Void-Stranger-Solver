@@ -246,32 +246,55 @@ export function applyAction(
 }
 
 export function stateKey(state: GameState): string {
-  const cellChar = (c: Cell) =>
-    c === "empty"
-      ? "0"
+  // We wrap these in IIFEs so the profiler names each part individually
+  function cellChar(c: Cell) {
+    return c === "empty"
+      ? " "
       : c === "floor"
-      ? "1"
+      ? "#"
       : c === "glass"
       ? "G"
       : c === "wall"
       ? "W"
-      : "S";
-  const boardStr = state.board.flat().map(cellChar).join("");
-  const entityStr = state.entities
-    .flat()
-    .map((e) => (e === "rock" ? "R" : "0"))
-    .join("");
-  const { row, col, facing, staffContent, wingsActive } = state.player;
-  const staffStr =
-    staffContent === "empty"
+      : c === "button"
+      ? "B"
+      : c === "stairs"
+      ? "S"
+      : c === "trap_active"
+      ? "A"
+      : c === "trap_inactive"
+      ? "T"
+      : "?";
+  }
+  const boardStr = (function getBoardStr() {
+    let str = "";
+    state.board.forEach((row) => row.forEach((c) => (str += cellChar(c))));
+    return str;
+  })();
+  const entityStr = (function getEntityStr() {
+    let str = "";
+    state.entities.forEach((row) =>
+      row.forEach((c) => (str += c === "rock" ? "R" : " ")),
+    );
+    return str;
+  })();
+  const { row, col, facing, staffContent, wingsActive } =
+    (function getStatePlayer() {
+      return state.player;
+    })();
+  const staffStr = (function getStaffStr() {
+    return staffContent === "empty"
       ? "e"
       : staffContent === "floor"
       ? "t"
       : staffContent === "glass"
       ? "g"
       : "s";
+  })();
   const wingsStr = wingsActive ? "W" : "0";
-  return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
+  return (function combineString() {
+    return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
+  })();
 }
 
 // Glass and floor are interchangeable for goal satisfaction — the brand only
