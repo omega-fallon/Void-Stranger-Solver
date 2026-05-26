@@ -20,6 +20,7 @@ const { values } = parseArgs({
     brand: { type: "string", short: "d" },
     wings: { type: "boolean" },
     initialThreshold: { type: "string" },
+    cheatFirstNSteps: { type: "string" },
     verbose: { type: "string", short: "v" },
     slow: { type: "boolean", short: "s" },
   },
@@ -31,10 +32,14 @@ if (values.help) {
   console.log(`Usage: void-stranger-brand-solver [options]
 
 Options:
-  -h, --help           Show this help message
-  -be, --brane <name>   Level to solve (default: Add)
-  -bd, --brand <name>   Brand to carve (default: Add)
-  -v, --verbose        Print each board state during solution replay
+  -h, --help                      Show this help message
+  -e, --brane <name>              Brane (level) to solve
+  -d, --brand <name>              Brand to carve
+      --wings                     Enable wings mechanic
+  -v, --verbose <level>           Verbosity level: 1 = log search progress, 2 = replay solution
+  -s, --slow                      Add 100ms delay per node during search
+      --initialThreshold <n>      Override initial IDA* cost threshold
+      --cheatFirstNSteps <n>      Skip first N steps using the known correct path
 
 Available branes:
 ${be_list}
@@ -42,7 +47,7 @@ ${be_list}
 Available brands:
 ${bd_list}
 
-Board encoding: " " empty  "#" floor  "G" glass  "S" stairs
+Board encoding: " " empty  "#" floor  "G" glass  "S" stairs  "W" wall  "B" button  "T" inactive trap  "A" active trap
 `);
   process.exit(0);
 }
