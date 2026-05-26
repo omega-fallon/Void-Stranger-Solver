@@ -30,6 +30,7 @@ export async function search(
   slow = false,
   requireFinalJump = true,
   initialThreshold?: number,
+  hasWings = false,
 ): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
@@ -40,6 +41,7 @@ export async function search(
     initialThreshold ?? heuristic(initial, target, requireFinalJump).total;
   let nodesExplored = 0;
   let loopsPrevented = 0;
+  let pathsTrimmed = 0;
   const start = performance.now();
 
   // Per-path visited set — prevents cycles within a single DFS path.
@@ -49,15 +51,17 @@ export async function search(
 
   // DEBUG
   let maxCorrectSoFar = 0;
-  const eusSolutionPath = "LRURDRZLLZLZRRZRDLZDZDZLDR".split("").map((l) => {
-    return {
-      L: "left",
-      R: "right",
-      U: "up",
-      D: "down",
-      Z: "staff",
-    }[l];
-  });
+  const eusTanSolutionPath = "LLRZUDDRDDLRZDURZRLZULUURZRLZRZUDDLDDUZDZ"
+    .split("")
+    .map((l) => {
+      return {
+        L: "left",
+        R: "right",
+        U: "up",
+        D: "down",
+        Z: "staff",
+      }[l];
+    });
   // END DEBUG
 
   // Returns "found" on success, Infinity if this subtree is unsolvable, or the
@@ -69,17 +73,20 @@ export async function search(
   ): Promise<"found" | number> {
     const h = heuristic(state, target, requireFinalJump).total;
     const f = g + h;
-    if (f > threshold) return f;
+    if (f > threshold) {
+      pathsTrimmed++;
+      return f;
+    }
 
     nodesExplored++;
 
     const amountOfPathFound = (() => {
-      for (let i = 0; i < eusSolutionPath.length; i++) {
-        if (eusSolutionPath[i] != path[i]) {
+      for (let i = 0; i < eusTanSolutionPath.length; i++) {
+        if (eusTanSolutionPath[i] != path[i]) {
           return i;
         }
       }
-      return eusSolutionPath.length;
+      return eusTanSolutionPath.length;
     })();
     maxCorrectSoFar = Math.max(amountOfPathFound, maxCorrectSoFar);
 
@@ -91,7 +98,7 @@ export async function search(
       // console.log(path);
       // console.log(eusSolutionPath);
       console.log(
-        `Threshold: ${threshold} | Explored: ${nodesExplored} | ${loopsPrevented} loops prevented | ` +
+        `Threshold: ${threshold} | Explored: ${nodesExplored} | ${loopsPrevented} loops prevented | ${pathsTrimmed} paths trimmed | ` +
           `${elapsedMs.toFixed(1)}ms | ${nodesPerSec} nodes/sec\n` +
           `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct | Action: ${action}\n` +
           `${renderBoard(state, numFloorTilesInSolution)}`,
@@ -103,8 +110,10 @@ export async function search(
     if (isGoal(state, target, requireFinalJump)) return "found";
 
     // Exit step: player is in the void but not at goal — dead end.
+    // Exception: if wings are active the player is still airborne and can land.
     const { row, col } = state.player;
-    if (state.board[row]?.[col] === "empty") return Infinity;
+    if (state.board[row]?.[col] === "empty" && !state.player.wingsActive)
+      return Infinity;
 
     // Pruning: not enough floor tiles remaining to satisfy the target.
     const floorInStaff = ["floor", "glass"].includes(state.player.staffContent)
@@ -117,7 +126,7 @@ export async function search(
     let min = Infinity;
 
     for (const action of ACTIONS) {
-      const next = applyAction(state, action);
+      const next = applyAction(state, action, hasWings);
       // console.log(
       //   "Trying action:",
       //   action,

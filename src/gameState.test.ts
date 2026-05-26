@@ -143,3 +143,114 @@ test("step off glass then store front floor", () => {
   assert.equal(s2.board[0]![2], "empty");
   assert.equal(s2.board[0]![0], "empty"); // glass still gone
 });
+
+// Wings
+
+function withWings(state: GameState): GameState {
+  return { ...state, player: { ...state.player, wingsActive: true } };
+}
+
+test("stepping into empty activates wings when hasWings=true", () => {
+  // Player on floor, adjacent empty cell ahead
+  const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.wingsActive, true);
+});
+
+test("stepping into empty does not activate wings when hasWings=false", () => {
+  const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
+  const r = applyAction(s, "up", false)!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.wingsActive, false);
+});
+
+test("glass breaks when stepping off to fly", () => {
+  // Player on glass, steps into empty void — glass breaks, wings activate
+  const s = makeState(1, 0, "up", "empty", [[1, 0, "glass"]]);
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.wingsActive, true);
+  assert.equal(r.board[1]![0], "empty"); // glass broke on departure
+});
+
+test("flying into empty stays airborne", () => {
+  // Player already airborne on empty, next cell also empty
+  const s = withWings(makeState(2, 0, "up", "empty"));
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r.player.row, 1);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.wingsActive, true);
+});
+
+test("flying onto floor deactivates wings", () => {
+  const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "floor"]]));
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r.player.row, 1);
+  assert.equal(r.player.wingsActive, false);
+});
+
+test("flying onto glass deactivates wings; origin empty cell unchanged", () => {
+  const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "glass"]]));
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r.player.row, 1);
+  assert.equal(r.player.wingsActive, false);
+  // Origin was empty — nothing to break
+  assert.equal(r.board[2]![0], "empty");
+  // Destination glass is intact (player hasn't left it yet)
+  assert.equal(r.board[1]![0], "glass");
+});
+
+test("flying into wall causes fall in place with facing update", () => {
+  const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "wall"]]));
+  const r = applyAction(s, "up", true)!;
+  // Player stays at (2,0), facing updates, wings off
+  assert.equal(r.player.row, 2);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.facing, "up");
+  assert.equal(r.player.wingsActive, false);
+});
+
+test("flying into stairs is disallowed", () => {
+  const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "stairs"]]));
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r, null);
+});
+
+test("flying into rock entity causes fall in place; rock still moves", () => {
+  const s = withWings(
+    makeState(
+      2,
+      0,
+      "up",
+      "empty",
+      [
+        [0, 0, "floor"], // landing cell for the pushed rock
+        [1, 0, "floor"],
+        [2, 0, "floor"],
+      ],
+      [[1, 0, "rock"]],
+    ),
+  );
+  const r = applyAction(s, "up", true)!;
+  assert.equal(r.player.row, 2);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.wingsActive, false);
+  assert.equal(r.entities[1]![0], "empty"); // rock vacated its original cell
+  assert.equal(r.entities[0]![0], "rock"); // rock pushed to row 0
+});
+
+test("flying out of bounds is not allowed", () => {
+  const s = withWings(makeState(0, 0, "up", "empty"));
+  assert.equal(applyAction(s, "up", true), null);
+});
+
+test("staff action preserves wingsActive state", () => {
+  // Player airborne, uses staff to pick up a floor tile ahead
+  const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "floor"]]));
+  const r = applyAction(s, "staff", true)!;
+  assert.equal(r.player.wingsActive, true); // still airborne
+  assert.equal(r.player.staffContent, "floor");
+  assert.equal(r.board[1]![0], "empty");
+});

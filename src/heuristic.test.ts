@@ -115,7 +115,7 @@ for (const {
     assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
     const targetBoard = parseBoard(target);
     const hBefore = heuristic(before, targetBoard, requireFinalJump);
-    console.log(`Heuristic admissibility — ${name}, hBefore: ${hBefore.total}`);
+    // console.log(`Heuristic admissibility — ${name}, hBefore: ${hBefore.total}`);
     assert.ok(
       hBefore.total <= solutionLength,
       `Heuristic is ${hBefore.total} — expected ≤ ${solutionLength}. mismatches: ${hBefore.mismatches}, transportCost: ${hBefore.transportCost}, travelCost: ${hBefore.travelCost}`,
@@ -135,9 +135,9 @@ for (const {
     const targetBoard = parseBoard(target);
     const hBefore = heuristic(before, targetBoard, requireFinalJump).total;
     const hAfter = heuristic(after, targetBoard, requireFinalJump).total;
-    console.log(
-      `Heuristic consistency — ${name}, hBefore: ${hBefore}, hAfter: ${hAfter}`,
-    );
+    // console.log(
+    //   `Heuristic consistency — ${name}, hBefore: ${hBefore}, hAfter: ${hAfter}`,
+    // );
     assert.ok(
       hAfter <= hBefore + 1,
       `Heuristic increased by ${

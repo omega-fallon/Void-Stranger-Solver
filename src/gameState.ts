@@ -52,16 +52,109 @@ function setEntity(
 export function applyAction(
   state: GameState,
   action: Action,
+  hasWings = false,
 ): GameState | null {
   const { board, entities, player } = state;
   const { row, col, facing, staffContent } = player;
+  const wingsActive = hasWings && (player.wingsActive ?? false);
 
   if (action !== "staff") {
     const { dr, dc } = DELTAS[action];
     const newRow = row + dr;
     const newCol = col + dc;
+
     if (!inBounds(newRow, newCol)) return null;
+
     const dest = getCell(board, newRow, newCol);
+
+    if (wingsActive) {
+      // ── Flying (wings active) ─────────────────────────────────────────────
+      // Stairs are impassable while airborne — return null.
+      if (dest === "stairs") return null;
+
+      // Walls block passage while airborne: the player falls in place (stays on
+      // their current empty cell, facing updates, wings deactivate).
+      if (dest === "wall") {
+        return {
+          board,
+          entities,
+          player: {
+            row,
+            col,
+            facing: action,
+            staffContent,
+            wingsActive: false,
+          },
+        };
+      }
+
+      // Rock-push while airborne: push succeeds if the cell behind the rock is
+      // clear (in-bounds, not a wall, not another rock). Player falls in place
+      // (stays on current empty cell, facing updates, wings deactivate).
+      if (getEntity(entities, newRow, newCol) === "rock") {
+        const rockDestRow = newRow + dr;
+        const rockDestCol = newCol + dc;
+        if (!inBounds(rockDestRow, rockDestCol)) return null;
+        if (getCell(board, rockDestRow, rockDestCol) === "wall") return null;
+        if (getEntity(entities, rockDestRow, rockDestCol) === "rock")
+          return null;
+
+        const newEntities = setEntity(
+          setEntity(entities, newRow, newCol, "empty"),
+          rockDestRow,
+          rockDestCol,
+          getCell(board, rockDestRow, rockDestCol) === "empty"
+            ? "empty"
+            : "rock",
+        );
+        // Break any glass the rock was pushed off of.
+        const newBoard =
+          getCell(board, newRow, newCol) === "glass"
+            ? setCell(board, newRow, newCol, "empty")
+            : board;
+        return {
+          board: newBoard,
+          entities: newEntities,
+          player: {
+            row,
+            col,
+            facing: action,
+            staffContent,
+            wingsActive: false,
+          },
+        };
+      }
+
+      if (dest === "empty") {
+        // Another void tile — stay airborne. Origin was empty, so no glass to break.
+        return {
+          board,
+          entities,
+          player: {
+            row: newRow,
+            col: newCol,
+            facing: action,
+            staffContent,
+            wingsActive: true,
+          },
+        };
+      }
+
+      // Solid tile (floor or glass) — land. Origin was empty, so no glass to break.
+      return {
+        board,
+        entities,
+        player: {
+          row: newRow,
+          col: newCol,
+          facing: action,
+          staffContent,
+          wingsActive: false,
+        },
+      };
+    }
+
+    // ── Not flying ────────────────────────────────────────────────────────────
     if (dest === "wall" || dest === "stairs") return null;
 
     // Rock-push: if there is a rock in the destination cell, attempt to push it.
@@ -81,7 +174,7 @@ export function applyAction(
         rockDestCol,
         getCell(board, rockDestRow, rockDestCol) === "empty" ? "empty" : "rock",
       );
-      // Break any glass the rock was on
+      // Break any glass the rock was pushed off of.
       const newBoard =
         getCell(board, newRow, newCol) === "glass"
           ? setCell(board, newRow, newCol, "empty")
@@ -89,24 +182,31 @@ export function applyAction(
       return {
         board: newBoard,
         entities: newEntities,
-        player: { row, col, facing: action, staffContent },
+        player: { row, col, facing: action, staffContent, wingsActive: false },
       };
     }
 
-    // Normal move — no rock in the way.
+    // Normal move. Wings activate if the player steps into the void.
     const newBoard =
       getCell(board, row, col) === "glass"
         ? setCell(board, row, col, "empty")
         : board;
+    const newWingsActive = hasWings && dest === "empty";
 
     return {
       board: newBoard,
       entities,
-      player: { row: newRow, col: newCol, facing: action, staffContent },
+      player: {
+        row: newRow,
+        col: newCol,
+        facing: action,
+        staffContent,
+        wingsActive: newWingsActive,
+      },
     };
   }
 
-  // staff action — operates on the cell in front, player does not move
+  // ── Staff action — player does not move; wingsActive passes through unchanged ─
   const { dr, dc } = DELTAS[facing];
   const fr = row + dr;
   const fc = col + dc;
@@ -118,7 +218,13 @@ export function applyAction(
     return {
       board: setCell(board, fr, fc, "empty"),
       entities,
-      player: { row, col, facing, staffContent: front as StaffContent },
+      player: {
+        row,
+        col,
+        facing,
+        staffContent: front as StaffContent,
+        wingsActive: player.wingsActive ?? false,
+      },
     };
   }
 
@@ -126,7 +232,13 @@ export function applyAction(
     return {
       board: setCell(board, fr, fc, staffContent as Cell),
       entities,
-      player: { row, col, facing, staffContent: "empty" },
+      player: {
+        row,
+        col,
+        facing,
+        staffContent: "empty",
+        wingsActive: player.wingsActive ?? false,
+      },
     };
   }
 
@@ -149,7 +261,7 @@ export function stateKey(state: GameState): string {
     .flat()
     .map((e) => (e === "rock" ? "R" : "0"))
     .join("");
-  const { row, col, facing, staffContent } = state.player;
+  const { row, col, facing, staffContent, wingsActive } = state.player;
   const staffStr =
     staffContent === "empty"
       ? "e"
@@ -158,7 +270,8 @@ export function stateKey(state: GameState): string {
       : staffContent === "glass"
       ? "g"
       : "s";
-  return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr}`;
+  const wingsStr = wingsActive ? "W" : "0";
+  return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
 }
 
 // Glass and floor are interchangeable for goal satisfaction — the brand only
@@ -263,9 +376,11 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
   const numFloorTilesRemaining =
     countFloorTiles(board) +
     (["floor", "glass"].includes(state.player.staffContent) ? 1 : 0);
+  const wingsIndicator = state.player.wingsActive ? " 🦋" : "";
   return (
     `${numFloorTilesRemaining} floor tiles remain${
       requiredTiles ? ` out of a necessary ${requiredTiles}` : ""
-    }\n` + ["┌────────────┐", ...rows, "└────────────┘"].join("\n")
+    }${wingsIndicator}\n` +
+    ["┌────────────┐", ...rows, "└────────────┘"].join("\n")
   );
 }

@@ -77,6 +77,7 @@ export function boardToStrings(board: Board): string[] {
 const TEST_LEVELS: (RawLevel & {
   solutionLength?: number;
   requireFinalJump?: boolean;
+  hasWings?: boolean;
 })[] = [
   {
     name: "Solves Add's brand",
@@ -126,6 +127,7 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
       "      ",
     ],
+    solutionLength: 5,
   },
   {
     name: "Moves a piece of glass",
@@ -150,9 +152,10 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
       "      ",
     ],
+    solutionLength: 9,
   },
   {
-    name: "Move a piece of glass",
+    name: "Move a piece of glass to destroy all the glass",
     initial: {
       // prettier-ignore
       board: [
@@ -174,63 +177,93 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
       "      ",
     ],
-    // solutionLength: 5,
+    solutionLength: 14,
   },
-  // {
-  //   name: "First few moves of Eus",
-  //   // Real full solution is LRURDRZLLZLZRRZRDLZDZDZLDR
-  //   initial: {
-  //     // prettier-ignore
-  //     board: [
-  //       "GGGGGG",
-  //       "GG##GG",
-  //       "GG#GGG",
-  //       "GGGGGG",
-  //       "GGG GG",
-  //       "GGG GW",
-  //     ],
-  //     player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
-  //   },
-  //   // prettier-ignore
-  //   target: [
-  //     "GG  GG",
-  //     "  ##G ",
-  //     "GG  GG",
-  //     "GGG GG",
-  //     "GGG#GG",
-  //     "GGG GW",
-  //   ],
-  //   // solutionLength: 5,
-  // },
-  // Eus last step
   {
-    name: "Eus final step",
+    name: "Fly over a gap",
+    hasWings: true,
     initial: {
       // prettier-ignore
       board: [
-        'GG  GG',
-        '  ##  ',
-        'GG   G',
-        'GGG GG',
-        'GG #GG',
-        'GGG GW' 
+        "      ",
+        " # #S ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
       ],
-      player: { row: 5, col: 2, facing: "down", staffContent: "stairs" },
+      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
     target: [
-      'GG  GG',
-      '  ##  ',
-      'GG   G',
-      'GGG GG',
-      'GG #GG',
-      'GG  GW' 
+      "      ",
+      " # #  ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
     ],
+    solutionLength: 4,
+  },
+  {
+    name: "Fly over a gap multiple times",
+    hasWings: true,
+    initial: {
+      // prettier-ignore
+      board: [
+        "      ",
+        " # ## ",
+        "  #   ",
+        "  S   ",
+        "      ",
+        "      ",
+      ],
+      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+    },
+    // prettier-ignore
+    target: [
+      "      ",
+      "## #  ",
+      "  #   ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+    ],
+    solutionLength: 10,
+  },
+  {
+    name: "Grab a tile while flying",
+    hasWings: true,
+    initial: {
+      // prettier-ignore
+      board: [
+        "      ",
+        " # #  ",
+        " S    ",
+        "      ",
+        "      ",
+        "      ",
+      ],
+      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+    },
+    // prettier-ignore
+    target: [
+      "      ",
+      "##    ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+    ],
+    solutionLength: 8,
   },
 ];
 
 for (const level of TEST_LEVELS) {
-  test(`${level.name}`, async () => {
+  test(`${level.name}`, async (t) => {
     const initial = {
       board: parseBoard(level.initial.board),
       entities: level.initial.entities
@@ -243,14 +276,24 @@ for (const level of TEST_LEVELS) {
     const { path } = await search(
       initial,
       target,
-      false,
+      0,
       false,
       requireFinalJump,
+      undefined,
+      level.hasWings ?? false,
     );
     if (level.solutionLength) {
       assert.equal(level.solutionLength, path?.length);
     }
-    if (path) replayPath(initial, path, target, requireFinalJump);
+    if (process.env.VERBOSE && path)
+      replayPath(initial, path, target, requireFinalJump);
     assert.ok(path !== null, "No solution found");
+    if (level.solutionLength)
+      assert.equal(
+        path.length,
+        level.solutionLength,
+        `Path had length ${path.length} but should have been ${level.solutionLength}`,
+      );
+    else t.assert.snapshot(path.length);
   });
 }

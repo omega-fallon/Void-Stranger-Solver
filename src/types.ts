@@ -34,6 +34,8 @@ export interface PlayerState {
   col: number;
   facing: Direction;
   staffContent: StaffContent;
+  /** True while the player is gliding over the void using the wings burden. */
+  wingsActive?: boolean;
 }
 
 export interface GameState {

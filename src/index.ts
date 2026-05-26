@@ -13,6 +13,8 @@ const { values } = parseArgs({
     help: { type: "boolean", short: "h" },
     brane: { type: "string", short: "e" },
     brand: { type: "string", short: "d" },
+    wings: { type: "boolean" },
+    initialThreshold: { type: "string" },
     verbose: { type: "string", short: "v" },
     slow: { type: "boolean", short: "s" },
   },
@@ -63,6 +65,10 @@ const INITIAL_STATE: GameState = {
 };
 const TARGET_BOARD: Board = parseBoard(rawBrand.board);
 
+const initialThreshold = values.initialThreshold
+  ? Number(values.initialThreshold)
+  : undefined;
+
 async function main() {
   console.log("Searching for solution...");
   const start = performance.now();
@@ -71,6 +77,9 @@ async function main() {
     TARGET_BOARD,
     Number(values.verbose),
     values.slow,
+    true,
+    initialThreshold,
+    values.wings,
   );
   const elapsedMs = performance.now() - start;
   const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
