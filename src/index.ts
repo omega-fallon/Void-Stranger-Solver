@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "node:util";
-import { replayPath } from "./gameState";
+import { applyAction, renderBoard, replayPath } from "./gameState";
 import { BRANES, BRANDS, KNOWN_CORRECT_PATHS } from "./levels";
 import { search } from "./search";
 import {
@@ -95,18 +95,54 @@ const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
   });
 
 async function main() {
+  // Advance the initial state by applying the first N steps of the known
+  // correct path, so the search can skip ahead past already-solved prefixes.
+  const cheatN = values.cheatFirstNSteps ? Number(values.cheatFirstNSteps) : 0;
+  let searchState = INITIAL_STATE;
+  const cheatPrefix: Action[] = [];
+
+  if (cheatN > 0) {
+    if (!knownCorrectPath.length) {
+      console.error(
+        `--cheatFirstNSteps requires a known correct path for "${scenarioName}" but none is defined.`,
+      );
+      process.exit(1);
+    }
+    if (knownCorrectPath.length < cheatN) {
+      console.error(
+        `--cheatFirstNSteps ${cheatN} exceeds known path length ${knownCorrectPath.length}.`,
+      );
+      process.exit(1);
+    }
+    for (let i = 0; i < cheatN; i++) {
+      const action = knownCorrectPath[i]!;
+      const next = applyAction(searchState, action, values.wings ?? false);
+      if (!next) {
+        console.error(
+          `Cheat step ${i + 1} (${action}) produced an invalid state.`,
+        );
+        process.exit(1);
+      }
+      cheatPrefix.push(action);
+      searchState = next;
+    }
+    console.log(
+      `Cheated first ${cheatN} steps (${actionsToString(cheatPrefix)}). Starting from:\n${renderBoard(searchState)}`,
+    );
+  }
+
   console.log(
     `Searching for solution... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
   );
   const start = performance.now();
   const { path, nodesExplored } = await search({
-    initial: INITIAL_STATE,
+    initial: searchState,
     target: TARGET_BOARD,
     verbose: Number(values.verbose),
     slow: values.slow ?? false,
     requireFinalJump: true,
     initialThreshold,
-    knownCorrectPath,
+    knownCorrectPath: knownCorrectPath.slice(cheatN),
     hasWings: values.wings ?? false,
   });
   const elapsedMs = performance.now() - start;
@@ -120,10 +156,11 @@ async function main() {
     return;
   }
 
-  console.log(`Solution found in ${path.length} steps (${perf}):`);
-  console.log(actionsToString(path));
+  const fullPath = [...cheatPrefix, ...path];
+  console.log(`Solution found in ${fullPath.length} steps (${perf}):`);
+  console.log(actionsToString(fullPath));
 
-  if (values.verbose) replayPath(INITIAL_STATE, path, TARGET_BOARD);
+  if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD);
 }
 
 main();
