@@ -269,6 +269,7 @@ export const BRANDS: RawBrand[] = [
 ];
 
 export const KNOWN_CORRECT_PATHS = {
+  "Add/Add": "URUZU",
   "Eus/Eus": "LRURDRZLLZLZRRZRDLZDZDZLDR",
   "Eus/Tan wings": "LLRZUDDRDDLRZDURZRLZULUURZRLZRZUDDLDDUZDZ",
 } as { [name: string]: string };

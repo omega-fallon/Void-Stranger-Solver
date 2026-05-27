@@ -31,6 +31,8 @@ export interface HeuristicResult {
   transportCost: number;
   /** Player travel lower bound: cost to reach the first excess or deficit tile. */
   travelCost: number;
+  /** 1 if we need a final jump and we're on a tile; 0 otherwise */
+  finalJumpCost: number;
 }
 
 export function heuristic(
@@ -44,6 +46,9 @@ export function heuristic(
   const excess: [number, number, Cell][] = []; // cells with tiles that shouldn't be there
   const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
 
+  let finalJumpCost =
+    requireFinalJump && board[player.row]![player.col]! != "empty" ? 1 : 0;
+
   // We wrap these in IIFEs so the profiler names each part individually
   (function calculateBoardDiff() {
     for (let r = 0; r < 6; r++) {
@@ -53,8 +58,8 @@ export function heuristic(
         // Glass the player is standing on will break for free on their next move.
         // If the target wants that cell empty, the mismatch resolves at no extra cost —
         // and crucially, the glass cannot be transported (it simply breaks), so it must
-        // not be added to excess. This is always correct: if the target wants empty here,
-        // the player must have moved away by then, and the break is free.
+        // not be added to excess. If the target wants empty here, the player must have
+        // moved away by then, and the break is free.
         if (
           r === player.row &&
           c === player.col &&
@@ -86,7 +91,13 @@ export function heuristic(
   })();
 
   if (mismatches === 0)
-    return { total: 0, mismatches: 0, transportCost: 0, travelCost: 0 };
+    return {
+      total: finalJumpCost,
+      mismatches: 0,
+      transportCost: 0,
+      travelCost: 0,
+      finalJumpCost,
+    };
 
   let transportCost = 0;
   (function calculateTransportCost() {
@@ -141,9 +152,10 @@ export function heuristic(
   })();
 
   return {
-    total: mismatches + transportCost + travelCost,
+    total: mismatches + transportCost + travelCost + finalJumpCost,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
+    finalJumpCost,
   };
 }

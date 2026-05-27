@@ -3,8 +3,9 @@ import test from "node:test";
 import { PARTIAL_EUS_STATES } from "./data/PARTIAL_EUS_STATES";
 import { applyAction, renderBoard } from "./gameState";
 import { heuristic } from "./heuristic";
+import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "./levels";
 import type { Action, GameState } from "./types";
-import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
+import { applyPath, emptyEntityGrid, parseBoard, parseEntities } from "./utils";
 
 // Tests that h(after) ≤ h(before) + 1 for a single action (consistency).
 // Each action costs 1, so a consistent heuristic must not increase by more than 1.
@@ -156,6 +157,46 @@ const CONSISTENCY_CASES: {
     ],
     solutionLength: 7,
   },
+  {
+    name: "Broken",
+    initial: {
+      // prettier-ignore
+      "board": parseBoard([
+        "G GGGG",
+        "  G# G",
+        "G #GGG",
+        "GG  GG",
+        "G G# G",
+        "GG SG#"
+      ]),
+      // prettier-ignore
+      "entities": parseEntities([
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "     R"
+      ]),
+      player: {
+        row: 1,
+        col: 3,
+        facing: "left",
+        staffContent: "empty",
+        wingsActive: false,
+      },
+    },
+    action: "left",
+    // prettier-ignore
+    target: [
+      "G GGGG",
+      "  G# G",
+      "G #GGG",
+      "GG  GG",
+      "G G# G",
+      "GG SG#"
+    ],
+  },
 ];
 
 for (const {
@@ -179,30 +220,38 @@ for (const {
     );
   });
 }
-for (const {
-  name,
-  initial: before,
-  action,
-  target,
-  requireFinalJump = false,
-} of CONSISTENCY_CASES) {
-  test(`Heuristic consistency — ${name}`, () => {
-    const after = applyAction(before, action);
-    assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
-    const targetBoard = parseBoard(target);
-    const hBefore = heuristic(before, targetBoard, requireFinalJump).total;
-    const hAfter = heuristic(after, targetBoard, requireFinalJump).total;
-    // console.log(
-    //   `Heuristic consistency — ${name}, hBefore: ${hBefore}, hAfter: ${hAfter}`,
-    // );
-    assert.ok(
-      hAfter <= hBefore + 1,
-      `Heuristic increased by ${
-        hAfter - hBefore
-      } after "${action}" — expected ≤ 1. h(before)=${hBefore}, h(after)=${hAfter}`,
-    );
-  });
-}
+// Actually we don't need the heuristic to be consistent — see https://webdocs.cs.ualberta.ca/~jonathan/publications/ai_publications/incaaai.pdf
+// for (const {
+//   name,
+//   initial: before,
+//   action,
+//   target,
+//   requireFinalJump = false,
+// } of CONSISTENCY_CASES) {
+//   test(`Heuristic consistency — ${name}`, () => {
+//     const after = applyAction(before, action);
+//     assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
+//     const targetBoard = parseBoard(target);
+//     const hBefore = heuristic(before, targetBoard, requireFinalJump).total;
+//     const hAfter = heuristic(after, targetBoard, requireFinalJump).total;
+//     // console.log(
+//     //   `Heuristic consistency — ${name}, hBefore: ${hBefore}, hAfter: ${hAfter}`,
+//     // );
+//     assert.ok(
+//       hBefore <= hAfter + 1,
+//       `Heuristic decreased by ${
+//         hBefore - hAfter
+//       } after "${action}" — expected ≤ 1. h(before)=${hBefore}, h(after)=${hAfter}\n${JSON.stringify(
+//         {
+//           h: heuristic(before, parseBoard(target), requireFinalJump),
+//           nextH: heuristic(after, parseBoard(target), requireFinalJump),
+//         },
+//         null,
+//         2,
+//       )}\n${renderBoard(before)}\n${renderBoard(after)}`,
+//     );
+//   });
+// }
 
 test("Heuristic + steps should not exceed target level for all state pairs (admissibility)", () => {
   for (const [iStr, level] of Object.entries(PARTIAL_EUS_STATES)) {
@@ -213,13 +262,15 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
       const targetLevelNumber = Number(targetLevelNumberStr);
       if (targetLevelNumber <= i) continue;
       const stepsTaken = Number(level.name.replace(/\D*/, ""));
+      const state = {
+        ...level,
+        board: parseBoard(level.board),
+        entities: emptyEntityGrid(),
+      } as GameState;
+      const target = parseBoard(targetLevel.board);
       const heuristicValues = heuristic(
-        {
-          ...level,
-          board: parseBoard(level.board),
-          entities: emptyEntityGrid(),
-        } as GameState,
-        parseBoard(targetLevel.board),
+        state,
+        target,
         level.requireFinalJump ?? false,
       );
       const combined = stepsTaken + heuristicValues.total;
@@ -247,8 +298,40 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
 
       assert.ok(
         combined <= targetLevelNumber,
-        `Going from ${level.name} to ${targetLevelNumber}, step ${stepsTaken} + h ${heuristicValues.total} = total: ${combined} > ${targetLevelNumber}. mismatches: ${heuristicValues.mismatches}, transportCost: ${heuristicValues.transportCost}, travelCost: ${heuristicValues.travelCost}`,
+        `Going from ${
+          level.name
+        } to ${targetLevelNumber}, step ${stepsTaken} + h ${
+          heuristicValues.total
+        } = total: ${combined} > ${targetLevelNumber}. mismatches: ${
+          heuristicValues.mismatches
+        }, transportCost: ${heuristicValues.transportCost}, travelCost: ${
+          heuristicValues.travelCost
+        }\n${JSON.stringify(
+          heuristic(state, target, level.requireFinalJump ?? false),
+          null,
+          2,
+        )}\n${renderBoard(state)}`,
       );
     }
   }
 });
+
+for (let searchName of ["Add/Add", "Eus/Eus"]) {
+  const [braneName, brandName] = searchName.split("/");
+  let startState = BRANES.find((b) => b.name === braneName)!;
+  let pathStr = KNOWN_CORRECT_PATHS[searchName]!;
+  let statesOnPath = applyPath(startState, pathStr);
+  for (const [iStr, state] of Object.entries(statesOnPath)) {
+    let i = Number(iStr);
+    let h = heuristic(
+      state,
+      parseBoard(BRANDS.find((b) => b.name === brandName)!.board),
+      true,
+    );
+    console.log(
+      `${searchName} at step ${i} with h=${h.total} which underestimates by ${
+        pathStr.length - (i + h.total)
+      } (${JSON.stringify(h)})`,
+    );
+  }
+}
