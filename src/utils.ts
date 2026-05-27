@@ -43,7 +43,6 @@ export function applyPath(
   initial: { board: string[]; entities?: string[]; player: PlayerState },
   pathStr: string,
 ): GameState[] {
-  const states: GameState[] = [];
   let state: GameState = {
     board: parseBoard(initial.board),
     entities: initial.entities
@@ -51,6 +50,7 @@ export function applyPath(
       : emptyEntityGrid(),
     player: initial.player,
   };
+  const states: GameState[] = [state];
 
   for (let i = 0; i < pathStr.length; i++) {
     if (process.env.VERBOSE) console.log(renderBoard(state));

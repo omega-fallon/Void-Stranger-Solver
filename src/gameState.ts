@@ -346,6 +346,40 @@ export function replayPath(
   }
 }
 
+function renderCellFloor(cell: Cell) {
+  let floorChar = "  ";
+  switch (cell) {
+    case "floor":
+      floorChar = "██";
+      break;
+    case "glass":
+      floorChar = "░░";
+      break;
+    case "stairs":
+      floorChar = "S ";
+      break;
+    case "wall":
+      floorChar = "▓▓";
+      break;
+    case "button":
+      floorChar = "█B";
+      break;
+    case "trap_inactive":
+      floorChar = "ΘΘ";
+      break;
+    case "trap_active":
+      floorChar = "ϴϴ";
+      break;
+    case "empty":
+      floorChar = "  ";
+      break;
+    default:
+      floorChar = "??";
+      break;
+  }
+  return floorChar;
+}
+
 export function renderBoard(state: GameState, requiredTiles?: number): string {
   const { board, entities, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
@@ -362,36 +396,7 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
     } else if (entities[r]?.[c] === "rock") {
       overlayChar = "R";
     }
-    let floorChar = "  ";
-    switch (cell) {
-      case "floor":
-        floorChar = "██";
-        break;
-      case "glass":
-        floorChar = "░░";
-        break;
-      case "stairs":
-        floorChar = "S ";
-        break;
-      case "wall":
-        floorChar = "▓▓";
-        break;
-      case "button":
-        floorChar = "█B";
-        break;
-      case "trap_inactive":
-        floorChar = "ΘΘ";
-        break;
-      case "trap_active":
-        floorChar = "ϴϴ";
-        break;
-      case "empty":
-        floorChar = "  ";
-        break;
-      default:
-        floorChar = "??";
-        break;
-    }
+    let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
   };
   const rows = board.map(
@@ -404,7 +409,10 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
   return (
     `${numFloorTilesRemaining} floor tiles remain${
       requiredTiles ? ` out of a necessary ${requiredTiles}` : ""
-    }${wingsIndicator}\n` +
-    ["┌────────────┐", ...rows, "└────────────┘"].join("\n")
+    }\n` +
+    ["┌────────────┐", ...rows, "└────────────┘"].join("\n") +
+    `\nstaff: [${renderCellFloor(
+      state.player.staffContent,
+    )}]${wingsIndicator}\n`
   );
 }

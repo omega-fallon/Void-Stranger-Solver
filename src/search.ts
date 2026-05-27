@@ -99,7 +99,7 @@ export async function search({
       console.log(
         `Threshold: ${threshold} | Explored: ${nodesExplored} | ${loopsPrevented} loops prevented | ${pathsTrimmed} paths trimmed | ` +
           `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
-          `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct | Action: ${action}\n` +
+          `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct / ${knownCorrectPath.length} | Action: ${action}\n` +
           `${renderBoard(state, numFloorTilesInSolution)}`,
       );
     }
