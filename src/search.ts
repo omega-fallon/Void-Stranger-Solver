@@ -127,7 +127,7 @@ export async function search({
       let r : number = coord[0]!;
       let c : number = coord[1]!;
     
-      if (state.entities[r]![c]! === "rock") {
+      if (state.entities[r]![c]! === "rock" || state.entities[r]![c]! === "watcher") {
         // The cornered rock is covering stairs.
         if (state.board[r]![c]! === "stairs") {
           //console.log("trimmed1");
@@ -159,9 +159,9 @@ export async function search({
       let r : number = coords[i]!;
       let c : number = coords[i+1]!;
     
-      if (state.entities[r]?.[c] === "rock") {
+      if (state.entities[r]?.[c] === "rock" || state.entities[r]?.[c] === "watcher") {
         // Rock stuck.
-        if (((i == 0 || i == 2) && (state.entities[0]![0]! === "rock")) || ((i == 4 || i == 6) && (state.entities[0]![5]! === "rock")) || ((i == 8 || i == 10) && (state.entities[5]![0]! === "rock")) || ((i == 12 || i == 14) && (state.entities[5]![5]! === "rock"))) {
+        if (((i == 0 || i == 2) && (state.entities[0]![0]! === "rock" || state.entities[0]![0]! === "watcher")) || ((i == 4 || i == 6) && (state.entities[0]![5]! === "rock" || state.entities[0]![5]! === "watcher")) || ((i == 8 || i == 10) && (state.entities[5]![0]! === "rock" || state.entities[5]![0]! === "watcher")) || ((i == 12 || i == 14) && (state.entities[5]![5]! === "rock" || state.entities[5]![5]! === "watcher"))) {
           // The cornered rock is covering stairs.
           if (state.board[r]![c]! === "stairs") {
             //console.log("trimmed3");

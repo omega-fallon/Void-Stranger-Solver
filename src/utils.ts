@@ -123,6 +123,7 @@ export function parseEntities(rows: string[]): EntityGrid {
     B: "beaver",
     M: "mimic",
     H: "hand",
+    W: "watcher",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {

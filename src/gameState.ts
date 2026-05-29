@@ -127,12 +127,12 @@ export function applyAction(
     // Rock-push while airborne: push succeeds if the cell behind the rock is
     // clear (in-bounds, not a wall, not another rock). Player falls in place
     // (stays on current empty cell, facing updates, wings deactivate).
-    if (getEntity(entities, newRow, newCol) === "rock") {
+    if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher") {
       const rockDestRow = newRow + dr;
       const rockDestCol = newCol + dc;
         
-      // If any of these three things are true, we push but nothing happens, equivalent to hitting a wall.
-      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock")) {
+      // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
+      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher")) {
         return {
           board,
           entities,
@@ -152,7 +152,7 @@ export function applyAction(
         rockDestCol,
         getCell(board, rockDestRow, rockDestCol) === "empty"
           ? "empty"
-          : "rock",
+          : getEntity(entities, newRow, newCol),
       );
       // Break any glass the rock was pushed off of.
       const newBoard =
@@ -288,7 +288,7 @@ export function stateKey(state: GameState): string {
   const entityStr = (function getEntityStr() {
     let str = "";
     state.entities.forEach((row) =>
-      row.forEach((c) => (str += c === "rock" ? "R" : " ")),
+      row.forEach((c) => (str += c === "rock" ? "R" : (c === "beaver" ? "B" : c === "mimic" ? "M" : c === "hand" ? "H" : c === "watcher" ? "W" : " "))),
     );
     return str;
   })();
@@ -427,6 +427,8 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       overlayChar = "M";
     } else if (entities[r]?.[c] === "hand") {
       overlayChar = "H";
+    } else if (entities[r]?.[c] === "watcher") {
+      overlayChar = "W";
     }
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
