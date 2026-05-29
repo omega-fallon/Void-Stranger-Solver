@@ -130,12 +130,12 @@ export async function search({
       if (state.entities[r]![c]! === "rock") {
         // The cornered rock is covering stairs.
         if (state.board[r]![c]! === "stairs") {
-          console.log("trimmed1");
+          //console.log("trimmed1");
           return Infinity;
         }
         // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
         else if (target[r]![c]! === "empty" || state.board[r]![c]! !== "trap_active") {
-          console.log("trimmed2");
+          //console.log("trimmed2");
           return Infinity;
         }
       }
@@ -164,12 +164,12 @@ export async function search({
         if (((i == 0 || i == 2) && (state.entities[0]![0]! === "rock")) || ((i == 4 || i == 6) && (state.entities[0]![5]! === "rock")) || ((i == 8 || i == 10) && (state.entities[5]![0]! === "rock")) || ((i == 12 || i == 14) && (state.entities[5]![5]! === "rock"))) {
           // The cornered rock is covering stairs.
           if (state.board[r]![c]! === "stairs") {
-            console.log("trimmed3");
+            //console.log("trimmed3");
             return Infinity;
           }
           // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
           else if (target[r]![c]! === "empty" || state.board[r]![c]! !== "trap_active") {
-            console.log("trimmed4");
+            //console.log("trimmed4");
             return Infinity;
           }
         }
