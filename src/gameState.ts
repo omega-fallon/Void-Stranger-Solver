@@ -298,15 +298,15 @@ export function stateKey(state: GameState): string {
   const swordStr = swordActive ? "S" : "0";
   const endlessStr = endlessActive ? "E" : "0";
   return (function combineString() {
-    return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
+    return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr},${swordStr},${endlessStr}`;
   })();
 }
 
 // Glass and floor are interchangeable for goal satisfaction — the brand only
 // requires "solid tile present" or "empty", not a specific solid type.
 export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
-  if (target === "floor" || target === "glass") {
-    return cell === "floor" || cell === "glass";
+  if (target === "floor" || target === "glass" || target == "wall" || target == "button" || target == "trap_inactive" || target == "trap_active") {
+    return cell === "floor" || cell === "glass" || cell == "wall" || cell == "button" || cell == "trap_inactive" || cell == "trap_active";
   }
   return cell === target;
 }
