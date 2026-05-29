@@ -161,6 +161,8 @@ async function main() {
   console.log(actionsToString(fullPath));
 
   if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD);
+  
+  console.log(values.brane+"/"+values.brand);
 }
 
 main();
