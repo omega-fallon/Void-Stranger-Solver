@@ -18,7 +18,7 @@ export function countFloorTiles(board: Board): number {
   return board
     .flat()
     .reduce(
-      (n, cell) => n + (["floor", "wall", "glass"].includes(cell) ? 1 : 0),
+      (n, cell) => n + (["floor", "wall", "glass", "button", "trap_inactive", "trap_active"].includes(cell) ? 1 : 0),
       0,
     );
 }
@@ -115,7 +115,7 @@ export async function search({
       return Infinity;
 
     // Pruning: not enough floor tiles remaining to satisfy the target.
-    const floorInStaff = ["floor", "glass"].includes(state.player.staffContent)
+    const floorInStaff = ["floor", "glass", "button", "trap_inactive", "trap_active"].includes(state.player.staffContent)
       ? 1
       : 0;
     if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {

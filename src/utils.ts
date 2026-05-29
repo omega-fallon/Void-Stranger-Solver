@@ -117,6 +117,9 @@ export function parseEntities(rows: string[]): EntityGrid {
   const charToEntity: Record<string, Entity> = {
     " ": "empty",
     R: "rock",
+    B: "beaver",
+    M: "mimic",
+    H: "hand",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {
