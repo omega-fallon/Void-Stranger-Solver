@@ -395,6 +395,12 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       overlayChar = arrows[player.facing];
     } else if (entities[r]?.[c] === "rock") {
       overlayChar = "R";
+    } else if (entities[r]?.[c] === "beaver") {
+      overlayChar = "B";
+    } else if (entities[r]?.[c] === "mimic") {
+      overlayChar = "M";
+    } else if (entities[r]?.[c] === "hand") {
+      overlayChar = "H";
     }
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
