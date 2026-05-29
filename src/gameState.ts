@@ -65,20 +65,37 @@ export function applyAction(
     const { dr, dc } = DELTAS[action];
     const newRow = row + dr;
     const newCol = col + dc;
-
-    if (!inBounds(newRow, newCol)) return null;
-
+    
     const dest = getCell(board, newRow, newCol);
 
-    if (wingsActive) {
-      // ── Flying (wings active) ─────────────────────────────────────────────
-      // Stairs are impassable while airborne — return null.
-      // TODO check stairs exitable for rooms with buttons.
-      if (dest === "stairs") return null;
+    // Wall bump!
+    if (!inBounds(newRow, newCol)) {
+      return {
+        board,
+        entities,
+        player: {
+          row,
+          col,
+          facing: action,
+          staffContent,
+          wingsActive: false, // Bumping always disables
+        },
+      };
+    }
+    
+    // Stairs are impassable.
+    // TODO check stairs exitable for rooms with buttons.
+    if (dest === "stairs") return null;
 
-      // Walls block passage while airborne: the player falls in place (stays on
-      // their current empty cell, facing updates, wings deactivate).
-      if (dest === "wall") {
+    // Rock-push while airborne: push succeeds if the cell behind the rock is
+    // clear (in-bounds, not a wall, not another rock). Player falls in place
+    // (stays on current empty cell, facing updates, wings deactivate).
+    if (getEntity(entities, newRow, newCol) === "rock") {
+      const rockDestRow = newRow + dr;
+      const rockDestCol = newCol + dc;
+        
+      // If any of these three things are true, we push but nothing happens, equivalent to hitting a wall.
+      if (!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") {
         return {
           board,
           entities,
@@ -92,43 +109,34 @@ export function applyAction(
         };
       }
 
-      // Rock-push while airborne: push succeeds if the cell behind the rock is
-      // clear (in-bounds, not a wall, not another rock). Player falls in place
-      // (stays on current empty cell, facing updates, wings deactivate).
-      if (getEntity(entities, newRow, newCol) === "rock") {
-        const rockDestRow = newRow + dr;
-        const rockDestCol = newCol + dc;
-        if (!inBounds(rockDestRow, rockDestCol)) return null;
-        if (getCell(board, rockDestRow, rockDestCol) === "wall") return null;
-        if (getEntity(entities, rockDestRow, rockDestCol) === "rock")
-          return null;
-
-        const newEntities = setEntity(
-          setEntity(entities, newRow, newCol, "empty"),
-          rockDestRow,
-          rockDestCol,
-          getCell(board, rockDestRow, rockDestCol) === "empty"
-            ? "empty"
-            : "rock",
-        );
-        // Break any glass the rock was pushed off of.
-        const newBoard =
-          getCell(board, newRow, newCol) === "glass"
-            ? setCell(board, newRow, newCol, "empty")
-            : board;
-        return {
-          board: newBoard,
-          entities: newEntities,
-          player: {
-            row,
-            col,
-            facing: action,
-            staffContent,
-            wingsActive: false,
-          },
-        };
-      }
-
+      const newEntities = setEntity(
+        setEntity(entities, newRow, newCol, "empty"),
+        rockDestRow,
+        rockDestCol,
+        getCell(board, rockDestRow, rockDestCol) === "empty"
+          ? "empty"
+          : "rock",
+      );
+      // Break any glass the rock was pushed off of.
+      const newBoard =
+        getCell(board, newRow, newCol) === "glass"
+          ? setCell(board, newRow, newCol, "empty")
+          : board;
+      return {
+        board: newBoard,
+        entities: newEntities,
+        player: {
+          row,
+          col,
+          facing: action,
+          staffContent,
+          wingsActive: false,
+        },
+      };
+    }
+    
+    // ── Flying (wings active) ─────────────────────────────────────────────
+    if (wingsActive) {
       if (dest === "empty") {
         // Another void tile — fall to your doom. Origin was empty, so no glass to break.
         return {
@@ -157,96 +165,66 @@ export function applyAction(
         },
       };
     }
-
-    // ── Not flying ────────────────────────────────────────────────────────────
-    // TODO check stairs exitable for rooms with buttons.
-    if (dest === "wall" || dest === "stairs") return null;
-
-    // Rock-push: if there is a rock in the destination cell, attempt to push it.
-    if (getEntity(entities, newRow, newCol) === "rock") {
-      const rockDestRow = newRow + dr;
-      const rockDestCol = newCol + dc;
-      // Rock cannot be pushed out of bounds, into a wall, or into another rock.
-      if (!inBounds(rockDestRow, rockDestCol)) return null;
-      if (getCell(board, rockDestRow, rockDestCol) === "wall") return null;
-      if (getEntity(entities, rockDestRow, rockDestCol) === "rock") return null;
-
-      // Push succeeds: rock moves, player stays in place (facing updates).
-      // Glass does not break because the player did not step off their current cell.
-      const newEntities = setEntity(
-        setEntity(entities, newRow, newCol, "empty"),
-        rockDestRow,
-        rockDestCol,
-        getCell(board, rockDestRow, rockDestCol) === "empty" ? "empty" : "rock",
-      );
-      // Break any glass the rock was pushed off of.
+    // ── Not flying (wings inactive) ─────────────────────────────────────────────
+    else {
+      // Normal move. Wings activate if the player steps into the void.
       const newBoard =
-        getCell(board, newRow, newCol) === "glass"
-          ? setCell(board, newRow, newCol, "empty")
+        getCell(board, row, col) === "glass"
+          ? setCell(board, row, col, "empty")
           : board;
+      const newWingsActive = hasWings && dest === "empty";
+
       return {
         board: newBoard,
-        entities: newEntities,
-        player: { row, col, facing: action, staffContent, wingsActive: false },
+        entities,
+        player: {
+          row: newRow,
+          col: newCol,
+          facing: action,
+          staffContent,
+          wingsActive: newWingsActive,
+        },
+      };
+    }
+  }
+  else {
+    // ── Staff action — player does not move; wingsActive passes through unchanged ─
+    const { dr, dc } = DELTAS[facing];
+    const fr = row + dr;
+    const fc = col + dc;
+    if (!inBounds(fr, fc)) return null;
+  
+    const front = getCell(board, fr, fc);
+
+    // TODO check for entities in front cell.
+    if (staffContent === "empty" && front !== "empty" && front !== "wall") {
+      return {
+        board: setCell(board, fr, fc, "empty"),
+        entities,
+        player: {
+          row,
+          col,
+          facing,
+          staffContent: front as StaffContent,
+          wingsActive: player.wingsActive ?? false,
+        },
       };
     }
 
-    // Normal move. Wings activate if the player steps into the void.
-    const newBoard =
-      getCell(board, row, col) === "glass"
-        ? setCell(board, row, col, "empty")
-        : board;
-    const newWingsActive = hasWings && dest === "empty";
-
-    return {
-      board: newBoard,
-      entities,
-      player: {
-        row: newRow,
-        col: newCol,
-        facing: action,
-        staffContent,
-        wingsActive: newWingsActive,
-      },
-    };
-  }
-
-  // ── Staff action — player does not move; wingsActive passes through unchanged ─
-  const { dr, dc } = DELTAS[facing];
-  const fr = row + dr;
-  const fc = col + dc;
-  if (!inBounds(fr, fc)) return null;
-
-  const front = getCell(board, fr, fc);
-
-  // TODO check for entities in front cell.
-  if (staffContent === "empty" && front !== "empty" && front !== "wall") {
-    return {
-      board: setCell(board, fr, fc, "empty"),
-      entities,
-      player: {
-        row,
-        col,
-        facing,
-        staffContent: front as StaffContent,
-        wingsActive: player.wingsActive ?? false,
-      },
-    };
-  }
-
-  // TODO check for entities in front cell.
-  if (staffContent !== "empty" && front === "empty") {
-    return {
-      board: setCell(board, fr, fc, staffContent as Cell),
-      entities,
-      player: {
-        row,
-        col,
-        facing,
-        staffContent: "empty",
-        wingsActive: player.wingsActive ?? false,
-      },
-    };
+    // TODO check for entities in front cell.
+    if (staffContent !== "empty" && front === "empty") {
+      return {
+        board: setCell(board, fr, fc, staffContent as Cell),
+        entities,
+        player: {
+          row,
+          col,
+          facing,
+          staffContent: "empty",
+          wingsActive: player.wingsActive ?? false,
+        },
+      };
+    }
   }
 
   return null;
