@@ -162,7 +162,12 @@ async function main() {
 
   if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD);
   
-  console.log(values.brane+"/"+values.brand);
+  if (values.wings) {
+    console.log(values.brane+"/"+values.brand+" with wings");
+  }
+  else {
+    console.log(values.brane+"/"+values.brand);
+  }
 }
 
 main();

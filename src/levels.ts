@@ -263,7 +263,31 @@ export const BRANDS: RawBrand[] = [
       " #  # ",
       "# #   ",
       "#  #  ",
-      "##    #"
+      "##   #"
+    ],
+  },
+  {
+    name: "Trailer",
+    // prettier-ignore
+    board: [
+      "#    #",
+      "      ",
+      " #  # ",
+      "##  ##",
+      "      ",
+      "# ## #"
+    ],
+  },
+  {
+    name: "Dev",
+    // prettier-ignore
+    board: [
+      "##   #",
+      "# #  #",
+      "#  ## ",
+      " ##  #",
+      "#  # #",
+      "#   ##"
     ],
   },
 ];
