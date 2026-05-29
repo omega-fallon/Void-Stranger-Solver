@@ -305,14 +305,14 @@ export function stateKey(state: GameState): string {
 // Non-(empty or stairs) are interchangeable for goal satisfaction — the brand only
 // requires "solid tile present" or "empty", not a specific solid type.
 export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
-  if (cell == "stairs") { // Stairs never matches target.
+  if (cell === "stairs") { // Stairs never matches target.
     return false
   }
-  else if (target == "empty") { // 
-    return cell == "empty"
+  else if (target === "empty") { // 
+    return cell === "empty"
   }
-  else { // Process of elimination: target is not empty and could never be stairs, so it must be one floor, glass, wall, button, trap_inactive, or trap_active. However we've also pruned cell == stairs, so we can just test if cell is empty now.
-    return cell != "empty";
+  else { // Process of elimination: target is not empty and could never be stairs, so it must be one floor, glass, wall, button, trap_inactive, or trap_active. However we've also pruned cell === stairs, so we can just test if cell is empty now.
+    return cell !== "empty";
   }
 }
 

@@ -46,7 +46,7 @@ export async function search({
 }: SearchOptions): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
-  if (verbose == 2 && initialThreshold)
+  if (verbose === 2 && initialThreshold)
     console.log(`Searching with initial threshold ${initialThreshold}`);
 
   let threshold =
@@ -77,7 +77,7 @@ export async function search({
 
     const amountOfPathFound = (() => {
       for (let i = 0; i < knownCorrectPath.length; i++) {
-        if (knownCorrectPath[i] != path[i]) {
+        if (knownCorrectPath[i] !== path[i]) {
           return i;
         }
       }

@@ -47,7 +47,7 @@ export function heuristic(
   const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
 
   let finalJumpCost =
-    requireFinalJump && board[player.row]![player.col]! != "empty" ? 1 : 0;
+    requireFinalJump && board[player.row]![player.col]! !== "empty" ? 1 : 0;
 
   // We wrap these in IIFEs so the profiler names each part individually
   (function calculateBoardDiff() {
