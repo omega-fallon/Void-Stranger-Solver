@@ -66,8 +66,6 @@ export function applyAction(
     const { dr, dc } = DELTAS[action];
     const newRow = row + dr;
     const newCol = col + dc;
-    
-    const dest = getCell(board, newRow, newCol);
 
     // Wall bump!
     if (!inBounds(newRow, newCol)) {
@@ -83,6 +81,8 @@ export function applyAction(
         },
       };
     }
+    
+    const dest = getCell(board, newRow, newCol);
     
     // Stairs are impassable.
     // TODO check stairs exitable for rooms with buttons.
