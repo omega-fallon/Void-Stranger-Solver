@@ -130,7 +130,7 @@ export function applyAction(
       }
 
       if (dest === "empty") {
-        // Another void tile — stay airborne. Origin was empty, so no glass to break.
+        // Another void tile — fall to your doom. Origin was empty, so no glass to break.
         return {
           board,
           entities,
@@ -139,7 +139,7 @@ export function applyAction(
             col: newCol,
             facing: action,
             staffContent,
-            wingsActive: true,
+            wingsActive: false,
           },
         };
       }
