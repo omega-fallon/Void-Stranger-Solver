@@ -50,6 +50,15 @@ function setEntity(
   );
 }
 
+function stairsActive(board: Board): bool {
+  for i in range(0,6):
+    for i2 in range(0,6):
+      // Check if the cell is a button AND has a non-player entity on it.
+      if getCell(board, i, i2) === "button" && getEntity(board, i, i2) !== "empty":
+        return false;
+  return true;
+}
+
 export function applyAction(
   state: GameState,
   action: Action,
@@ -84,9 +93,33 @@ export function applyAction(
     
     const dest = getCell(board, newRow, newCol);
     
-    // Stairs are impassable.
-    // TODO check stairs exitable for rooms with buttons.
-    if (dest === "stairs") return null;
+    // Stairs...
+    if (dest === "stairs") {
+      // ...are impassable.
+      if (stairsActive(board)) {
+        return null;
+      }
+      // ...are walkable
+      else {
+        // Normal move. Remove glass if walking off it.
+        const newBoard =
+        getCell(board, row, col) === "glass"
+          ? setCell(board, row, col, "empty")
+          : board;
+
+        return {
+          board: newBoard,
+          entities,
+          player: {
+            row: newRow,
+            col: newCol,
+            facing: action,
+            staffContent,
+            wingsActive: false,
+          },
+        }
+      }
+    }
 
     // Rock-push while airborne: push succeeds if the cell behind the rock is
     // clear (in-bounds, not a wall, not another rock). Player falls in place
