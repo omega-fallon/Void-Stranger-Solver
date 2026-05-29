@@ -121,7 +121,61 @@ export async function search({
     if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
       return Infinity;
     }
-
+    
+    // Pruning: We have a rock in a corner where there shouldn't be one.
+    for (let coord of [[0,0],[0,5],[5,0],[5,5]]) {
+      let r : number = coord[0]!;
+      let c : number = coord[1]!;
+    
+      if (state.entities[r]![c]! === "rock") {
+        // The cornered rock is covering stairs.
+        if (state.board[r]![c]! === "stairs") {
+          console.log("trimmed1");
+          return Infinity;
+        }
+        // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
+        else if (target[r]![c]! === "empty" || state.board[r]![c]! !== "trap_active") {
+          console.log("trimmed2");
+          return Infinity;
+        }
+      }
+    }
+    // The same thing but for "near corners"; a rock can be stuck against another rock.
+    for (let i = 0; i < 16; i += 2) {
+      let coords = [
+        0,1,//nw
+        1,0,
+        
+        0,4,//ne
+        1,5,
+        
+        4,0,//sw
+        5,1,
+        
+        4,5,//se
+        5,4
+      ]
+    
+      let r : number = coords[i]!;
+      let c : number = coords[i+1]!;
+    
+      if (state.entities[r]?.[c] === "rock") {
+        // Rock stuck.
+        if (((i == 0 || i == 2) && (state.entities[0]![0]! === "rock")) || ((i == 4 || i == 6) && (state.entities[0]![5]! === "rock")) || ((i == 8 || i == 10) && (state.entities[5]![0]! === "rock")) || ((i == 12 || i == 14) && (state.entities[5]![5]! === "rock"))) {
+          // The cornered rock is covering stairs.
+          if (state.board[r]![c]! === "stairs") {
+            console.log("trimmed3");
+            return Infinity;
+          }
+          // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
+          else if (target[r]![c]! === "empty" || state.board[r]![c]! !== "trap_active") {
+            console.log("trimmed4");
+            return Infinity;
+          }
+        }
+      }
+    }
+    
     let min = Infinity;
 
     for (const action of ACTIONS) {
