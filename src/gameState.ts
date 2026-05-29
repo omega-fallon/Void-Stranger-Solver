@@ -220,34 +220,39 @@ export function applyAction(
   
     const front = getCell(board, fr, fc);
 
-    // TODO check for entities in front cell.
-    if (staffContent === "empty" && front !== "empty" && front !== "wall") {
-      return {
-        board: setCell(board, fr, fc, "empty"),
-        entities,
-        player: {
-          row,
-          col,
-          facing,
-          staffContent: front as StaffContent,
-          wingsActive: player.wingsActive ?? false,
-        },
-      };
+    // Check for entities in front cell.
+    if (getEntity(entities, fr, fc) !== "empty") {
+      return null;
     }
+    else {
+      if (staffContent === "empty" && front !== "empty" && front !== "wall") {
+        return {
+          board: setCell(board, fr, fc, "empty"),
+          entities,
+          player: {
+            row,
+            col,
+            facing,
+            staffContent: front as StaffContent,
+            wingsActive: player.wingsActive ?? false,
+          },
+        };
+      }
 
-    // TODO check for entities in front cell.
-    if (staffContent !== "empty" && front === "empty") {
-      return {
-        board: setCell(board, fr, fc, staffContent as Cell),
-        entities,
-        player: {
-          row,
-          col,
-          facing,
-          staffContent: "empty",
-          wingsActive: player.wingsActive ?? false,
-        },
-      };
+      // TODO check for entities in front cell.
+      if (staffContent !== "empty" && front === "empty") {
+        return {
+          board: setCell(board, fr, fc, staffContent as Cell),
+          entities,
+          player: {
+            row,
+            col,
+            facing,
+            staffContent: "empty",
+            wingsActive: player.wingsActive ?? false,
+          },
+        };
+      }
     }
   }
 
