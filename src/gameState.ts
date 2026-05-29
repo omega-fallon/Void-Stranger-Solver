@@ -293,16 +293,22 @@ export function stateKey(state: GameState): string {
     return staffContent === "empty"
       ? "e"
       : staffContent === "floor"
-      ? "t"
+      ? "f"
       : staffContent === "glass"
       ? "g"
+      : staffContent === "button"
+      ? "b"
+      : staffContent === "trap_inactive"
+      ? "t"
+      : staffContent === "trap_active"
+      ? "a"
       : "s";
   })();
   const wingsStr = wingsActive ? "W" : "0";
   //const swordStr = swordActive ? "S" : "0";
   //const endlessStr = endlessActive ? "E" : "0";
   return (function combineString() {
-    return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr},${swordStr},${endlessStr}`;
+    return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
   })();
 }
 

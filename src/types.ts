@@ -16,7 +16,7 @@ export type Cell =
 export type Board = Cell[][];
 
 // Entity layer — overlaid on the board, tracks objects/enemies
-export type Entity = "empty" | "rock";
+export type Entity = "empty" | "rock" | "beaver" | "mimic" | "hand";
 export type EntityGrid = Entity[][];
 
 // Staff can hold nothing, a floor, a glass, or the stairs

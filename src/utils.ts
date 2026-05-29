@@ -82,6 +82,9 @@ const CELL_CHARS: Record<Cell, string> = {
 const ENTITY_CHARS: Record<Entity, string> = {
   empty: " ",
   rock: "R",
+  beaver: "B",
+  mimic: "M",
+  hand: "H",
 };
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
 
