@@ -50,11 +50,11 @@ function setEntity(
   );
 }
 
-function stairsActive(board: Board): bool {
-  for i in range(0,6) {
-    for i2 in range(0,6) {
+function stairsActive(board: Board, grid: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
       // Check if the cell is a button AND has a non-player entity on it.
-      if (getCell(board, i, i2) === "button" && getEntity(board, i, i2) !== "empty") {
+      if (getCell(board, i, i2) === "button" && getEntity(grid, i, i2) !== "empty") {
         return false;
       }
     }
@@ -99,7 +99,7 @@ export function applyAction(
     // Stairs...
     if (dest === "stairs") {
       // ...are impassable.
-      if (stairsActive(board)) {
+      if (stairsActive(board, entities)) {
         return null;
       }
       // ...are walkable
