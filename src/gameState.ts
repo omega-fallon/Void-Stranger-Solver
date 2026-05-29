@@ -302,7 +302,7 @@ export function stateKey(state: GameState): string {
   })();
 }
 
-// Non-empty & glass are interchangeable for goal satisfaction — the brand only
+// Non-(empty or stairs) are interchangeable for goal satisfaction — the brand only
 // requires "solid tile present" or "empty", not a specific solid type.
 export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
   if (cell == "stairs") { // Stairs never matches target.
