@@ -51,11 +51,14 @@ function setEntity(
 }
 
 function stairsActive(board: Board): bool {
-  for i in range(0,6):
-    for i2 in range(0,6):
+  for i in range(0,6) {
+    for i2 in range(0,6) {
       // Check if the cell is a button AND has a non-player entity on it.
-      if getCell(board, i, i2) === "button" && getEntity(board, i, i2) !== "empty":
+      if (getCell(board, i, i2) === "button" && getEntity(board, i, i2) !== "empty") {
         return false;
+      }
+    }
+  }
   return true;
 }
 
