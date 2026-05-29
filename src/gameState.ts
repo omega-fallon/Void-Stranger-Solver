@@ -58,8 +58,8 @@ export function applyAction(
   const { board, entities, player } = state;
   const { row, col, facing, staffContent } = player;
   const wingsActive = hasWings && (player.wingsActive ?? false);
-  const swordActive = hasSword && (player.swordActive ?? false);
-  const endlessActive = hasEndless && (player.endlessActive ?? false);
+  //const swordActive = hasSword && (player.swordActive ?? false);
+  //const endlessActive = hasEndless && (player.endlessActive ?? false);
 
   if (action !== "staff") {
     const { dr, dc } = DELTAS[action];
@@ -299,8 +299,8 @@ export function stateKey(state: GameState): string {
       : "s";
   })();
   const wingsStr = wingsActive ? "W" : "0";
-  const swordStr = swordActive ? "S" : "0";
-  const endlessStr = endlessActive ? "E" : "0";
+  //const swordStr = swordActive ? "S" : "0";
+  //const endlessStr = endlessActive ? "E" : "0";
   return (function combineString() {
     return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr},${swordStr},${endlessStr}`;
   })();
@@ -425,8 +425,8 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
     countFloorTiles(board) +
     (["floor", "glass"].includes(state.player.staffContent) ? 1 : 0);
   const wingsIndicator = state.player.wingsActive ? " 🦋" : "";
-  const swordIndicator = state.player.swordActive ? " 🗡️" : "";
-  const endlessIndicator = state.player.endlessActive ? " 🪄" : "";
+  //const swordIndicator = state.player.swordActive ? " 🗡️" : "";
+  //const endlessIndicator = state.player.endlessActive ? " 🪄" : "";
   return (
     `${numFloorTilesRemaining} floor tiles remain${
       requiredTiles ? ` out of a necessary ${requiredTiles}` : ""
