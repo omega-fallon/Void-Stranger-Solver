@@ -61,6 +61,7 @@ export function applyAction(
   //const swordActive = hasSword && (player.swordActive ?? false);
   //const endlessActive = hasEndless && (player.endlessActive ?? false);
 
+  // Movement!
   if (action !== "staff") {
     const { dr, dc } = DELTAS[action];
     const newRow = row + dr;
@@ -95,7 +96,7 @@ export function applyAction(
       const rockDestCol = newCol + dc;
         
       // If any of these three things are true, we push but nothing happens, equivalent to hitting a wall.
-      if (!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") {
+      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock")) {
         return {
           board,
           entities,
@@ -137,21 +138,8 @@ export function applyAction(
     
     // ── Flying (wings active) ─────────────────────────────────────────────
     if (wingsActive) {
-      if (dest === "empty") {
-        // Another void tile — fall to your doom. Origin was empty, so no glass to break.
-        return {
-          board,
-          entities,
-          player: {
-            row: newRow,
-            col: newCol,
-            facing: action,
-            staffContent,
-            wingsActive: false,
-          },
-        };
-      }
-
+      // Another void tile — fall to your doom. Origin was empty, so no glass to break.
+      // OR
       // Solid tile (floor or glass) — land. Origin was empty, so no glass to break.
       return {
         board,
