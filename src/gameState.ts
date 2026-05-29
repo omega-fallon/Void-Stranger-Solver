@@ -73,6 +73,7 @@ export function applyAction(
     if (wingsActive) {
       // ── Flying (wings active) ─────────────────────────────────────────────
       // Stairs are impassable while airborne — return null.
+      // TODO check stairs exitable for rooms with buttons.
       if (dest === "stairs") return null;
 
       // Walls block passage while airborne: the player falls in place (stays on
@@ -158,6 +159,7 @@ export function applyAction(
     }
 
     // ── Not flying ────────────────────────────────────────────────────────────
+    // TODO check stairs exitable for rooms with buttons.
     if (dest === "wall" || dest === "stairs") return null;
 
     // Rock-push: if there is a rock in the destination cell, attempt to push it.
@@ -217,6 +219,7 @@ export function applyAction(
 
   const front = getCell(board, fr, fc);
 
+  // TODO check for entities in front cell.
   if (staffContent === "empty" && front !== "empty" && front !== "wall") {
     return {
       board: setCell(board, fr, fc, "empty"),
@@ -231,6 +234,7 @@ export function applyAction(
     };
   }
 
+  // TODO check for entities in front cell.
   if (staffContent !== "empty" && front === "empty") {
     return {
       board: setCell(board, fr, fc, staffContent as Cell),
