@@ -62,6 +62,27 @@ function stairsActive(board: Board, grid: EntityGrid): boolean {
   return true;
 }
 
+// Causes any floating non-player entities to fall, and automatically calls triggerWatcher if needed.
+function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
+  let watchers_needing_triggering = 0;
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (board[i]![i2]! === "empty" && entities[i]![i2]! !== "empty") {
+        if (entities[i]![i2]! === "watcher_active") {
+          watchers_needing_triggering += 1;
+        }
+        entities[i]![i2]! = "empty";
+      }
+    }
+  }
+  
+  for (let i = 0; i < watchers_needing_triggering; i++) {
+    entities = triggerWatcher(entities);
+  }
+  
+  return entities;
+}
+
 function disperseTraps(board: Board, row: number, column: number): Board {
   let triggered_tiles : number[][] = [[row,column]];
   let done_anything : boolean = true;
@@ -212,7 +233,7 @@ export function applyAction(
       // Pushing into void.
       if (getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
         // Pushing an active watcher.
-        if (getEntity(entities, newRow, newCol) === "watcher_active" && getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
+        if (getEntity(entities, newRow, newCol) === "watcher_active") {
           newEntities = triggerWatcher(newEntities);
         }
       
@@ -239,19 +260,16 @@ export function applyAction(
         // Disperse all traps.
         newBoard = disperseTraps(newBoard, rockDestRow, rockDestCol);
         
-        // NOTICE! this code is NOT well equipped for more complex rooms with traps. //
-        // Pushing an active watcher.
-        if (getEntity(entities, newRow, newCol) === "watcher_active" && getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
-          newEntities = triggerWatcher(newEntities);
-        }
-        
-        // The rock has basically fallen.
+        // Set up the rock above the void...
         newEntities = setEntity(
           setEntity(entities, newRow, newCol, "empty"),
           rockDestRow,
           rockDestCol,
-          "empty",
+          getEntity(entities, newRow, newCol),
         );
+        
+        // ...and then trigger all fallings.
+        newEntities = checkFallen(newBoard, newEntities);
       }
       
       return {
@@ -270,14 +288,18 @@ export function applyAction(
     // ── Flying (wings active) ─────────────────────────────────────────────
     if (wingsActive) {
       let newBoard = board;
+      let newEntities = entities;
       
       // Walking onto inactive trap
       if (getCell(board, newRow, newCol) === "trap_inactive") {
         newBoard = setCell(newBoard, newRow, newCol, "trap_active");
       }
       // Walking onto ACTIVE trap
-      if (getCell(board, newRow, newCol) === "trap_active") {
+      else if (getCell(board, newRow, newCol) === "trap_active") {
         newBoard = disperseTraps(newBoard, newRow, newCol);//dead!
+        
+        // Account for any fallen entities.
+        newEntities = checkFallen(newBoard, newEntities);
       }
       
       // Another void tile — fall to your doom. Origin was empty, so no glass to break.
@@ -285,7 +307,7 @@ export function applyAction(
       // Solid tile. Origin was empty, so no glass to break.
       return {
         board: newBoard,
-        entities,
+        entities: newEntities,
         player: {
           row: newRow,
           col: newCol,
@@ -302,14 +324,18 @@ export function applyAction(
         getCell(board, row, col) === "glass"
           ? setCell(board, row, col, "empty")
           : board;
+      let newEntities = entities;
           
       // Walking onto inactive trap
       if (getCell(newBoard, newRow, newCol) === "trap_inactive") {
         newBoard = setCell(newBoard, newRow, newCol, "trap_active");
       }
       // Walking onto ACTIVE trap
-      if (getCell(newBoard, newRow, newCol) === "trap_active") {
-        newBoard = disperseTraps(newBoard, newRow, newCol);//dead!
+      else if (getCell(newBoard, newRow, newCol) === "trap_active") {
+        newBoard = disperseTraps(newBoard, newRow, newCol);
+        
+        // Account for any fallen entities.
+        newEntities = checkFallen(newBoard, newEntities);
       }
           
       // Wings activate if the player steps into the void.
@@ -317,7 +343,7 @@ export function applyAction(
 
       return {
         board: newBoard,
-        entities,
+        entities: newEntities,
         player: {
           row: newRow,
           col: newCol,
@@ -384,6 +410,9 @@ export function applyAction(
             wingsActive: player.wingsActive ?? false,
           },
         };
+      }
+      else {
+        return null
       }
     }
   }

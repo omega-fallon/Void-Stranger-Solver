@@ -139,7 +139,7 @@ export async function search({
     // Exit step: player is in the void but not at goal — dead end.
     // Exception: if wings are active the player is still airborne and can land.
     if (state.board[row]?.[col] === "empty" && !state.player.wingsActive) {
-      console.log("INF: pitfall");
+      //console.log("INF: pitfall");
       return Infinity;
     }
 
