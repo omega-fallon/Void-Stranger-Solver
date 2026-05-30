@@ -1,4 +1,5 @@
 import type { Board, Cell, GameState } from "./types";
+import { staffBanned } from "./search";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -40,7 +41,7 @@ export function heuristic(
   target: Board,
   requireFinalJump: boolean,
 ): HeuristicResult {
-  const { board, player } = state;
+  const { board, player, entities } = state;
 
   let mismatches = 0;
   const excess: [number, number, Cell][] = []; // cells with tiles that shouldn't be there
@@ -173,9 +174,10 @@ export function heuristic(
     }
     return count;
   }
+  const theWatchers = staffBanned(entities) ? Infinity : 0;
 
   return {
-    total: mismatches + transportCost + travelCost + finalJumpCost,
+    total: mismatches + transportCost + travelCost + finalJumpCost + theWatchers,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
