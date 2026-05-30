@@ -132,12 +132,14 @@ export async function search({
     
     // All Watcher statues triggered.
     if (allWatchersTriggeredQuestion(state.entities)) {
+      console.log("INF: all watchers");
       return Infinity;
     }
     
     // Exit step: player is in the void but not at goal — dead end.
     // Exception: if wings are active the player is still airborne and can land.
     if (state.board[row]?.[col] === "empty" && !state.player.wingsActive) {
+      console.log("INF: pitfall");
       return Infinity;
     }
 
@@ -146,6 +148,7 @@ export async function search({
       ? 1
       : 0;
     if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
+      console.log("INF: not enough tiles");
       return Infinity;
     }
     
@@ -157,12 +160,12 @@ export async function search({
       if (state.entities[r]![c]! === "rock" || state.entities[r]![c]! === "watcher_inactive" || state.entities[r]![c]! === "watcher_active" || state.entities[r]![c]! === "chest") {
         // The cornered rock is covering stairs.
         if (state.board[r]![c]! === "stairs") {
-          //console.log("trimmed1");
+          console.log("INF: cornered rock covering stairs");
           return Infinity;
         }
         // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
-        else if (target[r]![c]! === "empty" || state.board[r]![c]! !== "trap_active") {
-          //console.log("trimmed2");
+        else if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active") {
+          console.log("INF: cornered rock covering excess tile: "+String(coord));
           return Infinity;
         }
       }
@@ -193,12 +196,12 @@ export async function search({
         if (((i == 0 || i == 2) && (blockers.includes(state.entities[0]![0]!))) || ((i == 4 || i == 6) && (blockers.includes(state.entities[0]![5]!))) || ((i == 8 || i == 10) && (blockers.includes(state.entities[5]![0]!))) || ((i == 12 || i == 14) && (blockers.includes(state.entities[5]![5]!)))) {
           // The cornered rock is covering stairs.
           if (state.board[r]![c]! === "stairs") {
-            //console.log("trimmed3");
+            console.log("INF: side-cornered rock covering stairs");
             return Infinity;
           }
           // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
-          else if (target[r]![c]! === "empty" || state.board[r]![c]! !== "trap_active") {
-            //console.log("trimmed4");
+          else if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active") {
+            console.log("INF: side-cornered rock covering excess tile");
             return Infinity;
           }
         }
