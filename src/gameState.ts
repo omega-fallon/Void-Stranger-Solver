@@ -232,17 +232,17 @@ export function applyAction(
       
       // Pushing into void.
       if (getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
-        // Pushing an active watcher.
-        if (getEntity(entities, newRow, newCol) === "watcher_active") {
-          newEntities = triggerWatcher(newEntities);
-        }
-      
         newEntities = setEntity(
           setEntity(newEntities, newRow, newCol, "empty"),
           rockDestRow,
           rockDestCol,
           "empty",
         );
+        
+        // Pushing an active watcher.
+        if (getEntity(entities, newRow, newCol) === "watcher_active") {
+          newEntities = triggerWatcher(newEntities);
+        }
       }
       // Pushing onto an inactive trap.
       else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_inactive") {

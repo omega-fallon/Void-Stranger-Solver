@@ -148,7 +148,7 @@ export async function search({
       ? 1
       : 0;
     if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
-      console.log("INF: not enough tiles");
+      //console.log("INF: not enough tiles");
       return Infinity;
     }
     
