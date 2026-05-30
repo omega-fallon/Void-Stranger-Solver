@@ -137,8 +137,9 @@ export async function search({
     
     // Exit step: player is in the void but not at goal — dead end.
     // Exception: if wings are active the player is still airborne and can land.
-    if (state.board[row]?.[col] === "empty" && !state.player.wingsActive)
+    if (state.board[row]?.[col] === "empty" && !state.player.wingsActive) {
       return Infinity;
+    }
 
     // Pruning: not enough floor tiles remaining to satisfy the target.
     const floorInStaff = ["floor", "glass", "button", "trap_inactive", "trap_active"].includes(state.player.staffContent)
