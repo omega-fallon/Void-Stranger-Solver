@@ -150,9 +150,21 @@ export function heuristic(
       );
     }
   })();
+  
+  // Trap tiles factor...?
+  function hasTrap(board: Board): boolean {
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (board[i]![i2]! === "trap_inactive" || board[i]![i2]! === "trap_active") {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   return {
-    total: mismatches + transportCost + travelCost + finalJumpCost,
+    total: mismatches + transportCost + travelCost + finalJumpCost + Number(hasTrap(board))*-20,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,

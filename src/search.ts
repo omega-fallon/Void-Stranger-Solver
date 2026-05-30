@@ -251,7 +251,10 @@ export async function search({
 
   while (true) {
     const path: Action[] = [];
+    
+    //console.log("Beginning...");
     const result = await searchWithThreshold(initial, 0, path);
+    //console.log("End.");
 
     const elapsedMs = performance.now() - start;
     if (verbose) {

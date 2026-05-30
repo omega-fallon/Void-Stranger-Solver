@@ -131,6 +131,8 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 
 // Triggers the first watcher it encounters. If it doesn't encounter one, does nothing.
 function triggerWatcher(entities: EntityGrid): EntityGrid {
+  return entities;
+  
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
@@ -206,7 +208,7 @@ export function applyAction(
     }
 
     // Rock-pushing
-    if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher_inactive" || getEntity(entities, newRow, newCol) === "watcher_active") {
+    else if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher_inactive" || getEntity(entities, newRow, newCol) === "watcher_active") {
       const rockDestRow = newRow + dr;
       const rockDestCol = newCol + dc;
         
@@ -288,7 +290,7 @@ export function applyAction(
     }
     
     // ── Flying (wings active) ─────────────────────────────────────────────
-    if (wingsActive) {
+    else if (wingsActive) {
       let newBoard = board;
       let newEntities = entities;
       
@@ -419,6 +421,7 @@ export function applyAction(
     }
   }
 
+  throw new Error("applyAction failsafe triggered.");
   return null;
 }
 
