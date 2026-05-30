@@ -162,9 +162,20 @@ export function heuristic(
     }
     return false;
   }
+  function activeTraps(board: Board): number {
+    let count = 0;
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (board[i]![i2]! === "trap_active") {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
 
   return {
-    total: mismatches + transportCost + travelCost + finalJumpCost + Number(hasTrap(board))*-20,
+    total: mismatches + transportCost + travelCost + finalJumpCost,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,

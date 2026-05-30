@@ -155,6 +155,28 @@ export const BRANES: RawBraneInitial[] = [
     player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
   },
   {
+    name: "Lev-glass",
+    // prettier-ignore
+    board: [
+      "#GGS##",
+      "GG####",
+      "#GG#GG",
+      "GG##GG",
+      "GGGGG#",
+      "##GG##",
+    ],
+    // prettier-ignore
+    entities: [
+      "C     ",
+      "      ",
+      "   W  ",
+      "      ",
+      "      ",
+      "W     ",
+    ],
+    player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
+  },
+  {
     name: "Cif",
     // prettier-ignore
     board: [
