@@ -62,6 +62,64 @@ function stairsActive(board: Board, grid: EntityGrid): boolean {
   return true;
 }
 
+function disperseTraps(board: Board, row: number, column: number): Board {
+  let triggered_tiles : number[][] = [[row,column]];
+  let done_anything : boolean = true;
+  
+  // Iterate through each triggered_tile's neighbors and add them to the list if they're also active traps. Repeatedly do this until nothing changes.
+  while (done_anything) {
+    done_anything = false;
+    
+    for (let coord of triggered_tiles) {
+      let r : number = coord[0]!;
+      let c : number = coord[1]!;
+    
+      if (!triggered_tiles.includes([r-1,c]) && r >= 1 && board[r-1]![c]! === "trap_active") {
+        done_anything = true;
+        triggered_tiles.push([r-1,c]);
+        continue;
+      }
+      if (!triggered_tiles.includes([r,c-1]) && c >= 1 && board[r]![c-1]! === "trap_active") {
+        done_anything = true;
+        triggered_tiles.push([r,c-1]);
+        continue;
+      }
+      if (!triggered_tiles.includes([r+1,c]) && r <= 4 && board[r+1]![c]! === "trap_active") {
+        done_anything = true;
+        triggered_tiles.push([r+1,c]);
+        continue;
+      }
+      if (!triggered_tiles.includes([r,c+1]) && c <= 4 && board[r]![c+1]! === "trap_active") {
+        done_anything = true;
+        triggered_tiles.push([r,c+1]);
+        continue;
+      }
+    }
+  }
+  
+  // Found them all, now remove them.
+  let newBoard = board;
+  for (let coord of triggered_tiles) {
+    newBoard = setCell(newBoard, coord[0]!, coord[1]!, "empty");
+  }
+  
+  // All done!
+  return newBoard;
+}
+
+// Triggers the first watcher it encounters. If it doesn't encounter one, does nothing.
+function triggerWatcher(entities: EntityGrid): EntityGrid {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (entities[i]![i2]! === "watcher_inactive") {
+        entities[i]![i2]! = "watcher_active";
+        return entities;
+      }
+    }
+  }
+  return entities;
+}
+
 export function applyAction(
   state: GameState,
   action: Action,
@@ -80,7 +138,7 @@ export function applyAction(
     const newCol = col + dc;
 
     // Wall bump!
-    if (!inBounds(newRow, newCol)) {
+    if (!inBounds(newRow, newCol) || getEntity(entities, newRow, newCol) === "chest") {
       return {
         board,
         entities,
@@ -124,15 +182,13 @@ export function applyAction(
       }
     }
 
-    // Rock-push while airborne: push succeeds if the cell behind the rock is
-    // clear (in-bounds, not a wall, not another rock). Player falls in place
-    // (stays on current empty cell, facing updates, wings deactivate).
-    if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher") {
+    // Rock-pushing
+    if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher_inactive" || getEntity(entities, newRow, newCol) === "watcher_active") {
       const rockDestRow = newRow + dr;
       const rockDestCol = newCol + dc;
         
       // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
-      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher")) {
+      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_active") || (getEntity(entities, rockDestRow, rockDestCol) === "chest")) {
         return {
           board,
           entities,
@@ -145,20 +201,59 @@ export function applyAction(
           },
         };
       }
-
-      const newEntities = setEntity(
-        setEntity(entities, newRow, newCol, "empty"),
-        rockDestRow,
-        rockDestCol,
-        getCell(board, rockDestRow, rockDestCol) === "empty"
-          ? "empty"
-          : getEntity(entities, newRow, newCol),
-      );
+      
       // Break any glass the rock was pushed off of.
-      const newBoard =
+      let newBoard =
         getCell(board, newRow, newCol) === "glass"
           ? setCell(board, newRow, newCol, "empty")
           : board;
+      let newEntities = entities;
+      
+      // Pushing into void.
+      if (getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
+        // Pushing an active watcher.
+        if (getEntity(entities, newRow, newCol) === "watcher_active" && getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
+          newEntities = triggerWatcher(newEntities);
+        }
+      
+        newEntities = setEntity(
+          setEntity(newEntities, newRow, newCol, "empty"),
+          rockDestRow,
+          rockDestCol,
+          "empty",
+        );
+      }
+      // Pushing onto an inactive trap.
+      else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_inactive") {
+        newBoard = setCell(newBoard, rockDestRow, rockDestCol, "trap_active");
+        
+        newEntities = setEntity(
+          setEntity(entities, newRow, newCol, "empty"),
+          rockDestRow,
+          rockDestCol,
+          getEntity(entities, newRow, newCol),
+        );
+      }
+      // Pushing onto an ACTIVE trap.
+      else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_inactive") {
+        // Disperse all traps.
+        newBoard = disperseTraps(newBoard, rockDestRow, rockDestCol);
+        
+        // NOTICE! this code is NOT well equipped for more complex rooms with traps. //
+        // Pushing an active watcher.
+        if (getEntity(entities, newRow, newCol) === "watcher_active" && getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
+          newEntities = triggerWatcher(newEntities);
+        }
+        
+        // The rock has basically fallen.
+        newEntities = setEntity(
+          setEntity(entities, newRow, newCol, "empty"),
+          rockDestRow,
+          rockDestCol,
+          "empty",
+        );
+      }
+      
       return {
         board: newBoard,
         entities: newEntities,
@@ -167,18 +262,29 @@ export function applyAction(
           col,
           facing: action,
           staffContent,
-          wingsActive: false,
+          wingsActive: false, //always false after a push
         },
       };
     }
     
     // ── Flying (wings active) ─────────────────────────────────────────────
     if (wingsActive) {
+      let newBoard = board;
+      
+      // Walking onto inactive trap
+      if (getCell(board, newRow, newCol) === "trap_inactive") {
+        newBoard = setCell(newBoard, newRow, newCol, "trap_active");
+      }
+      // Walking onto ACTIVE trap
+      if (getCell(board, newRow, newCol) === "trap_active") {
+        newBoard = disperseTraps(newBoard, newRow, newCol);//dead!
+      }
+      
       // Another void tile — fall to your doom. Origin was empty, so no glass to break.
       // OR
-      // Solid tile (floor or glass) — land. Origin was empty, so no glass to break.
+      // Solid tile. Origin was empty, so no glass to break.
       return {
-        board,
+        board: newBoard,
         entities,
         player: {
           row: newRow,
@@ -191,12 +297,23 @@ export function applyAction(
     }
     // ── Not flying (wings inactive) ─────────────────────────────────────────────
     else {
-      // Normal move. Wings activate if the player steps into the void.
-      const newBoard =
+      // Normal move.
+      let newBoard =
         getCell(board, row, col) === "glass"
           ? setCell(board, row, col, "empty")
           : board;
-      const newWingsActive = hasWings && dest === "empty";
+          
+      // Walking onto inactive trap
+      if (getCell(newBoard, newRow, newCol) === "trap_inactive") {
+        newBoard = setCell(newBoard, newRow, newCol, "trap_active");
+      }
+      // Walking onto ACTIVE trap
+      if (getCell(newBoard, newRow, newCol) === "trap_active") {
+        newBoard = disperseTraps(newBoard, newRow, newCol);//dead!
+      }
+          
+      // Wings activate if the player steps into the void.
+      const newWingsActive = hasWings && (getCell(newBoard, newRow, newCol) === "empty");
 
       return {
         board: newBoard,
@@ -220,15 +337,32 @@ export function applyAction(
   
     const front = getCell(board, fr, fc);
 
-    // Check for entities in front cell.
-    if (getEntity(entities, fr, fc) !== "empty") {
+    // Chest and upwards?
+    if (facing === "up" && getEntity(entities, fr, fc) === "chest") {
+      // Turn chest into rock and face downward.
+      return {
+        board: board,
+        entities: setEntity(entities, fr, fc, "rock"),
+        player: {
+          row,
+          col,
+          facing: "down",
+          staffContent,
+          wingsActive: player.wingsActive ?? false,
+        },
+      };
+    }
+    // Check for other entities in front cell.
+    else if (getEntity(entities, fr, fc) !== "empty") {
       return null;
     }
     else {
+      const newEntities = triggerWatcher(entities);
+    
       if (staffContent === "empty" && front !== "empty" && front !== "wall") {
         return {
           board: setCell(board, fr, fc, "empty"),
-          entities,
+          entities: newEntities,
           player: {
             row,
             col,
@@ -238,12 +372,10 @@ export function applyAction(
           },
         };
       }
-
-      // TODO check for entities in front cell.
-      if (staffContent !== "empty" && front === "empty") {
+      else if (staffContent !== "empty" && front === "empty") {
         return {
           board: setCell(board, fr, fc, staffContent as Cell),
-          entities,
+          entities: newEntities,
           player: {
             row,
             col,
@@ -288,7 +420,7 @@ export function stateKey(state: GameState): string {
   const entityStr = (function getEntityStr() {
     let str = "";
     state.entities.forEach((row) =>
-      row.forEach((c) => (str += c === "rock" ? "R" : (c === "beaver" ? "B" : c === "mimic" ? "M" : c === "hand" ? "H" : c === "watcher" ? "W" : " "))),
+      row.forEach((c) => (str += c === "rock" ? "R" : (c === "beaver" ? "B" : (c === "mimic" ? "M" : (c === "hand" ? "H" : (c === "watcher_inactive" ? "W" : (c === "watcher_active" ? "!" : (c === "chest" ? "C" : " ")))))))),
     );
     return str;
   })();
@@ -427,8 +559,12 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       overlayChar = "M";
     } else if (entities[r]?.[c] === "hand") {
       overlayChar = "H";
-    } else if (entities[r]?.[c] === "watcher") {
+    } else if (entities[r]?.[c] === "watcher_inactive") {
       overlayChar = "W";
+    } else if (entities[r]?.[c] === "watcher_active") {
+      overlayChar = "!";
+    } else if (entities[r]?.[c] === "chest") {
+      overlayChar = "C";
     }
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;

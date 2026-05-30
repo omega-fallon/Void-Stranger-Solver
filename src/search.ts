@@ -6,7 +6,7 @@ import {
   stateKey,
 } from "./gameState";
 import { heuristic } from "./heuristic";
-import type { Action, Board, GameState } from "./types";
+import type { Action, Board, EntityGrid, GameState } from "./types";
 
 export interface SearchResult {
   path: Action[] | null;
@@ -21,6 +21,23 @@ export function countFloorTiles(board: Board): number {
       (n, cell) => n + (["floor", "wall", "glass", "button", "trap_inactive", "trap_active"].includes(cell) ? 1 : 0),
       0,
     );
+}
+
+// Returns true if all watchers are triggered.
+function allWatchersTriggeredQuestion(entities: EntityGrid): boolean {
+  let found_any : boolean = false;
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (entities[i]![i2]! === "watcher_inactive") {
+        return false;
+      }
+      else if (!found_any && entities[i]![i2]! === "watcher_active") {
+        found_any = true;
+      }
+    }
+  }
+  
+  return found_any;
 }
 
 export interface SearchOptions {
@@ -106,11 +123,20 @@ export async function search({
 
     if (slow) await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
+    // Note: this being here before the Watcher check means dying to a watcher while flying and falling into the solution IS accounted for.
     if (isGoal(state, target, requireFinalJump)) return "found";
 
+    // Begin pruning. //
+    
+    const { row, col } = state.player;
+    
+    // All Watcher statues triggered.
+    if (allWatchersTriggeredQuestion(state.entities)) {
+      return Infinity;
+    }
+    
     // Exit step: player is in the void but not at goal — dead end.
     // Exception: if wings are active the player is still airborne and can land.
-    const { row, col } = state.player;
     if (state.board[row]?.[col] === "empty" && !state.player.wingsActive)
       return Infinity;
 
@@ -127,7 +153,7 @@ export async function search({
       let r : number = coord[0]!;
       let c : number = coord[1]!;
     
-      if (state.entities[r]![c]! === "rock" || state.entities[r]![c]! === "watcher") {
+      if (state.entities[r]![c]! === "rock" || state.entities[r]![c]! === "watcher_inactive" || state.entities[r]![c]! === "watcher_active" || state.entities[r]![c]! === "chest") {
         // The cornered rock is covering stairs.
         if (state.board[r]![c]! === "stairs") {
           //console.log("trimmed1");
@@ -159,9 +185,11 @@ export async function search({
       let r : number = coords[i]!;
       let c : number = coords[i+1]!;
     
-      if (state.entities[r]?.[c] === "rock" || state.entities[r]?.[c] === "watcher") {
+      const blockers = ["rock","watcher_inactive","watcher_active","chest"];
+    
+      if (blockers.includes(state.entities[r]![c]!)) {
         // Rock stuck.
-        if (((i == 0 || i == 2) && (state.entities[0]![0]! === "rock" || state.entities[0]![0]! === "watcher")) || ((i == 4 || i == 6) && (state.entities[0]![5]! === "rock" || state.entities[0]![5]! === "watcher")) || ((i == 8 || i == 10) && (state.entities[5]![0]! === "rock" || state.entities[5]![0]! === "watcher")) || ((i == 12 || i == 14) && (state.entities[5]![5]! === "rock" || state.entities[5]![5]! === "watcher"))) {
+        if (((i == 0 || i == 2) && (blockers.includes(state.entities[0]![0]!))) || ((i == 4 || i == 6) && (blockers.includes(state.entities[0]![5]!))) || ((i == 8 || i == 10) && (blockers.includes(state.entities[5]![0]!))) || ((i == 12 || i == 14) && (blockers.includes(state.entities[5]![5]!)))) {
           // The cornered rock is covering stairs.
           if (state.board[r]![c]! === "stairs") {
             //console.log("trimmed3");
@@ -176,6 +204,7 @@ export async function search({
       }
     }
     
+    // End pruning. //
     let min = Infinity;
 
     for (const action of ACTIONS) {

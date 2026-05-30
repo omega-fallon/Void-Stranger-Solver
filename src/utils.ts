@@ -85,7 +85,9 @@ const ENTITY_CHARS: Record<Entity, string> = {
   beaver: "B",
   mimic: "M",
   hand: "H",
-  watcher: "W",
+  watcher_inactive: "W",
+  watcher_active: "!",
+  chest: "C",
 };
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
 
@@ -124,7 +126,9 @@ export function parseEntities(rows: string[]): EntityGrid {
     B: "beaver",
     M: "mimic",
     H: "hand",
-    W: "watcher",
+    W: "watcher_inactive",
+    "!": "watcher_active",
+    C: "chest",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {
