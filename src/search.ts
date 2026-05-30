@@ -175,6 +175,7 @@ export async function search({
     }
     
     // Pruning: We have a rock in a corner where there shouldn't be one.
+    // Intentionally not including monster statues here.
     for (let coord of [[0,0],[0,5],[5,0],[5,5]]) {
       let r : number = coord[0]!;
       let c : number = coord[1]!;

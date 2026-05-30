@@ -145,6 +145,30 @@ function triggerWatcher(entities: EntityGrid): EntityGrid {
   return entities;
 }
 
+// Handling for monster statues.
+function anyMonsters(entities: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i < 6; i++) {
+      if (getEntity(entities, i, i2) == "hand") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
+  if (!anyMonsters(entities)) {
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i < 6; i++) {
+        if (getEntity(entities, i, i2) == "monster_statue") {
+          return setEntity(entities, i, i2, "empty");
+        }
+      }
+    }
+  }
+  return entities
+}
+
 export function applyAction(
   state: GameState,
   action: Action,
@@ -179,8 +203,13 @@ export function applyAction(
     
     const dest = getCell(board, newRow, newCol);
     
+    // Hands... hands!
+    if (getEntity(entities, newRow, newCol) === "hand") {
+      return null
+    }
+    
     // Stairs...
-    if (dest === "stairs") {
+    if (getEntity(entities, newRow, newCol) === "empty" && dest === "stairs") {
       // ...are impassable.
       if (stairsActive(board, entities)) {
         return null;
@@ -206,14 +235,15 @@ export function applyAction(
         }
       }
     }
-
+    
     // Rock-pushing
-    else if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher_inactive" || getEntity(entities, newRow, newCol) === "watcher_active") {
+    else if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher_inactive" || getEntity(entities, newRow, newCol) === "watcher_active" || getEntity(entities, newRow, newCol) === "monster_statue") {
       const rockDestRow = newRow + dr;
       const rockDestCol = newCol + dc;
         
       // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
-      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_active") || (getEntity(entities, rockDestRow, rockDestCol) === "chest")) {
+      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_active") || (getEntity(entities, rockDestRow, rockDestCol) === "chest") || (getEntity(entities, rockDestRow, rockDestCol) === "monster_statue")) {
+        //console.log("f-f-f-failure");
         return {
           board,
           entities,
@@ -275,10 +305,19 @@ export function applyAction(
         // ...and then trigger all fallings.
         newEntities = checkFallen(newBoard, newEntities);
       }
+      // Normal
+      else {
+        newEntities = setEntity(
+          setEntity(entities, newRow, newCol, "empty"),
+          rockDestRow,
+          rockDestCol,
+          getEntity(entities, newRow, newCol),
+        );
+      }
       
       return {
         board: newBoard,
-        entities: newEntities,
+        entities: disperseMonsterStatues(newEntities),
         player: {
           row,
           col,
@@ -287,6 +326,11 @@ export function applyAction(
           wingsActive: false, //always false after a push
         },
       };
+    }
+    
+    // failsafe
+    else if (getEntity(entities, newRow, newCol) !== "empty") {
+      throw new Error("Couldn't figure out entity in gameState logic: "+String(getEntity(entities, newRow, newCol)));
     }
     
     // ── Flying (wings active) ─────────────────────────────────────────────
@@ -311,7 +355,7 @@ export function applyAction(
       // Solid tile. Origin was empty, so no glass to break.
       return {
         board: newBoard,
-        entities: newEntities,
+        entities: disperseMonsterStatues(newEntities),
         player: {
           row: newRow,
           col: newCol,
@@ -347,7 +391,7 @@ export function applyAction(
 
       return {
         board: newBoard,
-        entities: newEntities,
+        entities: disperseMonsterStatues(newEntities),
         player: {
           row: newRow,
           col: newCol,
@@ -372,7 +416,7 @@ export function applyAction(
       // Turn chest into rock and face downward.
       return {
         board: board,
-        entities: setEntity(entities, fr, fc, "rock"),
+        entities: disperseMonsterStatues(setEntity(entities, fr, fc, "rock")),
         player: {
           row,
           col,
@@ -392,7 +436,7 @@ export function applyAction(
       if (staffContent === "empty" && front !== "empty" && front !== "wall") {
         return {
           board: setCell(board, fr, fc, "empty"),
-          entities: newEntities,
+          entities: disperseMonsterStatues(newEntities),
           player: {
             row,
             col,
@@ -405,7 +449,7 @@ export function applyAction(
       else if (staffContent !== "empty" && front === "empty") {
         return {
           board: setCell(board, fr, fc, staffContent as Cell),
-          entities: newEntities,
+          entities: disperseMonsterStatues(newEntities),
           player: {
             row,
             col,
@@ -454,7 +498,7 @@ export function stateKey(state: GameState): string {
   const entityStr = (function getEntityStr() {
     let str = "";
     state.entities.forEach((row) =>
-      row.forEach((c) => (str += c === "rock" ? "R" : (c === "beaver" ? "B" : (c === "mimic" ? "M" : (c === "hand" ? "H" : (c === "watcher_inactive" ? "W" : (c === "watcher_active" ? "!" : (c === "chest" ? "C" : " ")))))))),
+      row.forEach((c) => (str += c === "rock" ? "R" : (c === "beaver" ? "B" : (c === "mimic" ? "M" : (c === "hand" ? "H" : (c === "watcher_inactive" ? "W" : (c === "watcher_active" ? "!" : (c === "chest" ? "C" : (c === "monster_statue" ? "~" : " "))))))))),
     );
     return str;
   })();
@@ -599,6 +643,8 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       overlayChar = "!";
     } else if (entities[r]?.[c] === "chest") {
       overlayChar = "C";
+    } else if (entities[r]?.[c] === "monster_statue") {
+      overlayChar = "~";
     }
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;

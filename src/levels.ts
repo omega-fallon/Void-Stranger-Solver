@@ -80,7 +80,16 @@ export const BRANES: RawBraneInitial[] = [
   //    " #   #",
   //    " S ## ",
   //    "#   ##",
-  //    "W#### ",
+  //    "##### ",
+  //  ],
+  //  // prettier-ignore
+  //  entities: [
+  //    "      ",
+  //    "      ",
+  //    "      ",
+  //    " B    ",
+  //    "      ",
+  //    "R     ",
   //  ],
   //  player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
   //},
@@ -88,37 +97,46 @@ export const BRANES: RawBraneInitial[] = [
     name: "Mon",
     // prettier-ignore
     board: [
-      "B####W",
+      "B#####",
       "#GGGG#",
       "#G#GG#",
       "#GG#G#",
       "#GGGG#",
-      "W####S",
+      "#####S",
     ],
     // prettier-ignore
     entities: [
-      "      ",
+      "     R",
       "      ",
       "      ",
       "      ",
       "    R ",
-      "      ",
+      "R     ",
     ],
     player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
   },
-  //{
-  //  name: "Tan",
-  //  // prettier-ignore
-  //  board: [
-  //    "#G##G#",
-  //    "GG##GG",
-  //    "#G##G#",
-  //    "##SG##",
-  //    "#G##G#",
-  //    "##GG##",
-  //  ],
-  //  player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
-  //},
+  {
+    name: "Tan",
+    // prettier-ignore
+    board: [
+      "#G##G#",
+      "GG##GG",
+      "#G##G#",
+      "##SG##",
+      "#G##G#",
+      "##GG##",
+    ],
+    // prettier-ignore
+    entities: [
+      "~H  H~",
+      "HH  HH",
+      "~H~~H~",
+      "   H  ",
+      " H~ H ",
+      "  HH  ",
+    ],
+    player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
+  },
   //{
   //  name: "Gor",
   //  // prettier-ignore
@@ -129,6 +147,15 @@ export const BRANES: RawBraneInitial[] = [
   //    "#GGGG#",
   //    "GG##GG",
   //    "WG##GS",
+  //  ],
+  //  // prettier-ignore
+  //  entities: [
+  //    "M     ",
+  //    "      ",
+  //    "      ",
+  //    "     R",
+  //    "      ",
+  //    "R     ",
   //  ],
   //  player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
   //},
@@ -328,4 +355,5 @@ export const KNOWN_CORRECT_PATHS = {
   "Eus/Eus": "LRURDRZLLZLZRRZRDLZDZDZLDR",
   "Eus/Tan wings": "LLRZUDDRDDLRZDURZRLZULUURZRLZRZUDDLDDUZDZ",
   "Lev/Lev": "LZRDDLDRDLLDLULLURURUULDLDU",
+  "Tan/Tan": "RDDDDLUZDZULDZRUZDLUZDZRDDDLLULRZLUZUURRLZDLLUDRZRRRRLZULRZRRLZRRRUDDLLUZUUURLZDUZUDZULLUDRULZDRZUZLZ",
 } as { [name: string]: string };
