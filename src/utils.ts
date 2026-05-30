@@ -85,6 +85,7 @@ const ENTITY_CHARS: Record<Entity, string> = {
   beaver: "B",
   mimic: "M",
   hand: "H",
+  watcher: "W",
 };
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
 
