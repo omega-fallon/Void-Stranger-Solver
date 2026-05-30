@@ -76,6 +76,7 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
     }
   }
   
+  console.log("Triggering",watchers_needing_triggering,"watchers");
   for (let i = 0; i < watchers_needing_triggering; i++) {
     entities = triggerWatcher(entities);
   }
@@ -133,6 +134,7 @@ function triggerWatcher(entities: EntityGrid): EntityGrid {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
+        //console.log("Triggering a watcher.\n",entities);
         entities[i]![i2]! = "watcher_active";
         return entities;
       }
@@ -256,7 +258,7 @@ export function applyAction(
         );
       }
       // Pushing onto an ACTIVE trap.
-      else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_inactive") {
+      else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_active") {
         // Disperse all traps.
         newBoard = disperseTraps(newBoard, rockDestRow, rockDestCol);
         
