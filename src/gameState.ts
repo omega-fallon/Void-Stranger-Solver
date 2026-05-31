@@ -90,31 +90,33 @@ function disperseTraps(board: Board, row: number, column: number): Board {
   
   // Iterate through each triggered_tile's neighbors and add them to the list if they're also active traps. Repeatedly do this until nothing changes.
   while (done_anything) {
+    console.log(triggered_tiles);
     done_anything = false;
     
-    for (let coord of triggered_tiles) {
+    const array2 = triggered_tiles.slice();
+    for (let coord of array2) {
       let r : number = coord[0]!;
       let c : number = coord[1]!;
     
-      if (!triggered_tiles.includes([r-1,c]) && r >= 1 && board[r-1]![c]! === "trap_active") {
+      if (!String(triggered_tiles).includes(String([r-1,c])) && r >= 1 && board[r-1]![c]! === "trap_active") {
         done_anything = true;
         triggered_tiles.push([r-1,c]);
-        continue;
+        console.log("APPLE");
       }
-      if (!triggered_tiles.includes([r,c-1]) && c >= 1 && board[r]![c-1]! === "trap_active") {
+      if (!String(triggered_tiles).includes(String([r,c-1])) && c >= 1 && board[r]![c-1]! === "trap_active") {
         done_anything = true;
         triggered_tiles.push([r,c-1]);
-        continue;
+        console.log("BISCUIT");
       }
-      if (!triggered_tiles.includes([r+1,c]) && r <= 4 && board[r+1]![c]! === "trap_active") {
+      if (!String(triggered_tiles).includes(String([r+1,c])) && r <= 4 && board[r+1]![c]! === "trap_active") {
         done_anything = true;
         triggered_tiles.push([r+1,c]);
-        continue;
+        console.log("COOKIE");
       }
-      if (!triggered_tiles.includes([r,c+1]) && c <= 4 && board[r]![c+1]! === "trap_active") {
+      if (!String(triggered_tiles).includes(String([r,c+1])) && c <= 4 && board[r]![c+1]! === "trap_active") {
         done_anything = true;
         triggered_tiles.push([r,c+1]);
-        continue;
+        console.log("DINNER");
       }
     }
   }
