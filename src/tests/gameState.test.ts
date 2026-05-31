@@ -1,8 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyAction, renderBoard, replayPath } from "./gameState";
-import { emptyEntityGrid } from "./utils";
-import type { Cell, Direction, Entity, GameState, StaffContent } from "./types";
+import { applyAction, renderBoard, replayPath } from "../gameState";
+import { emptyEntityGrid } from "../utils";
+import type {
+  Cell,
+  Direction,
+  Entity,
+  GameState,
+  StaffContent,
+} from "../types";
 
 function makeState(
   row: number,
@@ -259,23 +265,36 @@ test("staff action preserves wingsActive state", () => {
 
 test("ground push rock succeeds: rock moves one step, player stays in place", () => {
   const s = makeState(
-    2, 0, "down", "empty",
-    [[0, 0, "floor"], [1, 0, "floor"], [2, 0, "floor"]],
+    2,
+    0,
+    "down",
+    "empty",
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+      [2, 0, "floor"],
+    ],
     [[1, 0, "rock"]],
   );
   const r = applyAction(s, "up")!;
-  assert.equal(r.player.row, 2);            // player did NOT advance
+  assert.equal(r.player.row, 2); // player did NOT advance
   assert.equal(r.player.col, 0);
-  assert.equal(r.player.facing, "up");      // facing updated
+  assert.equal(r.player.facing, "up"); // facing updated
   assert.equal(r.entities[1]![0], "empty"); // rock left its cell
-  assert.equal(r.entities[0]![0], "rock");  // rock arrived at destination
+  assert.equal(r.entities[0]![0], "rock"); // rock arrived at destination
 });
 
 test("ground push rock out of bounds returns null", () => {
   // Rock at row 0 — pushing up would send it to row -1
   const s = makeState(
-    1, 0, "up", "empty",
-    [[0, 0, "floor"], [1, 0, "floor"]],
+    1,
+    0,
+    "up",
+    "empty",
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+    ],
     [[0, 0, "rock"]],
   );
   assert.equal(applyAction(s, "up"), null);
@@ -283,8 +302,15 @@ test("ground push rock out of bounds returns null", () => {
 
 test("ground push rock into wall returns null", () => {
   const s = makeState(
-    2, 0, "up", "empty",
-    [[0, 0, "wall"], [1, 0, "floor"], [2, 0, "floor"]],
+    2,
+    0,
+    "up",
+    "empty",
+    [
+      [0, 0, "wall"],
+      [1, 0, "floor"],
+      [2, 0, "floor"],
+    ],
     [[1, 0, "rock"]],
   );
   assert.equal(applyAction(s, "up"), null);
@@ -292,37 +318,60 @@ test("ground push rock into wall returns null", () => {
 
 test("ground push rock into another rock returns null", () => {
   const s = makeState(
-    2, 0, "up", "empty",
-    [[0, 0, "floor"], [1, 0, "floor"], [2, 0, "floor"]],
-    [[0, 0, "rock"], [1, 0, "rock"]],
+    2,
+    0,
+    "up",
+    "empty",
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+      [2, 0, "floor"],
+    ],
+    [
+      [0, 0, "rock"],
+      [1, 0, "rock"],
+    ],
   );
   assert.equal(applyAction(s, "up"), null);
 });
 
 test("ground push rock off glass: glass at rock origin breaks", () => {
   const s = makeState(
-    2, 0, "up", "empty",
-    [[0, 0, "floor"], [1, 0, "glass"], [2, 0, "floor"]],
+    2,
+    0,
+    "up",
+    "empty",
+    [
+      [0, 0, "floor"],
+      [1, 0, "glass"],
+      [2, 0, "floor"],
+    ],
     [[1, 0, "rock"]],
   );
   const r = applyAction(s, "up")!;
-  assert.equal(r.board[1]![0], "empty");    // glass broke where rock stood
+  assert.equal(r.board[1]![0], "empty"); // glass broke where rock stood
   assert.equal(r.entities[1]![0], "empty"); // rock vacated
-  assert.equal(r.entities[0]![0], "rock");  // rock arrived at floor
-  assert.equal(r.player.row, 2);            // player stayed
+  assert.equal(r.entities[0]![0], "rock"); // rock arrived at floor
+  assert.equal(r.player.row, 2); // player stayed
 });
 
 test("ground push rock into void: rock disappears", () => {
   // (0,0) is empty (void) — the rock falls in and is removed
   const s = makeState(
-    2, 0, "up", "empty",
-    [[1, 0, "floor"], [2, 0, "floor"]], // row 0 left as empty/void
+    2,
+    0,
+    "up",
+    "empty",
+    [
+      [1, 0, "floor"],
+      [2, 0, "floor"],
+    ], // row 0 left as empty/void
     [[1, 0, "rock"]],
   );
   const r = applyAction(s, "up")!;
   assert.equal(r.entities[0]![0], "empty"); // rock gone into void
   assert.equal(r.entities[1]![0], "empty"); // original spot also clear
-  assert.equal(r.player.row, 2);            // player stayed
+  assert.equal(r.player.row, 2); // player stayed
 });
 
 // renderBoard (lines 325-386)
@@ -345,7 +394,10 @@ test("renderBoard shows correct player arrow for each facing direction", () => {
   ];
   for (const [dir, arrow] of cases) {
     const s = makeState(0, 0, dir, "empty");
-    assert.ok(renderBoard(s).includes(arrow), `Expected arrow "${arrow}" for direction "${dir}"`);
+    assert.ok(
+      renderBoard(s).includes(arrow),
+      `Expected arrow "${arrow}" for direction "${dir}"`,
+    );
   }
 });
 
@@ -386,7 +438,14 @@ test("renderBoard shows trap_active tile", () => {
 });
 
 test("renderBoard shows rock entity as R", () => {
-  const s = makeState(5, 5, "right", "empty", [[1, 1, "floor"]], [[1, 1, "rock"]]);
+  const s = makeState(
+    5,
+    5,
+    "right",
+    "empty",
+    [[1, 1, "floor"]],
+    [[1, 1, "rock"]],
+  );
   assert.ok(renderBoard(s).includes("R"));
 });
 
@@ -407,19 +466,28 @@ test("renderBoard first line reports floor tile count (floor + glass combined)",
     [0, 2, "floor"],
   ]);
   const firstLine = renderBoard(s).split("\n")[0]!;
-  assert.ok(firstLine.startsWith("3 floor tiles remain"), `Got: "${firstLine}"`);
+  assert.ok(
+    firstLine.startsWith("3 floor tiles remain"),
+    `Got: "${firstLine}"`,
+  );
 });
 
 test("renderBoard counts floor tile held in staff toward total", () => {
   const s = makeState(5, 5, "right", "floor", [[0, 0, "floor"]]);
   const firstLine = renderBoard(s).split("\n")[0]!;
-  assert.ok(firstLine.startsWith("2 floor tiles remain"), `Got: "${firstLine}"`);
+  assert.ok(
+    firstLine.startsWith("2 floor tiles remain"),
+    `Got: "${firstLine}"`,
+  );
 });
 
 test("renderBoard counts glass tile held in staff toward total", () => {
   const s = makeState(5, 5, "right", "glass", [[0, 0, "floor"]]);
   const firstLine = renderBoard(s).split("\n")[0]!;
-  assert.ok(firstLine.startsWith("2 floor tiles remain"), `Got: "${firstLine}"`);
+  assert.ok(
+    firstLine.startsWith("2 floor tiles remain"),
+    `Got: "${firstLine}"`,
+  );
 });
 
 test("renderBoard shows requiredTiles in first line when provided", () => {

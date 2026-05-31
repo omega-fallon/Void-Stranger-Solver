@@ -1,7 +1,7 @@
 import assert from "assert";
 import test from "node:test";
-import type { Action } from "./types";
-import { estimateProgress, type ProgressSample } from "./estimateProgress";
+import type { Action } from "../types";
+import { estimateProgress, type ProgressSample } from "../estimateProgress";
 
 // ACTIONS order (from gameState.ts): ["left", "up", "right", "down", "staff"]
 // indices:                                0       1       2       3        4

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { applyAction, replayPath } from "./gameState";
-import { search } from "./search";
+import { applyAction, replayPath } from "../gameState";
+import { search } from "../search";
 import type {
   Action,
   Board,
@@ -9,9 +9,9 @@ import type {
   EntityGrid,
   GameState,
   PlayerState,
-} from "./types";
-import { emptyEntityGrid, parseBoard, parseEntities } from "./utils";
-import { RawLevel } from "./levels";
+} from "../types";
+import { emptyEntityGrid, parseBoard, parseEntities } from "../utils";
+import { RawLevel } from "../levels";
 
 const PATH_CHARS: Record<string, Action> = {
   U: "up",
