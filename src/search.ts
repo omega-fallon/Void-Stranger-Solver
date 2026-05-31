@@ -159,7 +159,7 @@ export async function search({
     }
     
     // All but one watcher statue is triggered (thus, staff usage is banned) and the player doesn't have wings (can't do the watcher-strike into pit strat)
-    if (staffBanned(entities) && staffContent !== "stairs" && !hasWings) {
+    if (staffBanned(state.entities) && state.player.staffContent !== "stairs" && !hasWings) {
       console.log("INF: staffed banned, not holding stairs, no wings");
       return Infinity;
     }
