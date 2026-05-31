@@ -51,6 +51,7 @@ async function idaDfs(
   numFloorTilesInSolution: number,
   requireFinalJump: boolean,
   counters: DfsCounters,
+  actions: Action[],
   onNode: (
     state: GameState,
     path: Action[],
@@ -86,7 +87,7 @@ async function idaDfs(
 
   let min = Infinity;
 
-  for (const action of ACTIONS) {
+  for (const action of actions) {
     const next = applyAction(state, action, hasWings);
     if (!next) continue;
 
@@ -111,6 +112,7 @@ async function idaDfs(
       numFloorTilesInSolution,
       requireFinalJump,
       counters,
+      actions,
       onNode,
     );
 
@@ -136,6 +138,7 @@ async function sampleProgressCheckpoints(
   target: Board,
   hasWings: boolean,
   requireFinalJump: boolean,
+  actions: Action[],
   numSamples = 200,
 ): Promise<ProgressSample[]> {
   const numFloorTilesInSolution = countFloorTiles(target);
@@ -159,6 +162,7 @@ async function sampleProgressCheckpoints(
     numFloorTilesInSolution,
     requireFinalJump,
     counters,
+    actions,
     async (_state, path, _g, _h) => {
       allPaths.push(path.slice());
       return "continue";
@@ -185,6 +189,7 @@ export interface SearchOptions {
   initialThreshold?: number | undefined;
   knownCorrectPath?: Action[] | undefined; // DEBUG
   hasWings?: boolean;
+  actions?: Action[];
 }
 
 export async function search({
@@ -196,6 +201,7 @@ export async function search({
   initialThreshold,
   knownCorrectPath = [],
   hasWings = false,
+  actions = ACTIONS,
 }: SearchOptions): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
 
@@ -212,6 +218,7 @@ export async function search({
         target,
         hasWings,
         requireFinalJump,
+        actions,
       )
     : undefined;
 
@@ -242,6 +249,7 @@ export async function search({
       numFloorTilesInSolution,
       requireFinalJump,
       counters,
+      actions,
       async (state, path, g, h) => {
         const f = g + h;
 
