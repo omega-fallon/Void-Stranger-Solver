@@ -160,7 +160,7 @@ export async function search({
     
     // All but one watcher statue is triggered (thus, staff usage is banned) and the player doesn't have wings (can't do the watcher-strike into pit strat)
     if (staffBanned(state.entities) && state.player.staffContent !== "stairs" && !hasWings) {
-      console.log("INF: staffed banned, not holding stairs, no wings");
+      console.log("INF: staff banned, not holding stairs, no wings");
       return Infinity;
     }
     
@@ -189,7 +189,7 @@ export async function search({
       if (state.entities[r]![c]! === "rock" || state.entities[r]![c]! === "watcher_inactive" || state.entities[r]![c]! === "watcher_active" || state.entities[r]![c]! === "chest") {
         // The cornered rock is covering stairs.
         if (state.board[r]![c]! === "stairs") {
-          console.log("INF: cornered rock covering stairs");
+          console.log("INF: cornered rock covering stairs"+String(coord));
           return Infinity;
         }
         // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
@@ -200,7 +200,7 @@ export async function search({
       }
     }
     // The same thing but for "near corners"; a rock can be stuck against another rock.
-    for (let i = 0; i < 16; i += 2) {
+    for (let i = 0; i <= 14; i += 2) {
       let coords = [
         0,1,//nw
         1,0,
@@ -222,14 +222,17 @@ export async function search({
     
       if (blockers.includes(state.entities[r]![c]!)) {
         // Rock stuck.
-        if (((i == 0 || i == 2) && (blockers.includes(state.entities[0]![0]!))) || ((i == 4 || i == 6) && (blockers.includes(state.entities[0]![5]!))) || ((i == 8 || i == 10) && (blockers.includes(state.entities[5]![0]!))) || ((i == 12 || i == 14) && (blockers.includes(state.entities[5]![5]!)))) {
+        const r2 : number = (i == 0 || i == 2) ? 0 : ((i == 4 || i == 6) ? 0 : ((i == 8 || i == 10) ? 5 : ((i == 12 || i == 2) ? 5 : 256)));
+        const c2 : number = (i == 0 || i == 2) ? 0 : ((i == 4 || i == 6) ? 5 : ((i == 8 || i == 10) ? 0 : ((i == 12 || i == 2) ? 5 : 256)));
+        
+        if (blockers.includes(state.entities[r2]![c2]!)) {
           // The cornered rock is covering stairs.
           if (state.board[r]![c]! === "stairs") {
             console.log("INF: side-cornered rock covering stairs");
             return Infinity;
           }
-          // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
-          else if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active") {
+          // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it or the cornered one off.
+          else if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active" && state.board[r2]![c2]! !== "trap_active") {
             console.log("INF: side-cornered rock covering excess tile");
             return Infinity;
           }
