@@ -158,6 +158,12 @@ export async function search({
       return Infinity;
     }
     
+    // All but one watcher statue is triggered (thus, staff usage is banned) and the player doesn't have wings (can't do the watcher-strike into pit strat)
+    if (staffBanned(entities) && staffContent !== "stairs" && !hasWings) {
+      console.log("INF: staffed banned, not holding stairs, no wings");
+      return Infinity;
+    }
+    
     // Exit step: player is in the void but not at goal — dead end.
     // Exception: if wings are active the player is still airborne and can land.
     if (state.board[row]?.[col] === "empty" && !state.player.wingsActive) {

@@ -133,7 +133,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 
 // Triggers the first watcher it encounters. If it doesn't encounter one, does nothing.
 function triggerWatcher(entities: EntityGrid): EntityGrid {
-  return entities;
+  //return entities;
   
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
