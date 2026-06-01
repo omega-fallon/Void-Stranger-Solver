@@ -85,7 +85,6 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
     }
   }
 
-  // console.log("Triggering", watchers_needing_triggering, "watchers");
   for (let i = 0; i < watchers_needing_triggering; i++) {
     entities = triggerWatcher(entities);
   }
