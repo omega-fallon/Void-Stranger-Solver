@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test, type TestContext } from "node:test";
 import { applyAction, replayPath } from "../gameState";
 import { search } from "../search";
 import type {
@@ -74,13 +74,43 @@ export function boardToStrings(board: Board): string[] {
   return board.map((row) => row.map((cell) => CELL_CHARS[cell]).join(""));
 }
 
-const TEST_LEVELS: (RawLevel & {
+type TestLevel = Omit<RawLevel, "name"> & {
+  name?: string;
   solutionLength?: number;
   requireFinalJump?: boolean;
   hasWings?: boolean;
-})[] = [
-  {
-    name: "Solves Add's brand",
+};
+
+async function runSearchTest(t: TestContext, level: TestLevel) {
+  const initial = {
+    board: parseBoard(level.initial.board),
+    entities: level.initial.entities
+      ? parseEntities(level.initial.entities)
+      : emptyEntityGrid(),
+    player: level.initial.player,
+  };
+  const target = parseBoard(level.target);
+  const requireFinalJump = level.requireFinalJump ?? true;
+  const { path } = await search({
+    initial,
+    target,
+    requireFinalJump,
+    hasWings: level.hasWings ?? false,
+  });
+  if (process.env.VERBOSE && path)
+    replayPath(initial, path, target, requireFinalJump);
+  assert.ok(path !== null, "No solution found");
+  if (level.solutionLength)
+    assert.equal(
+      path.length,
+      level.solutionLength,
+      `Path had length ${path.length} but should have been ${level.solutionLength}`,
+    );
+  else t.assert.snapshot(path.length);
+}
+
+test("Solves Add's brand", async (t) => {
+  await runSearchTest(t, {
     initial: {
       // prettier-ignore
       board: [
@@ -103,9 +133,11 @@ const TEST_LEVELS: (RawLevel & {
       "#    #",
     ],
     solutionLength: 5,
-  },
-  {
-    name: "Walks over glass",
+  });
+});
+
+test("Walks over glass", async (t) => {
+  await runSearchTest(t, {
     initial: {
       // prettier-ignore
       board: [
@@ -128,9 +160,11 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
     ],
     solutionLength: 5,
-  },
-  {
-    name: "Moves a piece of glass",
+  });
+});
+
+test("Moves a piece of glass", async (t) => {
+  await runSearchTest(t, {
     initial: {
       // prettier-ignore
       board: [
@@ -153,9 +187,11 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
     ],
     solutionLength: 9,
-  },
-  {
-    name: "Move a piece of glass to destroy all the glass",
+  });
+});
+
+test("Move a piece of glass to destroy all the glass", async (t) => {
+  await runSearchTest(t, {
     initial: {
       // prettier-ignore
       board: [
@@ -178,9 +214,11 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
     ],
     solutionLength: 14,
-  },
-  {
-    name: "Fly over a gap",
+  });
+});
+
+test("Fly over a gap", async (t) => {
+  await runSearchTest(t, {
     hasWings: true,
     initial: {
       // prettier-ignore
@@ -205,9 +243,11 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
     ],
     solutionLength: 4,
-  },
-  {
-    name: "Fly over a gap multiple times",
+  });
+});
+
+test("Fly over a gap multiple times", async (t) => {
+  await runSearchTest(t, {
     hasWings: true,
     initial: {
       // prettier-ignore
@@ -232,9 +272,11 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
     ],
     solutionLength: 10,
-  },
-  {
-    name: "Grab a tile while flying",
+  });
+});
+
+test("Grab a tile while flying", async (t) => {
+  await runSearchTest(t, {
     hasWings: true,
     initial: {
       // prettier-ignore
@@ -259,19 +301,21 @@ const TEST_LEVELS: (RawLevel & {
       "      ",
     ],
     solutionLength: 8,
-  },
-  {
-    name: "Eus/Eus search correctness regression",
+  });
+});
+
+test("Eus/Eus search correctness regression", async (t) => {
+  await runSearchTest(t, {
     initial: {
       // prettier-ignore
-      "board": ([
+      board: [
         "GG  GG",
         "  ##  ",
         "GG G G",
         "GGGGGG",
         "GGG GG",
-        "GGGSGG"
-      ]),
+        "GGGSGG",
+      ],
       // prettier-ignore
       entities: [
         "      ",
@@ -296,41 +340,8 @@ const TEST_LEVELS: (RawLevel & {
       "GG   G",
       "GGG GG",
       "GG #GG",
-      "GG  GG"
+      "GG  GG",
     ],
     solutionLength: 7,
-  },
-];
-
-for (const level of TEST_LEVELS) {
-  test(`${level.name}`, async (t) => {
-    const initial = {
-      board: parseBoard(level.initial.board),
-      entities: level.initial.entities
-        ? parseEntities(level.initial.entities)
-        : emptyEntityGrid(),
-      player: level.initial.player,
-    };
-    const target = parseBoard(level.target);
-    const requireFinalJump = level.requireFinalJump ?? true;
-    const { path } = await search({
-      initial,
-      target,
-      requireFinalJump,
-      hasWings: level.hasWings ?? false,
-    });
-    if (level.solutionLength) {
-      assert.equal(level.solutionLength, path?.length);
-    }
-    if (process.env.VERBOSE && path)
-      replayPath(initial, path, target, requireFinalJump);
-    assert.ok(path !== null, "No solution found");
-    if (level.solutionLength)
-      assert.equal(
-        path.length,
-        level.solutionLength,
-        `Path had length ${path.length} but should have been ${level.solutionLength}`,
-      );
-    else t.assert.snapshot(path.length);
   });
-}
+});
