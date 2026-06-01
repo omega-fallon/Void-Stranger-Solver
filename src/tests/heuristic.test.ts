@@ -1,11 +1,16 @@
 import assert from "assert";
 import test from "node:test";
-import { PARTIAL_EUS_STATES } from "./data/PARTIAL_EUS_STATES";
-import { applyAction, renderBoard } from "./gameState";
-import { heuristic } from "./heuristic";
-import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "./levels";
-import type { Action, GameState } from "./types";
-import { applyPath, emptyEntityGrid, parseBoard, parseEntities } from "./utils";
+import { PARTIAL_EUS_STATES } from "../data/PARTIAL_EUS_STATES";
+import { applyAction, renderBoard } from "../gameState";
+import { heuristic } from "../heuristic";
+import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "../levels";
+import type { Action, GameState } from "../types";
+import {
+  applyPath,
+  emptyEntityGrid,
+  parseBoard,
+  parseEntities,
+} from "../utils";
 
 // Tests that h(after) ≤ h(before) + 1 for a single action (consistency).
 // Each action costs 1, so a consistent heuristic must not increase by more than 1.

@@ -1,8 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyAction, renderBoard, replayPath } from "./gameState";
-import { emptyEntityGrid } from "./utils";
-import type { Cell, Direction, Entity, GameState, StaffContent } from "./types";
+import { applyAction, renderBoard, replayPath } from "../gameState";
+import { emptyEntityGrid } from "../utils";
+import type {
+  Cell,
+  Direction,
+  Entity,
+  GameState,
+  StaffContent,
+} from "../types";
 
 function makeState(
   row: number,
