@@ -82,6 +82,13 @@ const CELL_CHARS: Record<Cell, string> = {
 const ENTITY_CHARS: Record<Entity, string> = {
   empty: " ",
   rock: "R",
+  beaver: "B",
+  mimic: "M",
+  hand: "H",
+  watcher_inactive: "W",
+  watcher_active: "!",
+  chest: "C",
+  monster_statue: "~",
 };
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
 
@@ -99,6 +106,9 @@ export function parseBoard(rows: string[]): Board {
     G: "glass",
     S: "stairs",
     W: "wall",
+    B: "button",
+    T: "trap_inactive",
+    A: "trap_active",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {
@@ -114,6 +124,13 @@ export function parseEntities(rows: string[]): EntityGrid {
   const charToEntity: Record<string, Entity> = {
     " ": "empty",
     R: "rock",
+    B: "beaver",
+    M: "mimic",
+    H: "hand",
+    W: "watcher_inactive",
+    "!": "watcher_active",
+    C: "chest",
+    "~": "monster_statue",
   };
   return rows.map((row) =>
     Array.from(row).map((ch) => {

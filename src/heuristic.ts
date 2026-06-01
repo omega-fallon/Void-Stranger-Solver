@@ -1,4 +1,5 @@
 import type { Board, Cell, GameState } from "./types";
+import { staffBanned } from "./search";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -40,14 +41,14 @@ export function heuristic(
   target: Board,
   requireFinalJump: boolean,
 ): HeuristicResult {
-  const { board, player } = state;
+  const { board, player, entities } = state;
 
   let mismatches = 0;
   const excess: [number, number, Cell][] = []; // cells with tiles that shouldn't be there
   const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
 
   let finalJumpCost =
-    requireFinalJump && board[player.row]![player.col]! != "empty" ? 1 : 0;
+    requireFinalJump && board[player.row]![player.col]! !== "empty" ? 1 : 0;
 
   // We wrap these in IIFEs so the profiler names each part individually
   (function calculateBoardDiff() {
@@ -151,8 +152,36 @@ export function heuristic(
     }
   })();
 
+  // Trap tiles factor...?
+  function hasTrap(board: Board): boolean {
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (
+          board[i]![i2]! === "trap_inactive" ||
+          board[i]![i2]! === "trap_active"
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  function activeTraps(board: Board): number {
+    let count = 0;
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (board[i]![i2]! === "trap_active") {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+  const theWatchers = staffBanned(entities) ? Infinity : 0;
+
   return {
-    total: mismatches + transportCost + travelCost + finalJumpCost,
+    total:
+      mismatches + transportCost + travelCost + finalJumpCost + theWatchers,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
