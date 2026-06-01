@@ -41,11 +41,9 @@ test("move into empty moves player there (exit step)", () => {
   assert.equal(r.board[0]![0], "empty"); // destination cell stays empty
 });
 
-test("move out of bounds is a no-op", () => {
+test("move out of bounds returns null", () => {
   const s = makeState(0, 0, "up", "empty", [[0, 0, "floor"]]);
-  const r = applyAction(s, "up")!;
-  assert.equal(r.player.row, 0);
-  assert.equal(r.player.col, 0);
+  assert.equal(applyAction(s, "up"), null);
 });
 
 test("move onto stairs returns null (stairs is not walkable)", () => {

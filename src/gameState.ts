@@ -27,7 +27,7 @@ function inBounds(r: number, c: number): boolean {
 
 function getCell(board: Board, r: number, c: number): Cell {
   if (r < 0 || c < 0) {
-    throw new Error("getCell given negative inputs, why?"+String(r)+String(c));
+    throw new Error("getCell given negative inputs, why?"+String(r)+" "+String(c));
   }
 
   return board[r]![c]!;
@@ -213,12 +213,12 @@ export function applyAction(
     const dest = getCell(board, newRow, newCol);
     
     // Hands... hands!
-    else if (getEntity(entities, newRow, newCol) === "hand") {
+    if (getEntity(entities, newRow, newCol) === "hand") {
       return null
     }
     
     // Stairs...
-    if (getEntity(entities, newRow, newCol) === "empty" && dest === "stairs") {
+    else if (getEntity(entities, newRow, newCol) === "empty" && dest === "stairs") {
       // ...are impassable.
       if (stairsActive(board, entities)) {
         return null;
