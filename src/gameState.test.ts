@@ -175,13 +175,13 @@ test("glass breaks when stepping off to fly", () => {
   assert.equal(r.board[1]![0], "empty"); // glass broke on departure
 });
 
-test("flying into empty stays airborne", () => {
+test("flying from empty to empty loses wings (and you fall)", () => {
   // Player already airborne on empty, next cell also empty
   const s = withWings(makeState(2, 0, "up", "empty"));
   const r = applyAction(s, "up", true)!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.col, 0);
-  assert.equal(r.player.wingsActive, true);
+  assert.equal(r.player.wingsActive, false);
 });
 
 test("flying onto floor deactivates wings", () => {
