@@ -21,10 +21,10 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": ["--require", "ts-node/register", "--test"],
-      "program": "${workspaceFolder}/src/gameState.test.ts",
+      "program": "${workspaceFolder}/src/tests/gameState.test.ts",
       "args": [
-        "${workspaceFolder}/src/search.test.ts",
-        "${workspaceFolder}/src/heuristic.test.ts"
+        "${workspaceFolder}/src/tests/search.test.ts",
+        "${workspaceFolder}/src/tests/heuristic.test.ts"
       ],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
