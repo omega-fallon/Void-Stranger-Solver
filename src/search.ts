@@ -183,7 +183,7 @@ async function idaDfs(
     console.log("INF: staff banned, not holding stairs, no wings");
     return Infinity;
   }
-  
+
   // Useless for brandcarving.
   // There are more holes where tiles should be than there are inactive watchers.
   //const inactiveWatchers = countInactiveWatchers(state.entities);
