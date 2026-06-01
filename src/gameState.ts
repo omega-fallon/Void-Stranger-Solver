@@ -187,9 +187,14 @@ export function applyAction(
     const { dr, dc } = DELTAS[action];
     const newRow = row + dr;
     const newCol = col + dc;
+    
+    const dest = getCell(board, newRow, newCol);
 
     // Wall bump!
-    if (!inBounds(newRow, newCol) || getEntity(entities, newRow, newCol) === "chest") {
+    if (!inBounds(newRow, newCol) || dest === "wall" || getEntity(entities, newRow, newCol) === "chest") {
+      if (facing === action && wingsActive === false) {
+        return null
+      }
       return {
         board,
         entities,
@@ -203,10 +208,8 @@ export function applyAction(
       };
     }
     
-    const dest = getCell(board, newRow, newCol);
-    
     // Hands... hands!
-    if (getEntity(entities, newRow, newCol) === "hand") {
+    else if (getEntity(entities, newRow, newCol) === "hand") {
       return null
     }
     
@@ -246,17 +249,22 @@ export function applyAction(
       // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
       if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_active") || (getEntity(entities, rockDestRow, rockDestCol) === "chest") || (getEntity(entities, rockDestRow, rockDestCol) === "monster_statue")) {
         //console.log("f-f-f-failure");
-        return {
-          board,
-          entities,
-          player: {
-            row,
-            col,
-            facing: action,
-            staffContent,
-            wingsActive: false,
-          },
-        };
+        if (facing === action && wingsActive === false) {
+          return null
+        }
+        else {
+            return {
+              board,
+              entities,
+              player: {
+                row,
+                col,
+                facing: action,
+                staffContent,
+                wingsActive: false,
+              },
+            };
+        }
       }
       
       // Break any glass the rock was pushed off of.
