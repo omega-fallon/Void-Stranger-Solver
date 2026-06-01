@@ -230,6 +230,8 @@ export async function search({
     pathsTrimmed: 0,
   };
   const start = performance.now();
+  // Initialised to 0 so the first log fires immediately rather than waiting 3s.
+  let lastLogTime = 0;
 
   // Per-path visited set — prevents cycles within a single DFS path.
   // Memory is O(depth), never grows beyond the path length.
@@ -253,8 +255,10 @@ export async function search({
       async (state, path, g, h) => {
         const f = g + h;
 
-        if (showProgress && (verbose >= 3 || Math.random() < 0.00001)) {
-          const elapsedMs = performance.now() - start;
+        const now = performance.now();
+        if (showProgress && (verbose >= 3 || now - lastLogTime >= 3000)) {
+          lastLogTime = now;
+          const elapsedMs = now - start;
           const nodesPerSec = Math.round(
             (counters.nodesExplored / elapsedMs) * 1000,
           );
