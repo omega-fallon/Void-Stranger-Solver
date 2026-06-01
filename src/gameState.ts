@@ -153,16 +153,14 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 // Triggers the first watcher it encounters. If it doesn't encounter one, does nothing.
 function triggerWatcher(entities: EntityGrid): EntityGrid {
   // Deep copy the array so we don't mutate the original
-  let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
-        newEntities[i]![i2]! = "watcher_active";
-        return newEntities;
+        return setEntity(entities, i, i2, "watcher_active");
       }
     }
   }
-  return newEntities;
+  return entities;
 }
 
 // Handling for monster statues.
@@ -176,17 +174,20 @@ function anyMonsters(entities: EntityGrid): boolean {
   }
   return false;
 }
+
+// Removes any and all monster statues if there are no monsters.
 function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
+  let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
   if (!anyMonsters(entities)) {
     for (let i = 0; i < 6; i++) {
       for (let i2 = 0; i < 6; i++) {
         if (getEntity(entities, i, i2) == "monster_statue") {
-          return setEntity(entities, i, i2, "empty");
+          newEntities[i]![i2]! = "empty";
         }
       }
     }
   }
-  return entities;
+  return newEntities;
 }
 
 export function applyAction(
