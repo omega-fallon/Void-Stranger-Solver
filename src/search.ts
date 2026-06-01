@@ -77,6 +77,44 @@ export function staffBanned(entities: EntityGrid): boolean {
   return found_active;
 }
 
+// Simply counts inactive watchers.
+export function countInactiveWatchers(entities: EntityGrid): number {
+  let counter = 0;
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (entities[i]![i2]! === "watcher_inactive") {
+        counter++;
+      }
+    }
+  }
+  return counter;
+}
+
+// Counts how many places there are where the current state has a hole but the target wants a tile.
+export function countDeficits(board: Board, target: Board): number {
+  let counter = 0;
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (board[i]![i2]! === "empty" && target[i]![i2]! !== "empty") {
+        counter++;
+      }
+    }
+  }
+  return counter;
+}
+
+// Returns true if a beaver or mimic are present in the brane.
+export function hereBeMovers(entities: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (entities[i]![i2]! === "mimic" || entities[i]![i2]! === "beaver") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 interface DfsCounters {
   nodesExplored: number;
   loopsPrevented: number;
@@ -137,13 +175,22 @@ async function idaDfs(
 
   // All but one watcher statue is triggered (thus, staff usage is banned) and the player doesn't have wings (can't do the watcher-strike into pit strat)
   if (
-    staffBanned(state.entities) &&
+    !hasWings &&
     state.player.staffContent !== "stairs" &&
-    !hasWings
+    staffBanned(state.entities) &&
+    !hereBeMovers(state.entities)
   ) {
     console.log("INF: staff banned, not holding stairs, no wings");
     return Infinity;
   }
+  
+  // Useless for brandcarving.
+  // There are more holes where tiles should be than there are inactive watchers.
+  //const inactiveWatchers = countInactiveWatchers(state.entities);
+  //if (inactiveWatchers > 0 && countDeficits(state.board,target)*2 - Number(state.player.staffContent !== "empty") >= inactiveWatchers+Number(hasWings)) {
+  //  console.log("INF: too many watchers for deficits");
+  //  return Infinity;
+  //}
 
   // Exit step: player is in the void but not at goal — dead end.
   // Exception: if wings are active the player is still airborne and can land.
