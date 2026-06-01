@@ -51,6 +51,8 @@ export function allWatchersTriggeredQuestion(entities: EntityGrid): boolean {
 
   return found_any;
 }
+
+// Returns true if all but one watchers are triggered.
 export function staffBanned(entities: EntityGrid): boolean {
   let found_inactive: boolean = false;
   let found_active: boolean = false;
