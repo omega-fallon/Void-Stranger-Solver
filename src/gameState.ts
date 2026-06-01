@@ -26,6 +26,10 @@ function inBounds(r: number, c: number): boolean {
 }
 
 function getCell(board: Board, r: number, c: number): Cell {
+  if (r < 0 || c < 0) {
+    throw new Error("getCell given negative inputs, why?"+String(r)+String(c));
+  }
+
   return board[r]![c]!;
 }
 
@@ -188,10 +192,8 @@ export function applyAction(
     const newRow = row + dr;
     const newCol = col + dc;
     
-    const dest = getCell(board, newRow, newCol);
-
     // Wall bump!
-    if (!inBounds(newRow, newCol) || dest === "wall" || getEntity(entities, newRow, newCol) === "chest") {
+    if (!inBounds(newRow, newCol) || getCell(board, newRow, newCol) === "wall" || getEntity(entities, newRow, newCol) === "chest") {
       if (facing === action && wingsActive === false) {
         return null
       }
@@ -207,6 +209,8 @@ export function applyAction(
         },
       };
     }
+    
+    const dest = getCell(board, newRow, newCol);
     
     // Hands... hands!
     else if (getEntity(entities, newRow, newCol) === "hand") {
