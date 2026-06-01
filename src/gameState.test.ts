@@ -41,9 +41,11 @@ test("move into empty moves player there (exit step)", () => {
   assert.equal(r.board[0]![0], "empty"); // destination cell stays empty
 });
 
-test("move out of bounds returns null", () => {
+test("move out of bounds is a no-op", () => {
   const s = makeState(0, 0, "up", "empty", [[0, 0, "floor"]]);
-  assert.equal(applyAction(s, "up"), null);
+  const r = applyAction(s, "up")!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.col, 0);
 });
 
 test("move onto stairs returns null (stairs is not walkable)", () => {
@@ -241,9 +243,12 @@ test("flying into rock entity causes fall in place; rock still moves", () => {
   assert.equal(r.entities[0]![0], "rock"); // rock pushed to row 0
 });
 
-test("flying out of bounds is not allowed", () => {
+test("flying out of bounds makes you fall", () => {
   const s = withWings(makeState(0, 0, "up", "empty"));
-  assert.equal(applyAction(s, "up", true), null);
+  const r = applyAction(s, "up")!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.wingsActive, false);
 });
 
 test("staff action preserves wingsActive state", () => {
