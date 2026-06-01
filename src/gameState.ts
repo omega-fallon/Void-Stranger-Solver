@@ -85,7 +85,6 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
     }
   }
 
-  console.log("Triggering", watchers_needing_triggering, "watchers");
   for (let i = 0; i < watchers_needing_triggering; i++) {
     entities = triggerWatcher(entities);
   }
@@ -99,7 +98,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 
   // Iterate through each triggered_tile's neighbors and add them to the list if they're also active traps. Repeatedly do this until nothing changes.
   while (done_anything) {
-    console.log(triggered_tiles);
     done_anything = false;
 
     const array2 = triggered_tiles.slice();
@@ -114,7 +112,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r - 1, c]);
-        console.log("APPLE");
       }
       if (
         !String(triggered_tiles).includes(String([r, c - 1])) &&
@@ -123,7 +120,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r, c - 1]);
-        console.log("BISCUIT");
       }
       if (
         !String(triggered_tiles).includes(String([r + 1, c])) &&
@@ -132,7 +128,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r + 1, c]);
-        console.log("COOKIE");
       }
       if (
         !String(triggered_tiles).includes(String([r, c + 1])) &&
@@ -141,7 +136,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r, c + 1]);
-        console.log("DINNER");
       }
     }
   }
@@ -158,18 +152,17 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 
 // Triggers the first watcher it encounters. If it doesn't encounter one, does nothing.
 function triggerWatcher(entities: EntityGrid): EntityGrid {
-  //return entities;
-
+  // Deep copy the array so we don't mutate the original
+  let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
-        //console.log("Triggering a watcher.\n",entities);
-        entities[i]![i2]! = "watcher_active";
-        return entities;
+        newEntities[i]![i2]! = "watcher_active";
+        return newEntities;
       }
     }
   }
-  return entities;
+  return newEntities;
 }
 
 // Handling for monster statues.
