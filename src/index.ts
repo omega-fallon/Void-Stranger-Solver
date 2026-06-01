@@ -161,12 +161,11 @@ async function main() {
   console.log(actionsToString(fullPath));
 
   if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD);
-  
+
   if (values.wings) {
-    console.log(values.brane+"/"+values.brand+" with wings");
-  }
-  else {
-    console.log(values.brane+"/"+values.brand);
+    console.log(values.brane + "/" + values.brand + " with wings");
+  } else {
+    console.log(values.brane + "/" + values.brand);
   }
 }
 

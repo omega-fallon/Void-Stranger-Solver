@@ -151,12 +151,15 @@ export function heuristic(
       );
     }
   })();
-  
+
   // Trap tiles factor...?
   function hasTrap(board: Board): boolean {
     for (let i = 0; i < 6; i++) {
       for (let i2 = 0; i2 < 6; i2++) {
-        if (board[i]![i2]! === "trap_inactive" || board[i]![i2]! === "trap_active") {
+        if (
+          board[i]![i2]! === "trap_inactive" ||
+          board[i]![i2]! === "trap_active"
+        ) {
           return true;
         }
       }
@@ -177,7 +180,8 @@ export function heuristic(
   const theWatchers = staffBanned(entities) ? Infinity : 0;
 
   return {
-    total: mismatches + transportCost + travelCost + finalJumpCost + theWatchers,
+    total:
+      mismatches + transportCost + travelCost + finalJumpCost + theWatchers,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,

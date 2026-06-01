@@ -27,7 +27,9 @@ function inBounds(r: number, c: number): boolean {
 
 function getCell(board: Board, r: number, c: number): Cell {
   if (r < 0 || c < 0) {
-    throw new Error("getCell given negative inputs, why?"+String(r)+" "+String(c));
+    throw new Error(
+      "getCell given negative inputs, why?" + String(r) + " " + String(c),
+    );
   }
 
   return board[r]![c]!;
@@ -58,7 +60,10 @@ function stairsActive(board: Board, grid: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       // Check if the cell is a button AND has a non-player entity on it.
-      if (getCell(board, i, i2) === "button" && getEntity(grid, i, i2) !== "empty") {
+      if (
+        getCell(board, i, i2) === "button" &&
+        getEntity(grid, i, i2) !== "empty"
+      ) {
         return false;
       }
     }
@@ -79,58 +84,74 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
       }
     }
   }
-  
-  console.log("Triggering",watchers_needing_triggering,"watchers");
+
+  console.log("Triggering", watchers_needing_triggering, "watchers");
   for (let i = 0; i < watchers_needing_triggering; i++) {
     entities = triggerWatcher(entities);
   }
-  
+
   return entities;
 }
 
 function disperseTraps(board: Board, row: number, column: number): Board {
-  let triggered_tiles : number[][] = [[row,column]];
-  let done_anything : boolean = true;
-  
+  let triggered_tiles: number[][] = [[row, column]];
+  let done_anything: boolean = true;
+
   // Iterate through each triggered_tile's neighbors and add them to the list if they're also active traps. Repeatedly do this until nothing changes.
   while (done_anything) {
     console.log(triggered_tiles);
     done_anything = false;
-    
+
     const array2 = triggered_tiles.slice();
     for (let coord of array2) {
-      let r : number = coord[0]!;
-      let c : number = coord[1]!;
-    
-      if (!String(triggered_tiles).includes(String([r-1,c])) && r >= 1 && board[r-1]![c]! === "trap_active") {
+      let r: number = coord[0]!;
+      let c: number = coord[1]!;
+
+      if (
+        !String(triggered_tiles).includes(String([r - 1, c])) &&
+        r >= 1 &&
+        board[r - 1]![c]! === "trap_active"
+      ) {
         done_anything = true;
-        triggered_tiles.push([r-1,c]);
+        triggered_tiles.push([r - 1, c]);
         console.log("APPLE");
       }
-      if (!String(triggered_tiles).includes(String([r,c-1])) && c >= 1 && board[r]![c-1]! === "trap_active") {
+      if (
+        !String(triggered_tiles).includes(String([r, c - 1])) &&
+        c >= 1 &&
+        board[r]![c - 1]! === "trap_active"
+      ) {
         done_anything = true;
-        triggered_tiles.push([r,c-1]);
+        triggered_tiles.push([r, c - 1]);
         console.log("BISCUIT");
       }
-      if (!String(triggered_tiles).includes(String([r+1,c])) && r <= 4 && board[r+1]![c]! === "trap_active") {
+      if (
+        !String(triggered_tiles).includes(String([r + 1, c])) &&
+        r <= 4 &&
+        board[r + 1]![c]! === "trap_active"
+      ) {
         done_anything = true;
-        triggered_tiles.push([r+1,c]);
+        triggered_tiles.push([r + 1, c]);
         console.log("COOKIE");
       }
-      if (!String(triggered_tiles).includes(String([r,c+1])) && c <= 4 && board[r]![c+1]! === "trap_active") {
+      if (
+        !String(triggered_tiles).includes(String([r, c + 1])) &&
+        c <= 4 &&
+        board[r]![c + 1]! === "trap_active"
+      ) {
         done_anything = true;
-        triggered_tiles.push([r,c+1]);
+        triggered_tiles.push([r, c + 1]);
         console.log("DINNER");
       }
     }
   }
-  
+
   // Found them all, now remove them.
   let newBoard = board;
   for (let coord of triggered_tiles) {
     newBoard = setCell(newBoard, coord[0]!, coord[1]!, "empty");
   }
-  
+
   // All done!
   return newBoard;
 }
@@ -138,7 +159,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 // Triggers the first watcher it encounters. If it doesn't encounter one, does nothing.
 function triggerWatcher(entities: EntityGrid): EntityGrid {
   //return entities;
-  
+
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
@@ -172,7 +193,7 @@ function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
       }
     }
   }
-  return entities
+  return entities;
 }
 
 export function applyAction(
@@ -191,11 +212,15 @@ export function applyAction(
     const { dr, dc } = DELTAS[action];
     const newRow = row + dr;
     const newCol = col + dc;
-    
+
     // Wall bump!
-    if (!inBounds(newRow, newCol) || getCell(board, newRow, newCol) === "wall" || getEntity(entities, newRow, newCol) === "chest") {
+    if (
+      !inBounds(newRow, newCol) ||
+      getCell(board, newRow, newCol) === "wall" ||
+      getEntity(entities, newRow, newCol) === "chest"
+    ) {
       if (facing === action && wingsActive === false) {
-        return null
+        return null;
       }
       return {
         board,
@@ -209,16 +234,19 @@ export function applyAction(
         },
       };
     }
-    
+
     const dest = getCell(board, newRow, newCol);
-    
+
     // Hands... hands!
     if (getEntity(entities, newRow, newCol) === "hand") {
-      return null
+      return null;
     }
-    
+
     // Stairs...
-    else if (getEntity(entities, newRow, newCol) === "empty" && dest === "stairs") {
+    else if (
+      getEntity(entities, newRow, newCol) === "empty" &&
+      dest === "stairs"
+    ) {
       // ...are impassable.
       if (stairsActive(board, entities)) {
         return null;
@@ -227,9 +255,9 @@ export function applyAction(
       else {
         // Normal move. Remove glass if walking off it.
         const newBoard =
-        getCell(board, row, col) === "glass"
-          ? setCell(board, row, col, "empty")
-          : board;
+          getCell(board, row, col) === "glass"
+            ? setCell(board, row, col, "empty")
+            : board;
 
         return {
           board: newBoard,
@@ -241,43 +269,55 @@ export function applyAction(
             staffContent,
             wingsActive: false,
           },
-        }
+        };
       }
     }
-    
+
     // Rock-pushing
-    else if (getEntity(entities, newRow, newCol) === "rock" || getEntity(entities, newRow, newCol) === "watcher_inactive" || getEntity(entities, newRow, newCol) === "watcher_active" || getEntity(entities, newRow, newCol) === "monster_statue") {
+    else if (
+      getEntity(entities, newRow, newCol) === "rock" ||
+      getEntity(entities, newRow, newCol) === "watcher_inactive" ||
+      getEntity(entities, newRow, newCol) === "watcher_active" ||
+      getEntity(entities, newRow, newCol) === "monster_statue"
+    ) {
       const rockDestRow = newRow + dr;
       const rockDestCol = newCol + dc;
-        
+
       // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
-      if ((!inBounds(rockDestRow, rockDestCol)) || (getCell(board, rockDestRow, rockDestCol) === "wall") || (getEntity(entities, rockDestRow, rockDestCol) === "rock") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive") || (getEntity(entities, rockDestRow, rockDestCol) === "watcher_active") || (getEntity(entities, rockDestRow, rockDestCol) === "chest") || (getEntity(entities, rockDestRow, rockDestCol) === "monster_statue")) {
+      if (
+        !inBounds(rockDestRow, rockDestCol) ||
+        getCell(board, rockDestRow, rockDestCol) === "wall" ||
+        getEntity(entities, rockDestRow, rockDestCol) === "rock" ||
+        getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive" ||
+        getEntity(entities, rockDestRow, rockDestCol) === "watcher_active" ||
+        getEntity(entities, rockDestRow, rockDestCol) === "chest" ||
+        getEntity(entities, rockDestRow, rockDestCol) === "monster_statue"
+      ) {
         //console.log("f-f-f-failure");
         if (facing === action && wingsActive === false) {
-          return null
-        }
-        else {
-            return {
-              board,
-              entities,
-              player: {
-                row,
-                col,
-                facing: action,
-                staffContent,
-                wingsActive: false,
-              },
-            };
+          return null;
+        } else {
+          return {
+            board,
+            entities,
+            player: {
+              row,
+              col,
+              facing: action,
+              staffContent,
+              wingsActive: false,
+            },
+          };
         }
       }
-      
+
       // Break any glass the rock was pushed off of.
       let newBoard =
         getCell(board, newRow, newCol) === "glass"
           ? setCell(board, newRow, newCol, "empty")
           : board;
       let newEntities = entities;
-      
+
       // Pushing into void.
       if (getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
         newEntities = setEntity(
@@ -286,16 +326,18 @@ export function applyAction(
           rockDestCol,
           "empty",
         );
-        
+
         // Pushing an active watcher.
         if (getEntity(entities, newRow, newCol) === "watcher_active") {
           newEntities = triggerWatcher(newEntities);
         }
       }
       // Pushing onto an inactive trap.
-      else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_inactive") {
+      else if (
+        getCell(newBoard, rockDestRow, rockDestCol) === "trap_inactive"
+      ) {
         newBoard = setCell(newBoard, rockDestRow, rockDestCol, "trap_active");
-        
+
         newEntities = setEntity(
           setEntity(entities, newRow, newCol, "empty"),
           rockDestRow,
@@ -307,7 +349,7 @@ export function applyAction(
       else if (getCell(newBoard, rockDestRow, rockDestCol) === "trap_active") {
         // Disperse all traps.
         newBoard = disperseTraps(newBoard, rockDestRow, rockDestCol);
-        
+
         // Set up the rock above the void...
         newEntities = setEntity(
           setEntity(entities, newRow, newCol, "empty"),
@@ -315,7 +357,7 @@ export function applyAction(
           rockDestCol,
           getEntity(entities, newRow, newCol),
         );
-        
+
         // ...and then trigger all fallings.
         newEntities = checkFallen(newBoard, newEntities);
       }
@@ -328,7 +370,7 @@ export function applyAction(
           getEntity(entities, newRow, newCol),
         );
       }
-      
+
       return {
         board: newBoard,
         entities: disperseMonsterStatues(newEntities),
@@ -341,29 +383,32 @@ export function applyAction(
         },
       };
     }
-    
+
     // failsafe
     else if (getEntity(entities, newRow, newCol) !== "empty") {
-      throw new Error("Couldn't figure out entity in gameState logic: "+String(getEntity(entities, newRow, newCol)));
+      throw new Error(
+        "Couldn't figure out entity in gameState logic: " +
+          String(getEntity(entities, newRow, newCol)),
+      );
     }
-    
+
     // ── Flying (wings active) ─────────────────────────────────────────────
     else if (wingsActive) {
       let newBoard = board;
       let newEntities = entities;
-      
+
       // Walking onto inactive trap
       if (getCell(board, newRow, newCol) === "trap_inactive") {
         newBoard = setCell(newBoard, newRow, newCol, "trap_active");
       }
       // Walking onto ACTIVE trap
       else if (getCell(board, newRow, newCol) === "trap_active") {
-        newBoard = disperseTraps(newBoard, newRow, newCol);//dead!
-        
+        newBoard = disperseTraps(newBoard, newRow, newCol); //dead!
+
         // Account for any fallen entities.
         newEntities = checkFallen(newBoard, newEntities);
       }
-      
+
       // Another void tile — fall to your doom. Origin was empty, so no glass to break.
       // OR
       // Solid tile. Origin was empty, so no glass to break.
@@ -387,7 +432,7 @@ export function applyAction(
           ? setCell(board, row, col, "empty")
           : board;
       let newEntities = entities;
-          
+
       // Walking onto inactive trap
       if (getCell(newBoard, newRow, newCol) === "trap_inactive") {
         newBoard = setCell(newBoard, newRow, newCol, "trap_active");
@@ -395,13 +440,14 @@ export function applyAction(
       // Walking onto ACTIVE trap
       else if (getCell(newBoard, newRow, newCol) === "trap_active") {
         newBoard = disperseTraps(newBoard, newRow, newCol);
-        
+
         // Account for any fallen entities.
         newEntities = checkFallen(newBoard, newEntities);
       }
-          
+
       // Wings activate if the player steps into the void.
-      const newWingsActive = hasWings && (getCell(newBoard, newRow, newCol) === "empty");
+      const newWingsActive =
+        hasWings && getCell(newBoard, newRow, newCol) === "empty";
 
       return {
         board: newBoard,
@@ -415,14 +461,13 @@ export function applyAction(
         },
       };
     }
-  }
-  else {
+  } else {
     // ── Staff action — player does not move; wingsActive passes through unchanged ─
     const { dr, dc } = DELTAS[facing];
     const fr = row + dr;
     const fc = col + dc;
     if (!inBounds(fr, fc)) return null;
-  
+
     const front = getCell(board, fr, fc);
 
     // Chest and upwards?
@@ -443,10 +488,9 @@ export function applyAction(
     // Check for other entities in front cell.
     else if (getEntity(entities, fr, fc) !== "empty") {
       return null;
-    }
-    else {
+    } else {
       const newEntities = triggerWatcher(entities);
-    
+
       if (staffContent === "empty" && front !== "empty" && front !== "wall") {
         return {
           board: setCell(board, fr, fc, "empty"),
@@ -459,8 +503,7 @@ export function applyAction(
             wingsActive: player.wingsActive ?? false,
           },
         };
-      }
-      else if (staffContent !== "empty" && front === "empty") {
+      } else if (staffContent !== "empty" && front === "empty") {
         return {
           board: setCell(board, fr, fc, staffContent as Cell),
           entities: disperseMonsterStatues(newEntities),
@@ -472,9 +515,8 @@ export function applyAction(
             wingsActive: player.wingsActive ?? false,
           },
         };
-      }
-      else {
-        return null
+      } else {
+        return null;
       }
     }
   }
@@ -489,20 +531,20 @@ export function stateKey(state: GameState): string {
     return c === "empty"
       ? " "
       : c === "floor"
-      ? "#"
-      : c === "glass"
-      ? "G"
-      : c === "wall"
-      ? "W"
-      : c === "button"
-      ? "B"
-      : c === "stairs"
-      ? "S"
-      : c === "trap_active"
-      ? "A"
-      : c === "trap_inactive"
-      ? "T"
-      : "?";
+        ? "#"
+        : c === "glass"
+          ? "G"
+          : c === "wall"
+            ? "W"
+            : c === "button"
+              ? "B"
+              : c === "stairs"
+                ? "S"
+                : c === "trap_active"
+                  ? "A"
+                  : c === "trap_inactive"
+                    ? "T"
+                    : "?";
   }
   const boardStr = (function getBoardStr() {
     let str = "";
@@ -512,7 +554,27 @@ export function stateKey(state: GameState): string {
   const entityStr = (function getEntityStr() {
     let str = "";
     state.entities.forEach((row) =>
-      row.forEach((c) => (str += c === "rock" ? "R" : (c === "beaver" ? "B" : (c === "mimic" ? "M" : (c === "hand" ? "H" : (c === "watcher_inactive" ? "W" : (c === "watcher_active" ? "!" : (c === "chest" ? "C" : (c === "monster_statue" ? "~" : " "))))))))),
+      row.forEach(
+        (c) =>
+          (str +=
+            c === "rock"
+              ? "R"
+              : c === "beaver"
+                ? "B"
+                : c === "mimic"
+                  ? "M"
+                  : c === "hand"
+                    ? "H"
+                    : c === "watcher_inactive"
+                      ? "W"
+                      : c === "watcher_active"
+                        ? "!"
+                        : c === "chest"
+                          ? "C"
+                          : c === "monster_statue"
+                            ? "~"
+                            : " "),
+      ),
     );
     return str;
   })();
@@ -524,16 +586,16 @@ export function stateKey(state: GameState): string {
     return staffContent === "empty"
       ? "e"
       : staffContent === "floor"
-      ? "f"
-      : staffContent === "glass"
-      ? "g"
-      : staffContent === "button"
-      ? "b"
-      : staffContent === "trap_inactive"
-      ? "t"
-      : staffContent === "trap_active"
-      ? "a"
-      : "s";
+        ? "f"
+        : staffContent === "glass"
+          ? "g"
+          : staffContent === "button"
+            ? "b"
+            : staffContent === "trap_inactive"
+              ? "t"
+              : staffContent === "trap_active"
+                ? "a"
+                : "s";
   })();
   const wingsStr = wingsActive ? "W" : "0";
   //const swordStr = swordActive ? "S" : "0";
@@ -546,13 +608,14 @@ export function stateKey(state: GameState): string {
 // Non-(empty or stairs) are interchangeable for goal satisfaction — the brand only
 // requires "solid tile present" or "empty", not a specific solid type.
 export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
-  if (cell === "stairs") { // Stairs never matches target.
-    return false
-  }
-  else if (target === "empty") { // 
-    return cell === "empty"
-  }
-  else { // Process of elimination: target is not empty and could never be stairs, so it must be one floor, glass, wall, button, trap_inactive, or trap_active. However we've also pruned cell === stairs, so we can just test if cell is empty now.
+  if (cell === "stairs") {
+    // Stairs never matches target.
+    return false;
+  } else if (target === "empty") {
+    //
+    return cell === "empty";
+  } else {
+    // Process of elimination: target is not empty and could never be stairs, so it must be one floor, glass, wall, button, trap_inactive, or trap_active. However we've also pruned cell === stairs, so we can just test if cell is empty now.
     return cell !== "empty";
   }
 }
