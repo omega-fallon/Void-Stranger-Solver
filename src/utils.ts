@@ -45,9 +45,8 @@ export function applyPath(
 ): GameState[] {
   let state: GameState = {
     board: parseBoard(initial.board),
-    entities: initial.entities
-      ? parseEntities(initial.entities)
-      : emptyEntityGrid(),
+    entities:
+      initial.entities ? parseEntities(initial.entities) : emptyEntityGrid(),
     player: initial.player,
   };
   const states: GameState[] = [state];

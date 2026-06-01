@@ -22,16 +22,18 @@ export function countFloorTiles(board: Board): number {
     .reduce(
       (n, cell) =>
         n +
-        ([
-          "floor",
-          "wall",
-          "glass",
-          "button",
-          "trap_inactive",
-          "trap_active",
-        ].includes(cell)
-          ? 1
-          : 0),
+        ((
+          [
+            "floor",
+            "wall",
+            "glass",
+            "button",
+            "trap_inactive",
+            "trap_active",
+          ].includes(cell)
+        ) ?
+          1
+        : 0),
       0,
     );
 }
@@ -151,14 +153,13 @@ async function idaDfs(
   }
 
   // Pruning: not enough floor tiles remaining to satisfy the target.
-  const floorInStaff = [
-    "floor",
-    "glass",
-    "button",
-    "trap_inactive",
-    "trap_active",
-  ].includes(state.player.staffContent)
-    ? 1
+  const floorInStaff =
+    (
+      ["floor", "glass", "button", "trap_inactive", "trap_active"].includes(
+        state.player.staffContent,
+      )
+    ) ?
+      1
     : 0;
   if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
     //console.log("INF: not enough tiles");
@@ -231,25 +232,17 @@ async function idaDfs(
     if (blockers.includes(state.entities[r]![c]!)) {
       // Rock stuck.
       const r2: number =
-        i == 0 || i == 2
-          ? 0
-          : i == 4 || i == 6
-          ? 0
-          : i == 8 || i == 10
-          ? 5
-          : i == 12 || i == 2
-          ? 5
-          : 256;
+        i == 0 || i == 2 ? 0
+        : i == 4 || i == 6 ? 0
+        : i == 8 || i == 10 ? 5
+        : i == 12 || i == 2 ? 5
+        : 256;
       const c2: number =
-        i == 0 || i == 2
-          ? 0
-          : i == 4 || i == 6
-          ? 5
-          : i == 8 || i == 10
-          ? 0
-          : i == 12 || i == 2
-          ? 5
-          : 256;
+        i == 0 || i == 2 ? 0
+        : i == 4 || i == 6 ? 5
+        : i == 8 || i == 10 ? 0
+        : i == 12 || i == 2 ? 5
+        : 256;
 
       if (blockers.includes(state.entities[r2]![c2]!)) {
         // The cornered rock is covering stairs.
@@ -399,8 +392,9 @@ export async function search({
   if (showProgress && initialThreshold)
     console.log(`Searching with initial threshold ${initialThreshold}`);
 
-  const progressSamples = showProgress
-    ? await sampleProgressCheckpoints(
+  const progressSamples =
+    showProgress ?
+      await sampleProgressCheckpoints(
         initial,
         target,
         hasWings,

@@ -255,9 +255,9 @@ export function applyAction(
       else {
         // Normal move. Remove glass if walking off it.
         const newBoard =
-          getCell(board, row, col) === "glass"
-            ? setCell(board, row, col, "empty")
-            : board;
+          getCell(board, row, col) === "glass" ?
+            setCell(board, row, col, "empty")
+          : board;
 
         return {
           board: newBoard,
@@ -313,9 +313,9 @@ export function applyAction(
 
       // Break any glass the rock was pushed off of.
       let newBoard =
-        getCell(board, newRow, newCol) === "glass"
-          ? setCell(board, newRow, newCol, "empty")
-          : board;
+        getCell(board, newRow, newCol) === "glass" ?
+          setCell(board, newRow, newCol, "empty")
+        : board;
       let newEntities = entities;
 
       // Pushing into void.
@@ -428,9 +428,9 @@ export function applyAction(
     else {
       // Normal move.
       let newBoard =
-        getCell(board, row, col) === "glass"
-          ? setCell(board, row, col, "empty")
-          : board;
+        getCell(board, row, col) === "glass" ?
+          setCell(board, row, col, "empty")
+        : board;
       let newEntities = entities;
 
       // Walking onto inactive trap
@@ -528,23 +528,17 @@ export function applyAction(
 export function stateKey(state: GameState): string {
   // We wrap these in IIFEs so the profiler names each part individually
   function cellChar(c: Cell) {
-    return c === "empty"
-      ? " "
-      : c === "floor"
-        ? "#"
-        : c === "glass"
-          ? "G"
-          : c === "wall"
-            ? "W"
-            : c === "button"
-              ? "B"
-              : c === "stairs"
-                ? "S"
-                : c === "trap_active"
-                  ? "A"
-                  : c === "trap_inactive"
-                    ? "T"
-                    : "?";
+    return (
+      c === "empty" ? " "
+      : c === "floor" ? "#"
+      : c === "glass" ? "G"
+      : c === "wall" ? "W"
+      : c === "button" ? "B"
+      : c === "stairs" ? "S"
+      : c === "trap_active" ? "A"
+      : c === "trap_inactive" ? "T"
+      : "?"
+    );
   }
   const boardStr = (function getBoardStr() {
     let str = "";
@@ -557,23 +551,15 @@ export function stateKey(state: GameState): string {
       row.forEach(
         (c) =>
           (str +=
-            c === "rock"
-              ? "R"
-              : c === "beaver"
-                ? "B"
-                : c === "mimic"
-                  ? "M"
-                  : c === "hand"
-                    ? "H"
-                    : c === "watcher_inactive"
-                      ? "W"
-                      : c === "watcher_active"
-                        ? "!"
-                        : c === "chest"
-                          ? "C"
-                          : c === "monster_statue"
-                            ? "~"
-                            : " "),
+            c === "rock" ? "R"
+            : c === "beaver" ? "B"
+            : c === "mimic" ? "M"
+            : c === "hand" ? "H"
+            : c === "watcher_inactive" ? "W"
+            : c === "watcher_active" ? "!"
+            : c === "chest" ? "C"
+            : c === "monster_statue" ? "~"
+            : " "),
       ),
     );
     return str;
@@ -583,19 +569,15 @@ export function stateKey(state: GameState): string {
       return state.player;
     })();
   const staffStr = (function getStaffStr() {
-    return staffContent === "empty"
-      ? "e"
-      : staffContent === "floor"
-        ? "f"
-        : staffContent === "glass"
-          ? "g"
-          : staffContent === "button"
-            ? "b"
-            : staffContent === "trap_inactive"
-              ? "t"
-              : staffContent === "trap_active"
-                ? "a"
-                : "s";
+    return (
+      staffContent === "empty" ? "e"
+      : staffContent === "floor" ? "f"
+      : staffContent === "glass" ? "g"
+      : staffContent === "button" ? "b"
+      : staffContent === "trap_inactive" ? "t"
+      : staffContent === "trap_active" ? "a"
+      : "s"
+    );
   })();
   const wingsStr = wingsActive ? "W" : "0";
   //const swordStr = swordActive ? "S" : "0";

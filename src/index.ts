@@ -68,16 +68,14 @@ if (!rawBrand) {
 
 const INITIAL_STATE: GameState = {
   board: parseBoard(rawLevel.board),
-  entities: rawLevel.entities
-    ? parseEntities(rawLevel.entities)
-    : emptyEntityGrid(),
+  entities:
+    rawLevel.entities ? parseEntities(rawLevel.entities) : emptyEntityGrid(),
   player: rawLevel.player,
 };
 const TARGET_BOARD: Board = parseBoard(rawBrand.board);
 
-const initialThreshold = values.initialThreshold
-  ? Number(values.initialThreshold)
-  : undefined;
+const initialThreshold =
+  values.initialThreshold ? Number(values.initialThreshold) : undefined;
 
 const scenarioName = `${values.brane}/${values.brand}${
   values.wings ? " wings" : ""
@@ -127,7 +125,9 @@ async function main() {
       searchState = next;
     }
     console.log(
-      `Cheated first ${cheatN} steps (${actionsToString(cheatPrefix)}). Starting from:\n${renderBoard(searchState)}`,
+      `Cheated first ${cheatN} steps (${actionsToString(
+        cheatPrefix,
+      )}). Starting from:\n${renderBoard(searchState)}`,
     );
   }
 

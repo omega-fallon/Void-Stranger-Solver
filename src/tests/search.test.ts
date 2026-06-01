@@ -84,8 +84,9 @@ type TestLevel = Omit<RawLevel, "name"> & {
 async function runSearchTest(t: TestContext, level: TestLevel) {
   const initial = {
     board: parseBoard(level.initial.board),
-    entities: level.initial.entities
-      ? parseEntities(level.initial.entities)
+    entities:
+      level.initial.entities ?
+        parseEntities(level.initial.entities)
       : emptyEntityGrid(),
     player: level.initial.player,
   };
@@ -112,8 +113,9 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
 async function assertSearchFailure(t: TestContext, level: TestLevel) {
   const initial = {
     board: parseBoard(level.initial.board),
-    entities: level.initial.entities
-      ? parseEntities(level.initial.entities)
+    entities:
+      level.initial.entities ?
+        parseEntities(level.initial.entities)
       : emptyEntityGrid(),
     player: level.initial.player,
   };
