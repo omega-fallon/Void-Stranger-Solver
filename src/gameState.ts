@@ -85,7 +85,7 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
     }
   }
 
-  console.log("Triggering", watchers_needing_triggering, "watchers");
+  // console.log("Triggering", watchers_needing_triggering, "watchers");
   for (let i = 0; i < watchers_needing_triggering; i++) {
     entities = triggerWatcher(entities);
   }
@@ -99,7 +99,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 
   // Iterate through each triggered_tile's neighbors and add them to the list if they're also active traps. Repeatedly do this until nothing changes.
   while (done_anything) {
-    console.log(triggered_tiles);
     done_anything = false;
 
     const array2 = triggered_tiles.slice();
@@ -114,7 +113,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r - 1, c]);
-        console.log("APPLE");
       }
       if (
         !String(triggered_tiles).includes(String([r, c - 1])) &&
@@ -123,7 +121,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r, c - 1]);
-        console.log("BISCUIT");
       }
       if (
         !String(triggered_tiles).includes(String([r + 1, c])) &&
@@ -132,7 +129,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r + 1, c]);
-        console.log("COOKIE");
       }
       if (
         !String(triggered_tiles).includes(String([r, c + 1])) &&
@@ -141,7 +137,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       ) {
         done_anything = true;
         triggered_tiles.push([r, c + 1]);
-        console.log("DINNER");
       }
     }
   }
