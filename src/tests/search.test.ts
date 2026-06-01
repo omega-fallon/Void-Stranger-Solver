@@ -109,6 +109,27 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
   else t.assert.snapshot(path.length);
 }
 
+async function assertSearchFailure(t: TestContext, level: TestLevel) {
+  const initial = {
+    board: parseBoard(level.initial.board),
+    entities: level.initial.entities
+      ? parseEntities(level.initial.entities)
+      : emptyEntityGrid(),
+    player: level.initial.player,
+  };
+  const target = parseBoard(level.target);
+  const requireFinalJump = level.requireFinalJump ?? true;
+  const { path } = await search({
+    initial,
+    target,
+    requireFinalJump,
+    hasWings: level.hasWings ?? false,
+  });
+  if (process.env.VERBOSE && path)
+    replayPath(initial, path, target, requireFinalJump);
+  assert.equal(path, null, "Solution was found, but should not have been");
+}
+
 test("Solves Add's brand", async (t) => {
   await runSearchTest(t, {
     initial: {
@@ -272,6 +293,34 @@ test("Fly over a gap multiple times", async (t) => {
       "      ",
     ],
     solutionLength: 10,
+  });
+});
+
+test("Should not fly over a gap more than 1 wide", async (t) => {
+  await assertSearchFailure(t, {
+    hasWings: true,
+    initial: {
+      // prettier-ignore
+      board: [
+        "      ",
+        " #  #S",
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+      ],
+      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+    },
+    // prettier-ignore
+    target: [
+      "      ",
+      " #  # ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+    ],
   });
 });
 
