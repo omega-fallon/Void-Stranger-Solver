@@ -243,7 +243,10 @@ test("flying into rock entity causes fall in place; rock still moves", () => {
 
 test("flying out of bounds makes you fall", () => {
   const s = withWings(makeState(0, 0, "up", "empty"));
-  assert.equal(applyAction(s, "up"),null);
+  const r = applyAction(s, "up")!;
+  assert.equal(r.player.row, 0);
+  assert.equal(r.player.col, 0);
+  assert.equal(r.player.wingsActive, false);
 });
 
 test("staff action preserves wingsActive state", () => {
