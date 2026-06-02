@@ -106,7 +106,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
     for (let coord of array2) {
       let r: number = coord[0]!;
       let c: number = coord[1]!;
-      
+
       const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
         pair.toString(),
       );

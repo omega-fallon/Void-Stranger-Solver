@@ -69,24 +69,20 @@ export function allWatchersTriggeredQuestion(entities: EntityGrid): boolean {
 
 // Returns true if all but one watchers are triggered.
 export function staffBanned(entities: EntityGrid): boolean {
-  let found_inactive: boolean = false;
-  let found_active: boolean = false;
+  let found_inactive: number = 0;
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
-        if (!found_inactive) {
-          found_inactive = true;
-        }
-        // Second inactive found, we're safe.
-        else {
+        found_inactive++;
+        
+        // 2 inactive statues means we have at least one safe usage.
+        if (found_inactive >= 2) {
           return false;
         }
-      } else if (!found_active && entities[i]![i2]! === "watcher_active") {
-        found_active = true;
       }
     }
   }
-  return found_active;
+  return found_inactive == 1;
 }
 
 /**
