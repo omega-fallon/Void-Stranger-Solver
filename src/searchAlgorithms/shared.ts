@@ -76,6 +76,7 @@ export function staffBanned(entities: EntityGrid): boolean {
       if (entities[i]![i2]! === "watcher_inactive") {
         if (!found_inactive) {
           found_inactive = true;
+          return false; // HACK: Fix this whole function if this works
         }
         // Second inactive found, we're safe.
         else {
