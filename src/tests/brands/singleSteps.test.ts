@@ -59,7 +59,7 @@ for (let algorithm of [
           }
 
           for (const level of TEST_LEVELS) {
-            test(`${level.name}`, async () => {
+            test(`${algorithm} ${level.name}`, async () => {
               // console.log(`${level.name}`);
               const initial = {
                 board: level.initial.board,

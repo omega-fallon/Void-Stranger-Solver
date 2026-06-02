@@ -7,8 +7,8 @@ import {
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
-import { NO_BURDENS } from "../types";
 import type { Action, Board, Burdens, GameState } from "../types";
+import { NO_BURDENS } from "../types";
 import { actionsToString } from "../utils";
 import {
   countFloorTiles,
@@ -41,6 +41,7 @@ export async function idaDfs(
   requireFinalJump: boolean,
   counters: DfsCounters,
   actions: Action[],
+  knownCorrectPath: Action[],
   onNode: (
     state: GameState,
     path: Action[],
@@ -52,6 +53,20 @@ export async function idaDfs(
   const f = g + h;
 
   if (f > threshold) {
+    const amountOfPathFound = (() => {
+      for (let i = 0; i < knownCorrectPath.length; i++) {
+        if (knownCorrectPath[i] != path[i]) return i;
+      }
+      return knownCorrectPath.length;
+    })();
+    if (amountOfPathFound === path.length)
+      console.warn(
+        `Pruning state from correct path (above threshold): ${g} + ${h} > ${threshold}\n` +
+          `${actionsToString(path)} / ${actionsToString(knownCorrectPath)}\n` +
+          JSON.stringify(heuristic(state, target, requireFinalJump)) +
+          "\n" +
+          renderState(state),
+      );
     counters.pathsTrimmed++;
     return f;
   }
@@ -63,8 +78,19 @@ export async function idaDfs(
   const nodeDecision = await onNode(state, path, g, h);
   if (nodeDecision === "found") return "found";
 
-  if (isPruned(state, target, burdens, numFloorTilesInSolution))
+  if (isPruned(state, target, burdens, numFloorTilesInSolution)) {
+    const amountOfPathFound = (() => {
+      for (let i = 0; i < knownCorrectPath.length; i++) {
+        if (knownCorrectPath[i] != path[i]) return i;
+      }
+      return knownCorrectPath.length;
+    })();
+    if (amountOfPathFound === path.length)
+      console.warn(
+        "Pruning state from correct path (invalid):\n" + renderState(state),
+      );
     return Infinity;
+  }
 
   let min = Infinity;
 
@@ -94,6 +120,7 @@ export async function idaDfs(
       requireFinalJump,
       counters,
       actions,
+      knownCorrectPath,
       onNode,
     );
 
@@ -144,6 +171,7 @@ async function sampleProgressCheckpoints(
     requireFinalJump,
     counters,
     actions,
+    [],
     async (_state, path, _g, _h) => {
       allPaths.push(path.slice());
       return "continue";
@@ -222,6 +250,7 @@ export async function idaStar({
       requireFinalJump,
       counters,
       actions,
+      knownCorrectPath,
       async (state, path, g, h) => {
         const f = g + h;
 

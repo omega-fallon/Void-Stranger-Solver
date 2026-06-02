@@ -247,6 +247,7 @@ export async function aStarThenIdaStar({
         requireFinalJump,
         counters,
         actions,
+        knownCorrectPath,
         async (state, subPath, g, h) => {
           const now = performance.now();
           if (showProgress && (verbose >= 3 || now - lastLogTime >= 3000)) {
