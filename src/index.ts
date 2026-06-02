@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "node:util";
-import { applyAction, renderBoard, replayPath } from "./gameState";
+import { applyAction, renderState, replayPath } from "./gameState";
 import { BRANES, BRANDS, KNOWN_CORRECT_PATHS } from "./levels";
 import { search } from "./search";
 import {
@@ -117,7 +117,10 @@ async function main() {
     }
     for (let i = 0; i < cheatN; i++) {
       const action = knownCorrectPath[i]!;
-      const next = applyAction(searchState, action, { wings: values.wings ?? false, sword: false });
+      const next = applyAction(searchState, action, {
+        wings: values.wings ?? false,
+        sword: false,
+      });
       if (!next) {
         console.error(
           `Cheat step ${i + 1} (${action}) produced an invalid state.`,
@@ -130,7 +133,7 @@ async function main() {
     console.log(
       `Cheated first ${cheatN} steps (${actionsToString(
         cheatPrefix,
-      )}). Starting from:\n${renderBoard(searchState)}`,
+      )}). Starting from:\n${renderState(searchState)}`,
     );
   }
 
@@ -171,7 +174,11 @@ async function main() {
   console.log(`Solution found in ${fullPath.length} steps (${perf}):`);
   console.log(actionsToString(fullPath));
 
-  if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD, { wings: values.wings ?? false, sword: false });
+  if (values.verbose)
+    replayPath(INITIAL_STATE, fullPath, TARGET_BOARD, {
+      wings: values.wings ?? false,
+      sword: false,
+    });
 
   if (values.wings) {
     console.log(values.brane + "/" + values.brand + " with wings");

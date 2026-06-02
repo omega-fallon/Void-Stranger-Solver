@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyAction, renderBoard, replayPath } from "../gameState";
+import { applyAction, renderState, replayPath } from "../gameState";
 import { emptyEntityGrid } from "../utils";
 import {
   NO_BURDENS,
@@ -382,7 +382,7 @@ test("ground push rock into void: rock disappears", () => {
 
 test("renderBoard returns a string with top and bottom borders", () => {
   const s = makeState(0, 0, "right", "empty");
-  const result = renderBoard(s);
+  const result = renderState(s);
   assert.equal(typeof result, "string");
   assert.ok(result.includes("┌────────────┐"));
   assert.ok(result.includes("└────────────┘"));
@@ -399,7 +399,7 @@ test("renderBoard shows correct player arrow for each facing direction", () => {
   for (const [dir, arrow] of cases) {
     const s = makeState(0, 0, dir, "empty");
     assert.ok(
-      renderBoard(s).includes(arrow),
+      renderState(s).includes(arrow),
       `Expected arrow "${arrow}" for direction "${dir}"`,
     );
   }
@@ -408,37 +408,37 @@ test("renderBoard shows correct player arrow for each facing direction", () => {
 test("renderBoard shows floor tile as solid block chars", () => {
   // Player at (5,5), floor at (1,1) — no overlay conflict
   const s = makeState(5, 5, "right", "empty", [[1, 1, "floor"]]);
-  assert.ok(renderBoard(s).includes("██"));
+  assert.ok(renderState(s).includes("██"));
 });
 
 test("renderBoard shows glass tile as light-shade chars", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "glass"]]);
-  assert.ok(renderBoard(s).includes("░░"));
+  assert.ok(renderState(s).includes("░░"));
 });
 
 test("renderBoard shows wall tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "wall"]]);
-  assert.ok(renderBoard(s).includes("▓▓"));
+  assert.ok(renderState(s).includes("▓▓"));
 });
 
 test("renderBoard shows stairs tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "stairs"]]);
-  assert.ok(renderBoard(s).includes("S "));
+  assert.ok(renderState(s).includes("S "));
 });
 
 test("renderBoard shows button tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "button"]]);
-  assert.ok(renderBoard(s).includes("█B"));
+  assert.ok(renderState(s).includes("█B"));
 });
 
 test("renderBoard shows trap_inactive tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "trap_inactive"]]);
-  assert.ok(renderBoard(s).includes("◖◗"));
+  assert.ok(renderState(s).includes("◖◗"));
 });
 
 test("renderBoard shows trap_active tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "trap_active"]]);
-  assert.ok(renderBoard(s).includes("<>"));
+  assert.ok(renderState(s).includes("<>"));
 });
 
 test("renderBoard shows rock entity as R", () => {
@@ -450,17 +450,17 @@ test("renderBoard shows rock entity as R", () => {
     [[1, 1, "floor"]],
     [[1, 1, "rock"]],
   );
-  assert.ok(renderBoard(s).includes("R"));
+  assert.ok(renderState(s).includes("R"));
 });
 
 test("renderBoard shows wings indicator when player is airborne", () => {
   const s = withWings(makeState(0, 0, "right", "empty"));
-  assert.ok(renderBoard(s).includes("🦋"));
+  assert.ok(renderState(s).includes("🦋"));
 });
 
 test("renderBoard omits wings indicator when player is grounded", () => {
   const s = makeState(0, 0, "right", "empty");
-  assert.ok(!renderBoard(s).includes("🦋"));
+  assert.ok(!renderState(s).includes("🦋"));
 });
 
 test("renderBoard first line reports floor tile count (floor + glass combined)", () => {
@@ -469,7 +469,7 @@ test("renderBoard first line reports floor tile count (floor + glass combined)",
     [0, 1, "glass"],
     [0, 2, "floor"],
   ]);
-  const firstLine = renderBoard(s).split("\n")[0]!;
+  const firstLine = renderState(s).split("\n")[0]!;
   assert.ok(
     firstLine.startsWith("3 floor tiles remain"),
     `Got: "${firstLine}"`,
@@ -478,7 +478,7 @@ test("renderBoard first line reports floor tile count (floor + glass combined)",
 
 test("renderBoard counts floor tile held in staff toward total", () => {
   const s = makeState(5, 5, "right", "floor", [[0, 0, "floor"]]);
-  const firstLine = renderBoard(s).split("\n")[0]!;
+  const firstLine = renderState(s).split("\n")[0]!;
   assert.ok(
     firstLine.startsWith("2 floor tiles remain"),
     `Got: "${firstLine}"`,
@@ -487,7 +487,7 @@ test("renderBoard counts floor tile held in staff toward total", () => {
 
 test("renderBoard counts glass tile held in staff toward total", () => {
   const s = makeState(5, 5, "right", "glass", [[0, 0, "floor"]]);
-  const firstLine = renderBoard(s).split("\n")[0]!;
+  const firstLine = renderState(s).split("\n")[0]!;
   assert.ok(
     firstLine.startsWith("2 floor tiles remain"),
     `Got: "${firstLine}"`,
@@ -496,12 +496,12 @@ test("renderBoard counts glass tile held in staff toward total", () => {
 
 test("renderBoard shows requiredTiles in first line when provided", () => {
   const s = makeState(0, 0, "right", "empty", [[1, 0, "floor"]]);
-  assert.ok(renderBoard(s, 10).includes("out of a necessary 10"));
+  assert.ok(renderState(s, 10).includes("out of a necessary 10"));
 });
 
 test("renderBoard omits requiredTiles phrase when not provided", () => {
   const s = makeState(0, 0, "right", "empty");
-  assert.ok(!renderBoard(s).includes("out of a necessary"));
+  assert.ok(!renderState(s).includes("out of a necessary"));
 });
 
 // replayPath (lines 301-323)

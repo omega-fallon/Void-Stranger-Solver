@@ -2,7 +2,7 @@ import {
   ACTIONS,
   applyAction,
   isGoal,
-  renderBoard,
+  renderState,
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
@@ -79,7 +79,7 @@ export async function aStar({
         `Open: ${open.size} | Closed: ${closed.size} | Explored: ${nodesExplored} | ` +
           `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
           `g=${current.gCost} | f=${current.gCost + current.hCost} (${current.gCost}g+${current.hCost}h)\n` +
-          `${renderBoard(current.state, numFloorTilesInSolution)}`,
+          `${renderState(current.state, numFloorTilesInSolution)}`,
       );
     }
 

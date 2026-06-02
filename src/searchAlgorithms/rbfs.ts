@@ -2,7 +2,7 @@ import {
   ACTIONS,
   applyAction,
   isGoal,
-  renderBoard,
+  renderState,
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
@@ -212,7 +212,7 @@ export async function rbfs({
             `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
             `Path: ${g} | f=${g + h} (${g}g+${h}h) | ${amountOfPathFound} correct: ${actionsToString(path)} / ${actionsToString(knownCorrectPath)}\n` +
             `Action: ${action}\n` +
-            `${renderBoard(state, numFloorTilesInSolution)}`,
+            `${renderState(state, numFloorTilesInSolution)}`,
         );
       }
 

@@ -3,7 +3,7 @@ import {
   ACTIONS,
   applyAction,
   isGoal,
-  renderBoard,
+  renderState,
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
@@ -252,7 +252,7 @@ export async function idaStar({
               ).toFixed(9)}% through search space (solution is ${(
                 estimateProgress(knownCorrectPath, progressSamples) * 100
               ).toFixed(9)}%) | Action: ${action}\n` +
-              `${renderBoard(state, numFloorTilesInSolution)}`,
+              `${renderState(state, numFloorTilesInSolution)}`,
           );
         }
 

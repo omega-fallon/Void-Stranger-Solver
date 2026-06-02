@@ -2,7 +2,7 @@ import {
   ACTIONS,
   applyAction,
   isGoal,
-  renderBoard,
+  renderState,
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
@@ -270,7 +270,7 @@ export async function aStarThenIdaStar({
                 `Explored: ${counters.nodesExplored} | ${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
                 `Full path: ${node.gCost + g} steps | ${amountOfPathFound} correct: ${actionsToString(fullPath)} / ${actionsToString(knownCorrectPath)}\n` +
                 `Action: ${action}\n` +
-                `${renderBoard(state, numFloorTilesInSolution)}`,
+                `${renderState(state, numFloorTilesInSolution)}`,
             );
           }
 

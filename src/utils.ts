@@ -1,4 +1,4 @@
-import { renderBoard, applyAction } from "./gameState";
+import { renderState, applyAction } from "./gameState";
 import { NO_BURDENS } from "./types";
 import type {
   Action,
@@ -64,14 +64,14 @@ export function applyPath(
   const states: GameState[] = [state];
 
   for (let i = 0; i < pathStr.length; i++) {
-    if (VERBOSE >= 2) console.log(renderBoard(state));
+    if (VERBOSE >= 2) console.log(renderState(state));
     const char = pathStr[i]!;
     const action = PATH_CHARS[char];
     if (!action)
       throw new Error(`Unknown path character "${char}" at index ${i}`);
     const next = applyAction(state, action, burdens);
     if (!next) {
-      if (VERBOSE >= 1) console.log(renderBoard(state));
+      if (VERBOSE >= 1) console.log(renderState(state));
       throw new Error(
         `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked`,
       );
@@ -80,7 +80,7 @@ export function applyPath(
     state = next;
   }
 
-  if (VERBOSE >= 2) console.log(renderBoard(state));
+  if (VERBOSE >= 2) console.log(renderState(state));
 
   return states;
 }

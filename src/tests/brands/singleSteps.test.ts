@@ -1,6 +1,6 @@
 import assert from "assert";
 import test from "node:test";
-import { renderBoard, renderBoardOnly, replayPath } from "../../gameState";
+import { renderState, renderBoard, replayPath } from "../../gameState";
 import { BRANES, KNOWN_CORRECT_PATHS, RawLevel } from "../../levels";
 import { search } from "../../search";
 import { Action, EntityGrid } from "../../types";
@@ -84,7 +84,7 @@ for (let algorithm of [
               // }
               assert.ok(
                 path !== null,
-                `No solution found from \n${renderBoard(initial)}\nto\n${renderBoardOnly(target)}`,
+                `No solution found from \n${renderState(initial)}\nto\n${renderBoard(target)}`,
               );
               if (VERBOSE) {
                 if (path)

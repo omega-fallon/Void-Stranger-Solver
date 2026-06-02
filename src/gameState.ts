@@ -619,14 +619,14 @@ export function replayPath(
 ): void {
   console.log("\n--- Solution replay ---");
   let state = initial;
-  console.log(`\nStep 0 (initial):\n${renderBoard(state)}\n`);
+  console.log(`\nStep 0 (initial):\n${renderState(state)}\n`);
   for (let i = 0; i < path.length; i++) {
     const action = path[i]!;
     state = applyAction(state, action, burdens)!;
     console.log(
       `Step ${i + 1}: ${action} | h: ${
         heuristic(state, target, requireFinalJump).total
-      }\n${renderBoard(state)}\n`,
+      }\n${renderState(state)}\n`,
     );
     if (isGoal(state, target, requireFinalJump)) {
       console.log("Goal reached!");
@@ -669,7 +669,7 @@ function renderCellFloor(cell: Cell) {
   return floorChar;
 }
 
-export function renderBoard(state: GameState, requiredTiles?: number): string {
+export function renderState(state: GameState, requiredTiles?: number): string {
   const { board, entities, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
     // Priority: player arrow > rock > board cell
@@ -723,7 +723,7 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
 }
 
 // TODO: Rename this to renderBoard and above to renderState, and DRY them out
-export function renderBoardOnly(board: Board): string {
+export function renderBoard(board: Board): string {
   const cellChar = (cell: Cell, r: number, c: number): string => {
     return renderCellFloor(cell);
   };
