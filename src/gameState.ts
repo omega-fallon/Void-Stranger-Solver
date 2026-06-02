@@ -107,8 +107,11 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       let r: number = coord[0]!;
       let c: number = coord[1]!;
 
+      const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
+        pair.toString(),
+      );
       if (
-        !String(triggered_tiles).includes(String([r - 1, c])) &&
+        !triggeredTileCoordStrings.includes(String([r - 1, c])) &&
         r >= 1 &&
         board[r - 1]![c]! === "trap_active"
       ) {
@@ -116,7 +119,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r - 1, c]);
       }
       if (
-        !String(triggered_tiles).includes(String([r, c - 1])) &&
+        !triggeredTileCoordStrings.includes(String([r, c - 1])) &&
         c >= 1 &&
         board[r]![c - 1]! === "trap_active"
       ) {
@@ -124,7 +127,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r, c - 1]);
       }
       if (
-        !String(triggered_tiles).includes(String([r + 1, c])) &&
+        !triggeredTileCoordStrings.includes(String([r + 1, c])) &&
         r <= 4 &&
         board[r + 1]![c]! === "trap_active"
       ) {
@@ -132,7 +135,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r + 1, c]);
       }
       if (
-        !String(triggered_tiles).includes(String([r, c + 1])) &&
+        !triggeredTileCoordStrings.includes(String([r, c + 1])) &&
         c <= 4 &&
         board[r]![c + 1]! === "trap_active"
       ) {
@@ -605,6 +608,11 @@ export function isGoal(
     if (getCell(state.board, state.player.row, state.player.col) !== "empty")
       return false;
   }
+  // console.debug(
+  //   state.board.map((row, r) =>
+  //     row.map((cell, c) => cellMatchesTarget(cell, getCell(target, r, c))),
+  //   ),
+  // );
   return state.board.every((row, r) =>
     row.every((cell, c) => cellMatchesTarget(cell, getCell(target, r, c))),
   );
