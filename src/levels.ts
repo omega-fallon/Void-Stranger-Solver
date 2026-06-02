@@ -1,28 +1,29 @@
-import type { PlayerState } from "./types";
+import type { Board, EntityGrid, PlayerState } from "./types";
+import { parseBoard, parseEntities } from "./utils";
 
 /** A level pairing an initial brane state with a target brand board. */
 export interface RawLevel {
   name: string;
   initial: {
-    board: string[];
-    entities?: string[];
+    board: Board;
+    entities?: EntityGrid;
     player: PlayerState;
   };
-  target: string[];
+  target: Board;
   requireFinalJump?: boolean;
 }
 
 export interface RawBraneInitial {
   name: string;
-  board: string[];
-  entities: string[];
+  board: Board;
+  entities: EntityGrid;
   player: PlayerState;
   knownPath?: string;
 }
 
 export interface RawBrand {
   name: string;
-  board: string[];
+  board: Board;
 }
 
 // Board encoding: " " empty  "#" floor  "G" glass  "S" stairs  "W" wall  "B" button  "T" inactive trap  "A" active trap
@@ -30,111 +31,111 @@ export const BRANES: RawBraneInitial[] = [
   {
     name: "Add",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#  S #",
       "   ## ",
       " #####",
       "##### ",
       " ##   ",
       "#    #",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "      ",
       "      ",
       "      ",
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
   },
   {
     name: "Eus",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "GGGGGG",
       "GG##GG",
       "GG#GGG",
       "GGGGGG",
       "GGG GG",
       "GGGSG#",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "      ",
       "      ",
       "      ",
       "      ",
       "      ",
       "     R",
-    ],
+    ]),
     player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
   },
   //{
   //  name: "Bee",
   //  // prettier-ignore
-  //  board: [
+  //  board: parseBoard([
   //    "  ### ",
   //    " ## ##",
   //    " #   #",
   //    " S ## ",
   //    "#   ##",
   //    "##### ",
-  //  ],
+  //  ]),
   //  // prettier-ignore
-  //  entities: [
+  //  entities: parseEntities([
   //    "      ",
   //    "      ",
   //    "      ",
   //    " B    ",
   //    "      ",
   //    "R     ",
-  //  ],
+  //  ]),
   //  player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
   //},
   {
     name: "Mon",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "B#####",
       "#GGGG#",
       "#G#GG#",
       "#GG#G#",
       "#GGGG#",
       "#####S",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "     R",
       "      ",
       "      ",
       "      ",
       "    R ",
       "R     ",
-    ],
+    ]),
     player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
   },
   {
     name: "Tan",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#G##G#",
       "GG##GG",
       "#G##G#",
       "##SG##",
       "#G##G#",
       "##GG##",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "~H  H~",
       "HH  HH",
       "~H~~H~",
       "   H  ",
       " H~ H ",
       "  HH  ",
-    ],
+    ]),
     player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
   },
   {
@@ -162,67 +163,67 @@ export const BRANES: RawBraneInitial[] = [
   {
     name: "Lev",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#TTS##",
       "TT####",
       "#TT#TT",
       "TT##TT",
       "TTTTT#",
       "##TT##",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "C     ",
       "      ",
       "   W  ",
       "      ",
       "      ",
       "W     ",
-    ],
+    ]),
     player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
   },
   {
     name: "Lev-glass",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#GGS##",
       "GG####",
       "#GG#GG",
       "GG##GG",
       "GGGGG#",
       "##GG##",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "C     ",
       "      ",
       "   W  ",
       "      ",
       "      ",
       "W     ",
-    ],
+    ]),
     player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
   },
   {
     name: "Cif",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "W#   W",
       " # # #",
       " #  # ",
       "# #   ",
       "#  #  ",
       "W# S W",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "      ",
       "      ",
       "      ",
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     player: { row: 4, col: 3, facing: "down", staffContent: "empty" },
   },
 ];
@@ -231,122 +232,122 @@ export const BRANDS: RawBrand[] = [
   {
     name: "Add",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#    #",
       "   ## ",
       " #####",
       "##### ",
       " ##   ",
       "#    #"
-    ],
+    ]),
   },
   {
     name: "Eus",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "##  ##",
       "  ##  ",
       "##   #",
       "### ##",
       "## ###",
       "##  ##"
-    ],
+    ]),
   },
   {
     name: "Bee",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "     #",
       "  ##  ",
       "###  #",
       "#  ###",
       "##  ##",
       "###  #"
-    ],
+    ]),
   },
   {
     name: "Mon",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#   ##",
       " ### #",
       "##  ##",
       " ### #",
       "#   ##",
       "###   "
-    ],
+    ]),
   },
   {
     name: "Tan",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "# ## #",
       "  ##  ",
       "# ## #",
       "##  ##",
       "# ## #",
       "##  ##"
-    ],
+    ]),
   },
   {
     name: "Gor",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "  ##  ",
       "  ##  ",
       "#  #  ",
       "##   #",
       "####  ",
       "####  "
-    ],
+    ]),
   },
   {
     name: "Lev",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#   ##",
       "  ####",
       "#  #  ",
       "  ##  ",
       "     #",
       "##  ##"
-    ],
+    ]),
   },
   {
     name: "Cif",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "##   #",
       " # # #",
       " #  # ",
       "# #   ",
       "#  #  ",
       "##   #"
-    ],
+    ]),
   },
   {
     name: "Trailer",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "#    #",
       "      ",
       " #  # ",
       "##  ##",
       "      ",
       "# ## #"
-    ],
+    ]),
   },
   {
     name: "Dev",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "##   #",
       "# #  #",
       "#  ## ",
       " ##  #",
       "#  # #",
       "#   ##"
-    ],
+    ]),
   },
 ];
 
@@ -355,6 +356,6 @@ export const KNOWN_CORRECT_PATHS = {
   "Eus/Eus": "LRURDRZLLZLZRRZRDLZDZDZLDR",
   "Eus/Tan wings": "LLRZUDDRDDLRZDURZRLZULUURZRLZRZUDDLDDUZDZ",
   "Lev/Lev": "LZRDDLDRDLLDLULLURURUULDLDU",
-  "Tan/Tan":
-    "RDDDDLUZDZULDZRUZDLUZDZRDDDLLULRZLUZUURRLZDLLUDRZRRRRLZULRZRRLZRRRUDDLLUZUUURLZDUZUDZULLUDRULZDRZUZLZ",
+  // "Tan/Tan":
+  //   "RDDDDLUZDZULDZRUZDLUZDZRDDDLLULRZLUZUURRLZDLLUDRZRRRRLZULRZRRLZRRRUDDLLUZUUURLZDUZUDZULLUDRULZDRZUZLZ",
 } as { [name: string]: string };

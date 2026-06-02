@@ -1,10 +1,10 @@
 import assert from "assert";
 import test from "node:test";
 import { PARTIAL_EUS_STATES } from "../data/PARTIAL_EUS_STATES";
-import { applyAction, renderBoard } from "../gameState";
+import { applyAction, renderState } from "../gameState";
 import { heuristic } from "../heuristic";
 import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "../levels";
-import type { Action, GameState } from "../types";
+import { NO_BURDENS, type Action, type GameState } from "../types";
 import {
   applyPath,
   emptyEntityGrid,
@@ -214,7 +214,7 @@ for (const {
 } of CONSISTENCY_CASES) {
   if (solutionLength == null) continue;
   test(`Heuristic admissibility — ${name}`, () => {
-    const after = applyAction(before, action);
+    const after = applyAction(before, action, NO_BURDENS);
     assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
     const targetBoard = parseBoard(target);
     const hBefore = heuristic(before, targetBoard, requireFinalJump);
@@ -293,7 +293,7 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
         );
         console.log("Next player states:\n", nextPlayerStates.join("\n"));
         console.log(
-          renderBoard({
+          renderState({
             ...level,
             board: parseBoard(level.board),
             entities: emptyEntityGrid(),
@@ -315,7 +315,7 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
           heuristic(state, target, level.requireFinalJump ?? false),
           null,
           2,
-        )}\n${renderBoard(state)}`,
+        )}\n${renderState(state)}`,
       );
     }
   }
@@ -330,7 +330,7 @@ for (let searchName of ["Add/Add", "Eus/Eus"]) {
     let i = Number(iStr);
     let h = heuristic(
       state,
-      parseBoard(BRANDS.find((b) => b.name === brandName)!.board),
+      BRANDS.find((b) => b.name === brandName)!.board,
       true,
     );
     console.log(

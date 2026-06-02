@@ -1,4 +1,12 @@
 export type Direction = "up" | "down" | "left" | "right";
+
+/** Indicates which Burdens the player has active */
+export interface Burdens {
+  wings: boolean;
+  sword: boolean;
+}
+
+export const NO_BURDENS: Burdens = { wings: false, sword: false };
 export type Action = "up" | "down" | "left" | "right" | "staff";
 
 // "empty" = void, "floor" = walkable floor, "glass" = walkable but breaks when stepped off, "stairs" = the stairs, "wall" = impassable and immovable

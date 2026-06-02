@@ -1,8 +1,10 @@
 import { heuristic } from "./heuristic";
 import { countFloorTiles } from "./search";
+import { NO_BURDENS } from "./types";
 import type {
   Action,
   Board,
+  Burdens,
   Cell,
   Direction,
   Entity,
@@ -109,6 +111,9 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         pair.toString(),
       );
 
+      const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
+        pair.toString(),
+      );
       if (
         !triggeredTileCoordStrings.includes(String([r - 1, c])) &&
         r >= 1 &&
@@ -311,11 +316,11 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
 export function applyAction(
   state: GameState,
   action: Action,
-  hasWings = false,
+  burdens: Burdens,
 ): GameState | null {
   const { board, entities, player } = state;
   const { row, col, facing, staffContent } = player;
-  const wingsActive = hasWings && (player.wingsActive ?? false);
+  const wingsActive = burdens.wings && (player.wingsActive ?? false);
   //const swordActive = hasSword && (player.swordActive ?? false);
   //const endlessActive = hasEndless && (player.endlessActive ?? false);
 
@@ -835,10 +840,8 @@ export function stateKey(state: GameState): string {
 // requires "solid tile present" or "empty", not a specific solid type.
 export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
   if (cell === "stairs") {
-    // Stairs never matches target.
-    return false;
+    return cell === "stairs";
   } else if (target === "empty") {
-    //
     return cell === "empty";
   } else {
     // Process of elimination: target is not empty and could never be stairs, so it must be one floor, glass, wall, button, trap_inactive, or trap_active. However we've also pruned cell === stairs, so we can just test if cell is empty now.
@@ -856,6 +859,11 @@ export function isGoal(
     if (getCell(state.board, state.player.row, state.player.col) !== "empty")
       return false;
   }
+  // console.debug(
+  //   state.board.map((row, r) =>
+  //     row.map((cell, c) => cellMatchesTarget(cell, getCell(target, r, c))),
+  //   ),
+  // );
   return state.board.every((row, r) =>
     row.every((cell, c) => cellMatchesTarget(cell, getCell(target, r, c))),
   );
@@ -865,18 +873,19 @@ export function replayPath(
   initial: GameState,
   path: Action[],
   target: Board,
+  burdens: Burdens = NO_BURDENS,
   requireFinalJump = true,
 ): void {
   console.log("\n--- Solution replay ---");
   let state = initial;
-  console.log(`\nStep 0 (initial):\n${renderBoard(state)}\n`);
+  console.log(`\nStep 0 (initial):\n${renderState(state)}\n`);
   for (let i = 0; i < path.length; i++) {
     const action = path[i]!;
-    state = applyAction(state, action)!;
+    state = applyAction(state, action, burdens)!;
     console.log(
       `Step ${i + 1}: ${action} | h: ${
         heuristic(state, target, requireFinalJump).total
-      }\n${renderBoard(state)}\n`,
+      }\n${renderState(state)}\n`,
     );
     if (isGoal(state, target, requireFinalJump)) {
       console.log("Goal reached!");
@@ -904,10 +913,10 @@ function renderCellFloor(cell: Cell) {
       floorChar = "█B";
       break;
     case "trap_inactive":
-      floorChar = "ΘΘ";
+      floorChar = "◖◗";
       break;
     case "trap_active":
-      floorChar = "ϴϴ";
+      floorChar = "<>";
       break;
     case "empty":
       floorChar = "  ";
@@ -919,7 +928,7 @@ function renderCellFloor(cell: Cell) {
   return floorChar;
 }
 
-export function renderBoard(state: GameState, requiredTiles?: number): string {
+export function renderState(state: GameState, requiredTiles?: number): string {
   const { board, entities, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
     // Priority: player arrow > rock > board cell
@@ -970,4 +979,15 @@ export function renderBoard(state: GameState, requiredTiles?: number): string {
       state.player.staffContent,
     )}]${wingsIndicator}\n`
   );
+}
+
+// TODO: Rename this to renderBoard and above to renderState, and DRY them out
+export function renderBoard(board: Board): string {
+  const cellChar = (cell: Cell, r: number, c: number): string => {
+    return renderCellFloor(cell);
+  };
+  const rows = board.map(
+    (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
+  );
+  return ["┌────────────┐", ...rows, "└────────────┘"].join("\n");
 }

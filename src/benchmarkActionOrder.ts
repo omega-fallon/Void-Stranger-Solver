@@ -13,16 +13,44 @@ function permutations<T>(arr: T[]): T[][] {
   );
 }
 
+// ── Symmetry helpers ──────────────────────────────────────────────────────────
+
+const swapLR = (a: Action): Action =>
+  a === "left" ? "right"
+  : a === "right" ? "left"
+  : a;
+
+const swapUD = (a: Action): Action =>
+  a === "up" ? "down"
+  : a === "down" ? "up"
+  : a;
+
+/**
+ * Returns the lexicographically smallest label among a permutation and its
+ * three symmetric variants (L↔R swap, U↔D swap, both), so that all four map
+ * to the same canonical key.
+ */
+function canonicalKey(actions: Action[]): string {
+  return [
+    actions,
+    actions.map(swapLR),
+    actions.map(swapUD),
+    actions.map((a) => swapLR(swapUD(a))),
+  ]
+    .map(actionsToString)
+    .sort()[0]!;
+}
+
 async function main() {
   const rawBrane = BRANES.find((l) => l.name === "Eus")!;
   const rawBrand = BRANDS.find((l) => l.name === "Eus")!;
 
   const initial = {
-    board: parseBoard(rawBrane.board),
+    board: rawBrane.board,
     entities: emptyEntityGrid(),
     player: rawBrane.player,
   };
-  const target = parseBoard(rawBrand.board);
+  const target = rawBrand.board;
 
   const BASE_ACTIONS: Action[] = ["left", "right", "up", "down", "staff"];
   const allPerms = permutations(BASE_ACTIONS);
@@ -63,10 +91,51 @@ async function main() {
 
   results.sort((a, b) => a.nodesExplored - b.nodesExplored);
 
-  const divider = "─".repeat(44);
-  console.log(`\n${divider}`);
+  // ── Grouped by symmetry (L↔R, U↔D) ────────────────────────────────────────
+
+  const groupMap = new Map<string, BenchResult[]>();
+  for (const r of results) {
+    const key = canonicalKey(r.actions);
+    const g = groupMap.get(key) ?? [];
+    g.push(r);
+    groupMap.set(key, g);
+  }
+
+  const groups = [...groupMap.values()]
+    .map((members) => ({
+      // Sort members alphabetically by label so the display is deterministic.
+      members: [...members].sort((a, b) =>
+        actionsToString(a.actions).localeCompare(actionsToString(b.actions)),
+      ),
+      avgNodes: Math.round(
+        members.reduce((sum, r) => sum + r.nodesExplored, 0) / members.length,
+      ),
+    }))
+    .sort((a, b) => a.avgNodes - b.avgNodes);
+
+  const div1 = "─".repeat(52);
+  console.log(
+    `\n=== Grouped by L↔R / U↔D symmetry (${groups.length} groups) ===`,
+  );
+  console.log(div1);
+  console.log(`Rank   ${"Avg Nodes".padStart(14)}   Equivalent orderings`);
+  console.log(div1);
+  for (let i = 0; i < groups.length; i++) {
+    const { members, avgNodes } = groups[i]!;
+    const rank = String(i + 1).padStart(3);
+    const avgStr = avgNodes.toLocaleString().padStart(14);
+    const labels = members.map((m) => actionsToString(m.actions)).join("  ");
+    console.log(`${rank}.  ${avgStr}   ${labels}`);
+  }
+  console.log(div1);
+
+  // ── Full individual ranking ─────────────────────────────────────────────────
+
+  const div2 = "─".repeat(44);
+  console.log(`\n=== All ${results.length} orderings ===`);
+  console.log(div2);
   console.log(`Rank  Order   ${"Nodes".padStart(14)}   Time`);
-  console.log(divider);
+  console.log(div2);
   for (let i = 0; i < results.length; i++) {
     const { actions, nodesExplored, elapsedMs, found } = results[i]!;
     const rank = String(i + 1).padStart(3);
@@ -79,7 +148,7 @@ async function main() {
       }`,
     );
   }
-  console.log(divider);
+  console.log(div2);
 }
 
 main();
