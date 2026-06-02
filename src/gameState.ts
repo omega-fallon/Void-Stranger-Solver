@@ -654,10 +654,10 @@ function renderCellFloor(cell: Cell) {
       floorChar = "█B";
       break;
     case "trap_inactive":
-      floorChar = "ΘΘ";
+      floorChar = "◖◗";
       break;
     case "trap_active":
-      floorChar = "ϴϴ";
+      floorChar = "<>";
       break;
     case "empty":
       floorChar = "  ";
