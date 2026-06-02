@@ -69,6 +69,11 @@ export function heuristic(
         ) {
           continue;
         }
+        // Ignore activated traps, since they might get dropped for free, or they might
+        // get used as floors for brand matching purposes
+        if (cur === "trap_active") {
+          continue;
+        }
         // The occupied tile is glass but the target wants a solid tile. The glass is doomed
         // to break whenever the player leaves, so the cell will need a replacement. Only
         // apply for full solves (requireFinalJump): in intermediate tests the player may
