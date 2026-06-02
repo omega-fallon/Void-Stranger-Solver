@@ -110,10 +110,6 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
         pair.toString(),
       );
-
-      const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
-        pair.toString(),
-      );
       if (
         !triggeredTileCoordStrings.includes(String([r - 1, c])) &&
         r >= 1 &&
@@ -675,7 +671,7 @@ export function applyAction(
 
       // Wings activate if the player steps into the void.
       const newWingsActive =
-        hasWings && getCell(newBoard, newRow, newCol) === "empty";
+        burdens.wings && getCell(newBoard, newRow, newCol) === "empty";
         
       // Move entities
       if (anyBeaversOrMimics(newEntities)) {
