@@ -7,7 +7,8 @@ import {
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
-import type { Action, Board, GameState } from "../types";
+import { NO_BURDENS } from "../types";
+import type { Action, Board, Burdens, GameState } from "../types";
 import { actionsToString } from "../utils";
 import {
   countFloorTiles,
@@ -16,6 +17,8 @@ import {
   type SearchOptions,
   type SearchResult,
 } from "./shared";
+
+const verbose = Number(process.env.VERBOSE);
 
 /**
  * Shared IDA* DFS kernel used by both the main search and the progress sampler.
@@ -26,14 +29,14 @@ import {
  * `onNode` is called for each node that passes the f-cost check.  Return "found"
  * to stop and preserve the path; return "continue" to recurse into children.
  */
-async function idaDfs(
+export async function idaDfs(
   state: GameState,
   g: number,
   path: Action[],
   threshold: number,
   visited: Set<string>,
   target: Board,
-  hasWings: boolean,
+  burdens: Burdens,
   numFloorTilesInSolution: number,
   requireFinalJump: boolean,
   counters: DfsCounters,
@@ -60,13 +63,13 @@ async function idaDfs(
   const nodeDecision = await onNode(state, path, g, h);
   if (nodeDecision === "found") return "found";
 
-  if (isPruned(state, target, hasWings, numFloorTilesInSolution))
+  if (isPruned(state, target, burdens, numFloorTilesInSolution))
     return Infinity;
 
   let min = Infinity;
 
   for (const action of actions) {
-    const next = applyAction(state, action, hasWings);
+    const next = applyAction(state, action, burdens);
     if (!next) continue;
 
     // Loop prevention speeds up searches by about 6x at threshold 20, 4x at threshold 26
@@ -86,7 +89,7 @@ async function idaDfs(
       threshold,
       visited,
       target,
-      hasWings,
+      burdens,
       numFloorTilesInSolution,
       requireFinalJump,
       counters,
@@ -114,7 +117,7 @@ async function idaDfs(
 async function sampleProgressCheckpoints(
   initial: GameState,
   target: Board,
-  hasWings: boolean,
+  burdens: Burdens,
   requireFinalJump: boolean,
   actions: Action[],
   numSamples = 200,
@@ -133,10 +136,10 @@ async function sampleProgressCheckpoints(
     initial,
     0,
     [],
-    22,
+    8, // TODO: Skip this entirely when knownCorrectPath is some tiny number (as seen in unit tests)
     visited,
     target,
-    hasWings,
+    burdens,
     numFloorTilesInSolution,
     requireFinalJump,
     counters,
@@ -161,12 +164,12 @@ async function sampleProgressCheckpoints(
 export async function idaStar({
   initial,
   target,
-  verbose = 0,
+  verbose = 0, // TODO: Clean up whether I pass this as variable vs use env variable everywhere
   slow = false,
   requireFinalJump = true,
   initialThreshold,
   knownCorrectPath = [],
-  hasWings = false,
+  burdens = NO_BURDENS,
   actions = ACTIONS,
 }: SearchOptions): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
@@ -183,7 +186,7 @@ export async function idaStar({
       await sampleProgressCheckpoints(
         initial,
         target,
-        hasWings,
+        burdens,
         requireFinalJump,
         actions,
       )
@@ -214,7 +217,7 @@ export async function idaStar({
       threshold,
       visited,
       target,
-      hasWings,
+      burdens,
       numFloorTilesInSolution,
       requireFinalJump,
       counters,
@@ -243,7 +246,7 @@ export async function idaStar({
               `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
               `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct: ${actionsToString(
                 path,
-              )}\n` +
+              )} / ${actionsToString(knownCorrectPath)}\n` +
               `${knownCorrectPath.length} | ${(
                 estimateProgress(path, progressSamples) * 100
               ).toFixed(9)}% through search space (solution is ${(

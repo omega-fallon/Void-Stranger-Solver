@@ -7,7 +7,8 @@ import {
 } from "../gameState";
 import { heuristic } from "../heuristic";
 import { MinHeap } from "../priorityQueue";
-import type { Action, Board, SearchNode } from "../types";
+import { NO_BURDENS } from "../types";
+import type { Action, Burdens, SearchNode } from "../types";
 import {
   countFloorTiles,
   isPruned,
@@ -16,12 +17,12 @@ import {
 } from "./shared";
 
 /**
- * Frontier A* — standard best-first search using a min-heap (the "frontier")
- * ordered by f = g + h, plus a closed set to avoid re-expanding states.
+ * Standard A* — best-first search using a min-heap ordered by f = g + h, plus
+ * a closed set to avoid re-expanding states.
  *
- * Unlike IDA* and RBFS, Frontier A* never re-explores a node once it has been
- * expanded (consistent heuristic guarantees the first expansion is optimal).
- * This avoids the redundant re-traversal that IDA* performs across threshold
+ * Unlike IDA* and RBFS, A* never re-explores a node once it has been expanded
+ * (a consistent heuristic guarantees the first expansion is optimal).  This
+ * avoids the redundant re-traversal that IDA* performs across threshold
  * iterations, at the cost of keeping the entire frontier in memory.
  *
  * Path reconstruction follows parent pointers stored in each SearchNode.
@@ -29,13 +30,13 @@ import {
  * Note: `initialThreshold` is not used — A* finds the optimal solution
  * without an external threshold.
  */
-export async function frontierAStar({
+export async function aStar({
   initial,
   target,
   verbose = 0,
   slow = false,
   requireFinalJump = true,
-  hasWings = false,
+  burdens = NO_BURDENS,
   actions = ACTIONS,
 }: SearchOptions): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
@@ -88,24 +89,20 @@ export async function frontierAStar({
       const elapsedMs = performance.now() - start;
       if (verbose) {
         console.log(
-          `Frontier A* done | ${nodesExplored} nodes | ${elapsedMs.toFixed(0)}ms | ${(
+          `A* done | ${nodesExplored} nodes | ${elapsedMs.toFixed(0)}ms | ${(
             nodesExplored /
             (elapsedMs / 1000)
           ).toFixed(0)} nodes/sec`,
         );
       }
-      return {
-        path: reconstructPath(current),
-        nodesExplored,
-        elapsedMs,
-      };
+      return { path: reconstructPath(current), nodesExplored, elapsedMs };
     }
 
-    if (isPruned(current.state, target, hasWings, numFloorTilesInSolution))
+    if (isPruned(current.state, target, burdens, numFloorTilesInSolution))
       continue;
 
     for (const action of actions) {
-      const next = applyAction(current.state, action, hasWings);
+      const next = applyAction(current.state, action, burdens);
       if (!next) continue;
       if (closed.has(stateKey(next))) continue;
 
@@ -123,14 +120,14 @@ export async function frontierAStar({
   const elapsedMs = performance.now() - start;
   if (verbose) {
     console.log(
-      `Frontier A* done (no solution) | ${nodesExplored} nodes | ${elapsedMs.toFixed(0)}ms`,
+      `A* done (no solution) | ${nodesExplored} nodes | ${elapsedMs.toFixed(0)}ms`,
     );
   }
   return { path: null, nodesExplored, elapsedMs };
 }
 
 /** Walks the parent-pointer chain from `node` back to the root to rebuild the action sequence. */
-function reconstructPath(node: SearchNode): Action[] {
+export function reconstructPath(node: SearchNode): Action[] {
   const path: Action[] = [];
   let current: SearchNode | null = node;
   while (current !== null && current.action !== null) {

@@ -1,17 +1,10 @@
 import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
-import { applyAction, replayPath } from "../gameState";
-import { search } from "../search";
-import type {
-  Action,
-  Board,
-  Cell,
-  EntityGrid,
-  GameState,
-  PlayerState,
-} from "../types";
-import { emptyEntityGrid, parseBoard, parseEntities } from "../utils";
+import { replayPath } from "../gameState";
 import { RawLevel } from "../levels";
+import { search } from "../search";
+import type { Action, Board, Cell } from "../types";
+import { emptyEntityGrid, parseBoard, parseEntities } from "../utils";
 
 const PATH_CHARS: Record<string, Action> = {
   U: "up",
@@ -20,43 +13,6 @@ const PATH_CHARS: Record<string, Action> = {
   R: "right",
   Z: "staff",
 };
-
-/**
- * Applies a compact path string to an initial board state and returns the
- * resulting GameState after each step.
- *
- * Path characters: U=up  D=down  L=left  R=right  Z=staff (use staff)
- *
- * Throws if a character is unrecognised or the resulting action is invalid
- * (e.g. moving into a wall), so call-site mistakes surface immediately.
- */
-export function applyPath(
-  initial: { board: string[]; player: PlayerState; entities: EntityGrid },
-  pathStr: string,
-): GameState[] {
-  const states: GameState[] = [];
-  let state: GameState = {
-    board: parseBoard(initial.board),
-    player: initial.player,
-    entities: initial.entities,
-  };
-
-  for (let i = 0; i < pathStr.length; i++) {
-    const char = pathStr[i]!;
-    const action = PATH_CHARS[char];
-    if (!action)
-      throw new Error(`Unknown path character "${char}" at index ${i}`);
-    const next = applyAction(state, action);
-    if (!next)
-      throw new Error(
-        `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked`,
-      );
-    states.push(next);
-    state = next;
-  }
-
-  return states;
-}
 
 const CELL_CHARS: Record<Cell, string> = {
   empty: " ",
@@ -83,23 +39,26 @@ type TestLevel = Omit<RawLevel, "name"> & {
 
 async function runSearchTest(t: TestContext, level: TestLevel) {
   const initial = {
-    board: parseBoard(level.initial.board),
-    entities:
-      level.initial.entities ?
-        parseEntities(level.initial.entities)
-      : emptyEntityGrid(),
+    board: level.initial.board,
+    entities: level.initial.entities ?? emptyEntityGrid(),
     player: level.initial.player,
   };
-  const target = parseBoard(level.target);
+  const target = level.target;
   const requireFinalJump = level.requireFinalJump ?? true;
   const { path } = await search({
     initial,
     target,
     requireFinalJump,
-    hasWings: level.hasWings ?? false,
+    burdens: { wings: level.hasWings ?? false, sword: false },
   });
   if (process.env.VERBOSE && path)
-    replayPath(initial, path, target, requireFinalJump);
+    replayPath(
+      initial,
+      path,
+      target,
+      { wings: level.hasWings ?? false, sword: false },
+      requireFinalJump,
+    );
   assert.ok(path !== null, "No solution found");
   if (level.solutionLength)
     assert.equal(
@@ -112,23 +71,26 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
 
 async function assertSearchFailure(t: TestContext, level: TestLevel) {
   const initial = {
-    board: parseBoard(level.initial.board),
-    entities:
-      level.initial.entities ?
-        parseEntities(level.initial.entities)
-      : emptyEntityGrid(),
+    board: level.initial.board,
+    entities: level.initial.entities ?? emptyEntityGrid(),
     player: level.initial.player,
   };
-  const target = parseBoard(level.target);
+  const target = level.target;
   const requireFinalJump = level.requireFinalJump ?? true;
   const { path } = await search({
     initial,
     target,
     requireFinalJump,
-    hasWings: level.hasWings ?? false,
+    burdens: { wings: level.hasWings ?? false, sword: false },
   });
   if (process.env.VERBOSE && path)
-    replayPath(initial, path, target, requireFinalJump);
+    replayPath(
+      initial,
+      path,
+      target,
+      { wings: level.hasWings ?? false, sword: false },
+      requireFinalJump,
+    );
   assert.equal(path, null, "Solution was found, but should not have been");
 }
 
@@ -136,25 +98,25 @@ test("Solves Add's brand", async (t) => {
   await runSearchTest(t, {
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "#  S #",
         "   ## ",
         " #####",
         "##### ",
         " ##   ",
         "#    #",
-      ],
+      ]),
       player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "#    #",
       "   ## ",
       " #####",
       "##### ",
       " ##   ",
       "#    #",
-    ],
+    ]),
     solutionLength: 5,
   });
 });
@@ -163,25 +125,25 @@ test("Walks over glass", async (t) => {
   await runSearchTest(t, {
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "#G#   ",
         " ###  ",
         "  S   ",
         "      ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 0, col: 0, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "# #   ",
       " ###  ",
       "      ",
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     solutionLength: 5,
   });
 });
@@ -190,25 +152,25 @@ test("Moves a piece of glass", async (t) => {
   await runSearchTest(t, {
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         " G#G  ",
         " ###  ",
         "   #  ",
         "   S  ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "  #   ",
       " ###G ",
       "   #  ",
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     solutionLength: 9,
   });
 });
@@ -217,25 +179,25 @@ test("Move a piece of glass to destroy all the glass", async (t) => {
   await runSearchTest(t, {
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "      ",
         "GG##GG",
         "  #   ",
         "  S   ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "      ",
       "  ##  ",
       "  #   ",
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     solutionLength: 14,
   });
 });
@@ -245,18 +207,18 @@ test("Fly over a gap", async (t) => {
     hasWings: true,
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "      ",
         " # #S ",
         "      ",
         "      ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "      ",
       " # #  ",
       "      ",
@@ -264,7 +226,7 @@ test("Fly over a gap", async (t) => {
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     solutionLength: 4,
   });
 });
@@ -274,18 +236,18 @@ test("Fly over a gap multiple times", async (t) => {
     hasWings: true,
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "      ",
         " # ## ",
         "  #   ",
         "  S   ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "      ",
       "## #  ",
       "  #   ",
@@ -293,7 +255,7 @@ test("Fly over a gap multiple times", async (t) => {
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     solutionLength: 10,
   });
 });
@@ -303,18 +265,18 @@ test("Should not fly over a gap more than 1 wide", async (t) => {
     hasWings: true,
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "      ",
         " #  #S",
         "      ",
         "      ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "      ",
       " #  # ",
       "      ",
@@ -322,7 +284,7 @@ test("Should not fly over a gap more than 1 wide", async (t) => {
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
   });
 });
 
@@ -331,18 +293,18 @@ test("Grab a tile while flying", async (t) => {
     hasWings: true,
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "      ",
         " # #  ",
         " S    ",
         "      ",
         "      ",
         "      ",
-      ],
+      ]),
       player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "      ",
       "##    ",
       "      ",
@@ -350,7 +312,7 @@ test("Grab a tile while flying", async (t) => {
       "      ",
       "      ",
       "      ",
-    ],
+    ]),
     solutionLength: 8,
   });
 });
@@ -359,23 +321,23 @@ test("Eus/Eus search correctness regression", async (t) => {
   await runSearchTest(t, {
     initial: {
       // prettier-ignore
-      board: [
+      board: parseBoard([
         "GG  GG",
         "  ##  ",
         "GG G G",
         "GGGGGG",
         "GGG GG",
         "GGGSGG",
-      ],
+      ]),
       // prettier-ignore
-      entities: [
+      entities: parseEntities([
         "      ",
         "      ",
         "      ",
         "      ",
         "      ",
         "     R",
-      ],
+      ]),
       player: {
         row: 2,
         col: 3,
@@ -385,14 +347,14 @@ test("Eus/Eus search correctness regression", async (t) => {
       },
     },
     // prettier-ignore
-    target: [
+    target: parseBoard([
       "GG  GG",
       "  ##  ",
       "GG   G",
       "GGG GG",
       "GG #GG",
       "GG  GG",
-    ],
+    ]),
     solutionLength: 7,
   });
 });

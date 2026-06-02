@@ -6,7 +6,8 @@ import {
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
-import type { Action, Board, GameState } from "../types";
+import { NO_BURDENS } from "../types";
+import type { Action, Board, Burdens, GameState } from "../types";
 import { actionsToString } from "../utils";
 import {
   countFloorTiles,
@@ -44,7 +45,7 @@ async function rbfsDfs(
   path: Action[],
   visited: Set<string>,
   target: Board,
-  hasWings: boolean,
+  burdens: Burdens,
   numFloorTilesInSolution: number,
   requireFinalJump: boolean,
   counters: DfsCounters,
@@ -69,7 +70,7 @@ async function rbfsDfs(
   const nodeDecision = await onNode(state, path, g, h);
   if (nodeDecision === "found") return "found";
 
-  if (isPruned(state, target, hasWings, numFloorTilesInSolution))
+  if (isPruned(state, target, burdens, numFloorTilesInSolution))
     return Infinity;
 
   // Build the successor list, computing each child's f up-front so we can sort.
@@ -77,7 +78,7 @@ async function rbfsDfs(
   const successors: Successor[] = [];
 
   for (const action of actions) {
-    const next = applyAction(state, action, hasWings);
+    const next = applyAction(state, action, burdens);
     if (!next) continue;
 
     const key = stateKey(next);
@@ -121,7 +122,7 @@ async function rbfsDfs(
       path,
       visited,
       target,
-      hasWings,
+      burdens,
       numFloorTilesInSolution,
       requireFinalJump,
       counters,
@@ -137,7 +138,6 @@ async function rbfsDfs(
     // Update this successor's recorded f with the best cost found in its subtree,
     // then re-sort so the new best rises to the front.
     best.f = result;
-    console.log("Successors:", successors);
     successors.sort((a, b) => a.f - b.f);
   }
 }
@@ -156,7 +156,7 @@ export async function rbfs({
   slow = false,
   requireFinalJump = true,
   knownCorrectPath = [],
-  hasWings = false,
+  burdens = NO_BURDENS,
   actions = ACTIONS,
 }: SearchOptions): Promise<SearchResult> {
   const numFloorTilesInSolution = countFloorTiles(target);
@@ -185,7 +185,7 @@ export async function rbfs({
     path,
     visited,
     target,
-    hasWings,
+    burdens,
     numFloorTilesInSolution,
     requireFinalJump,
     counters,
@@ -210,7 +210,7 @@ export async function rbfs({
         console.log(
           `Explored: ${counters.nodesExplored} | ${counters.loopsPrevented} loops prevented | ` +
             `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
-            `Path: ${g} | f=${g + h} (${g}g+${h}h) | ${amountOfPathFound} correct: ${actionsToString(path)}\n` +
+            `Path: ${g} | f=${g + h} (${g}g+${h}h) | ${amountOfPathFound} correct: ${actionsToString(path)} / ${actionsToString(knownCorrectPath)}\n` +
             `Action: ${action}\n` +
             `${renderBoard(state, numFloorTilesInSolution)}`,
         );

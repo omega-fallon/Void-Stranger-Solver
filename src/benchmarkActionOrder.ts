@@ -46,11 +46,11 @@ async function main() {
   const rawBrand = BRANDS.find((l) => l.name === "Eus")!;
 
   const initial = {
-    board: parseBoard(rawBrane.board),
+    board: rawBrane.board,
     entities: emptyEntityGrid(),
     player: rawBrane.player,
   };
-  const target = parseBoard(rawBrand.board);
+  const target = rawBrand.board;
 
   const BASE_ACTIONS: Action[] = ["left", "right", "up", "down", "staff"];
   const allPerms = permutations(BASE_ACTIONS);

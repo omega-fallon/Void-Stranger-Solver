@@ -1,6 +1,8 @@
 import { renderBoard, applyAction } from "./gameState";
+import { NO_BURDENS } from "./types";
 import type {
   Action,
+  Burdens,
   PlayerState,
   GameState,
   Cell,
@@ -8,6 +10,8 @@ import type {
   Entity,
   EntityGrid,
 } from "./types";
+
+let VERBOSE = Number(process.env.VERBOSE);
 
 const PATH_CHARS: Record<string, Action> = {
   U: "up",
@@ -24,11 +28,19 @@ const ACTION_CHARS: Record<Action, string> = {
   right: "R",
   staff: "Z",
 };
+const ACTION_STRINGS: Record<string, Action> = Object.fromEntries(
+  Object.entries(ACTION_CHARS).map(([s, c]) => [c, s as Action]),
+);
 
 /** Converts a list of actions back to the compact path string. Inverse of applyPath's input. */
 export function actionsToString(actions: Action[]): string {
   return actions.map((a) => ACTION_CHARS[a]).join("");
 }
+
+export function parseActions(actionString: string): Action[] {
+  return actionString.split("").map((c) => ACTION_STRINGS[c]!);
+}
+
 /**
  * Applies a compact path string to an initial board state and returns the
  * resulting GameState after each step.
@@ -40,31 +52,35 @@ export function actionsToString(actions: Action[]): string {
  */
 
 export function applyPath(
-  initial: { board: string[]; entities?: string[]; player: PlayerState },
+  initial: { board: Board; entities?: EntityGrid; player: PlayerState },
   pathStr: string,
+  burdens: Burdens = NO_BURDENS,
 ): GameState[] {
   let state: GameState = {
-    board: parseBoard(initial.board),
-    entities:
-      initial.entities ? parseEntities(initial.entities) : emptyEntityGrid(),
+    board: initial.board,
+    entities: initial.entities ?? emptyEntityGrid(),
     player: initial.player,
   };
   const states: GameState[] = [state];
 
   for (let i = 0; i < pathStr.length; i++) {
-    if (process.env.VERBOSE) console.log(renderBoard(state));
+    if (VERBOSE >= 2) console.log(renderBoard(state));
     const char = pathStr[i]!;
     const action = PATH_CHARS[char];
     if (!action)
       throw new Error(`Unknown path character "${char}" at index ${i}`);
-    const next = applyAction(state, action);
-    if (!next)
+    const next = applyAction(state, action, burdens);
+    if (!next) {
+      if (VERBOSE >= 1) console.log(renderBoard(state));
       throw new Error(
         `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked`,
       );
+    }
     states.push(next);
     state = next;
   }
+
+  if (VERBOSE >= 2) console.log(renderBoard(state));
 
   return states;
 }

@@ -1,4 +1,7 @@
-import type { Action, Board, EntityGrid, GameState } from "../types";
+import { NO_BURDENS } from "../types";
+import type { Action, Board, Burdens, EntityGrid, GameState } from "../types";
+
+const verbose = Number(process.env.VERBOSE);
 
 export interface DfsCounters {
   nodesExplored: number;
@@ -20,9 +23,11 @@ export interface SearchOptions {
   requireFinalJump?: boolean;
   initialThreshold?: number | undefined;
   knownCorrectPath?: Action[] | undefined;
-  hasWings?: boolean;
+  burdens?: Burdens;
   actions?: Action[];
-  algorithm?: "idaStar" | "rbfs" | "frontierAStar";
+  algorithm?: "idaStar" | "rbfs" | "aStar" | "aStarThenIdaStar";
+  /** Only used by `aStarThenIdaStar`: how many layers A* expands before handing off to IDA*. Default 10. */
+  frontierDepth?: number;
 }
 
 export function countFloorTiles(board: Board): number {
@@ -98,14 +103,14 @@ export function staffBanned(entities: EntityGrid): boolean {
 export function isPruned(
   state: GameState,
   target: Board,
-  hasWings: boolean,
+  burdens: Burdens,
   numFloorTilesInSolution: number,
 ): boolean {
   const { row, col } = state.player;
 
   // All Watcher statues triggered.
   if (allWatchersTriggeredQuestion(state.entities)) {
-    console.log("INF: all watchers");
+    if (verbose >= 3) console.log("INF: all watchers");
     return true;
   }
 
@@ -114,15 +119,18 @@ export function isPruned(
   if (
     staffBanned(state.entities) &&
     state.player.staffContent !== "stairs" &&
-    !hasWings
+    !burdens.wings
   ) {
-    console.log("INF: staff banned, not holding stairs, no wings");
+    if (verbose >= 3)
+      console.log("INF: staff banned, not holding stairs, no wings");
     return true;
   }
 
   // Player is in the void but not at goal — dead end.
   // Exception: if wings are active the player is still airborne and can land.
   if (state.board[row]?.[col] === "empty" && !state.player.wingsActive) {
+    if (verbose >= 3)
+      console.log("INF: Player is on empty tile but wings are not active");
     return true;
   }
 

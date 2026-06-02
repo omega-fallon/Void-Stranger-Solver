@@ -24,6 +24,7 @@ const { values } = parseArgs({
     verbose: { type: "string", short: "v" },
     slow: { type: "boolean", short: "s" },
     algorithm: { type: "string", short: "a" },
+    frontierDepth: { type: "string" },
   },
 });
 
@@ -41,7 +42,8 @@ Options:
   -s, --slow                      Add 100ms delay per node during search
       --initialThreshold <n>      Override initial IDA* cost threshold
       --cheatFirstNSteps <n>      Skip first N steps using the known correct path
-  -a, --algorithm <name>          Search algorithm: idaStar (default) | rbfs | frontierAStar
+  -a, --algorithm <name>          Search algorithm: idaStar (default) | rbfs | aStar | aStarThenIdaStar
+      --frontierDepth <n>         A* layers before IDA* tail in aStarThenIdaStar (default 10)
 
 Available branes:
 ${be_list}
@@ -69,12 +71,11 @@ if (!rawBrand) {
 }
 
 const INITIAL_STATE: GameState = {
-  board: parseBoard(rawLevel.board),
-  entities:
-    rawLevel.entities ? parseEntities(rawLevel.entities) : emptyEntityGrid(),
+  board: rawLevel.board,
+  entities: rawLevel.entities ?? emptyEntityGrid(),
   player: rawLevel.player,
 };
-const TARGET_BOARD: Board = parseBoard(rawBrand.board);
+const TARGET_BOARD: Board = rawBrand.board;
 
 const initialThreshold =
   values.initialThreshold ? Number(values.initialThreshold) : undefined;
@@ -116,7 +117,7 @@ async function main() {
     }
     for (let i = 0; i < cheatN; i++) {
       const action = knownCorrectPath[i]!;
-      const next = applyAction(searchState, action, values.wings ?? false);
+      const next = applyAction(searchState, action, { wings: values.wings ?? false, sword: false });
       if (!next) {
         console.error(
           `Cheat step ${i + 1} (${action}) produced an invalid state.`,
@@ -145,11 +146,15 @@ async function main() {
     requireFinalJump: true,
     initialThreshold,
     knownCorrectPath: knownCorrectPath.slice(cheatN),
-    hasWings: values.wings ?? false,
+    burdens: { wings: values.wings ?? false, sword: false },
     algorithm: (values.algorithm ?? "idaStar") as
       | "idaStar"
       | "rbfs"
-      | "frontierAStar",
+      | "aStar"
+      | "aStarThenIdaStar",
+    ...(values.frontierDepth !== undefined ?
+      { frontierDepth: Number(values.frontierDepth) }
+    : {}),
   });
   const elapsedMs = performance.now() - start;
   const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
@@ -166,7 +171,7 @@ async function main() {
   console.log(`Solution found in ${fullPath.length} steps (${perf}):`);
   console.log(actionsToString(fullPath));
 
-  if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD);
+  if (values.verbose) replayPath(INITIAL_STATE, fullPath, TARGET_BOARD, { wings: values.wings ?? false, sword: false });
 
   if (values.wings) {
     console.log(values.brane + "/" + values.brand + " with wings");

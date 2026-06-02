@@ -2,12 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyAction, renderBoard, replayPath } from "../gameState";
 import { emptyEntityGrid } from "../utils";
-import type {
-  Cell,
-  Direction,
-  Entity,
-  GameState,
-  StaffContent,
+import {
+  NO_BURDENS,
+  type Cell,
+  type Direction,
+  type Entity,
+  type GameState,
+  type StaffContent,
 } from "../types";
 
 function makeState(
@@ -32,7 +33,7 @@ test("move into floor updates position and facing", () => {
     [0, 0, "floor"],
     [1, 0, "floor"],
   ]);
-  const r = applyAction(s, "up")!;
+  const r = applyAction(s, "up", NO_BURDENS)!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.facing, "up");
@@ -41,7 +42,7 @@ test("move into floor updates position and facing", () => {
 
 test("move into empty moves player there (exit step)", () => {
   const s = makeState(1, 0, "down", "empty", [[1, 0, "floor"]]);
-  const r = applyAction(s, "up")!;
+  const r = applyAction(s, "up", NO_BURDENS)!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
   assert.equal(r.board[0]![0], "empty"); // destination cell stays empty
@@ -49,7 +50,7 @@ test("move into empty moves player there (exit step)", () => {
 
 test("move out of bounds returns null", () => {
   const s = makeState(0, 0, "up", "empty", [[0, 0, "floor"]]);
-  assert.equal(applyAction(s, "up"), null);
+  assert.equal(applyAction(s, "up", NO_BURDENS), null);
 });
 
 test("move onto stairs returns null (stairs is not walkable)", () => {
@@ -57,7 +58,7 @@ test("move onto stairs returns null (stairs is not walkable)", () => {
     [0, 0, "stairs"],
     [1, 0, "floor"],
   ]);
-  assert.equal(applyAction(s, "up"), null);
+  assert.equal(applyAction(s, "up", NO_BURDENS), null);
 });
 
 // Glass
@@ -67,7 +68,7 @@ test("stepping off glass breaks it", () => {
     [0, 0, "glass"],
     [0, 1, "floor"],
   ]);
-  const r = applyAction(s, "right")!;
+  const r = applyAction(s, "right", NO_BURDENS)!;
   assert.equal(r.player.col, 1);
   assert.equal(r.board[0]![0], "empty"); // glass broke
 });
@@ -77,7 +78,7 @@ test("standing on glass and using staff does not break glass", () => {
     [0, 0, "glass"],
     [0, 1, "floor"],
   ]);
-  const r = applyAction(s, "staff")!;
+  const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.board[0]![0], "glass"); // glass intact
   assert.equal(r.player.staffContent, "floor");
   assert.equal(r.board[0]![1], "empty");
@@ -90,7 +91,7 @@ test("store floor into empty staff", () => {
     [0, 0, "floor"],
     [1, 0, "floor"],
   ]);
-  const r = applyAction(s, "staff")!;
+  const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.player.staffContent, "floor");
   assert.equal(r.board[0]![0], "empty");
   assert.equal(r.player.row, 1); // player did not move
@@ -101,14 +102,14 @@ test("store stairs into empty staff", () => {
     [0, 0, "stairs"],
     [1, 0, "floor"],
   ]);
-  const r = applyAction(s, "staff")!;
+  const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.player.staffContent, "stairs");
   assert.equal(r.board[0]![0], "empty");
 });
 
 test("place floor from staff onto empty cell", () => {
   const s = makeState(1, 0, "up", "floor", [[1, 0, "floor"]]);
-  const r = applyAction(s, "staff")!;
+  const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.board[0]![0], "floor");
   assert.equal(r.player.staffContent, "empty");
 });
@@ -118,17 +119,17 @@ test("staff full + front occupied returns null", () => {
     [0, 0, "floor"],
     [1, 0, "floor"],
   ]);
-  assert.equal(applyAction(s, "staff"), null);
+  assert.equal(applyAction(s, "staff", NO_BURDENS), null);
 });
 
 test("staff empty + front empty returns null", () => {
   const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
-  assert.equal(applyAction(s, "staff"), null);
+  assert.equal(applyAction(s, "staff", NO_BURDENS), null);
 });
 
 test("staff use with front out of bounds returns null", () => {
   const s = makeState(0, 0, "up", "empty", [[0, 0, "floor"]]);
-  assert.equal(applyAction(s, "staff"), null);
+  assert.equal(applyAction(s, "staff", NO_BURDENS), null);
 });
 
 // Combination: glass + movement + staff storage
@@ -140,11 +141,11 @@ test("step off glass then store front floor", () => {
     [0, 2, "floor"],
   ]);
   // Step 1: move right — glass breaks
-  const s1 = applyAction(s0, "right")!;
+  const s1 = applyAction(s0, "right", NO_BURDENS)!;
   assert.equal(s1.board[0]![0], "empty");
   assert.equal(s1.player.col, 1);
   // Step 2: store (0,2) floor
-  const s2 = applyAction(s1, "staff")!;
+  const s2 = applyAction(s1, "staff", NO_BURDENS)!;
   assert.equal(s2.player.staffContent, "floor");
   assert.equal(s2.board[0]![2], "empty");
   assert.equal(s2.board[0]![0], "empty"); // glass still gone
@@ -159,7 +160,7 @@ function withWings(state: GameState): GameState {
 test("stepping into empty activates wings when hasWings=true", () => {
   // Player on floor, adjacent empty cell ahead
   const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, true);
@@ -167,7 +168,7 @@ test("stepping into empty activates wings when hasWings=true", () => {
 
 test("stepping into empty does not activate wings when hasWings=false", () => {
   const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
-  const r = applyAction(s, "up", false)!;
+  const r = applyAction(s, "up", { wings: false, sword: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.wingsActive, false);
 });
@@ -175,7 +176,7 @@ test("stepping into empty does not activate wings when hasWings=false", () => {
 test("glass breaks when stepping off to fly", () => {
   // Player on glass, steps into empty void — glass breaks, wings activate
   const s = makeState(1, 0, "up", "empty", [[1, 0, "glass"]]);
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.wingsActive, true);
   assert.equal(r.board[1]![0], "empty"); // glass broke on departure
@@ -184,7 +185,7 @@ test("glass breaks when stepping off to fly", () => {
 test("flying from empty to empty loses wings (and you fall)", () => {
   // Player already airborne on empty, next cell also empty
   const s = withWings(makeState(2, 0, "up", "empty"));
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, false);
@@ -192,14 +193,14 @@ test("flying from empty to empty loses wings (and you fall)", () => {
 
 test("flying onto floor deactivates wings", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "floor"]]));
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.wingsActive, false);
 });
 
 test("flying onto glass deactivates wings; origin empty cell unchanged", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "glass"]]));
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.wingsActive, false);
   // Origin was empty — nothing to break
@@ -210,7 +211,7 @@ test("flying onto glass deactivates wings; origin empty cell unchanged", () => {
 
 test("flying into wall causes fall in place with facing update", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "wall"]]));
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   // Player stays at (2,0), facing updates, wings off
   assert.equal(r.player.row, 2);
   assert.equal(r.player.col, 0);
@@ -220,7 +221,7 @@ test("flying into wall causes fall in place with facing update", () => {
 
 test("flying into stairs is disallowed", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "stairs"]]));
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r, null);
 });
 
@@ -239,7 +240,7 @@ test("flying into rock entity causes fall in place; rock still moves", () => {
       [[1, 0, "rock"]],
     ),
   );
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 2);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, false);
@@ -249,7 +250,7 @@ test("flying into rock entity causes fall in place; rock still moves", () => {
 
 test("flying out of bounds makes you fall", () => {
   const s = withWings(makeState(0, 0, "up", "empty"));
-  const r = applyAction(s, "up", true)!;
+  const r = applyAction(s, "up", { wings: true, sword: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, false);
@@ -258,7 +259,7 @@ test("flying out of bounds makes you fall", () => {
 test("staff action preserves wingsActive state", () => {
   // Player airborne, uses staff to pick up a floor tile ahead
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "floor"]]));
-  const r = applyAction(s, "staff", true)!;
+  const r = applyAction(s, "staff", { wings: true, sword: false })!;
   assert.equal(r.player.wingsActive, true); // still airborne
   assert.equal(r.player.staffContent, "floor");
   assert.equal(r.board[1]![0], "empty");
@@ -279,7 +280,7 @@ test("ground push rock succeeds: rock moves one step, player stays in place", ()
     ],
     [[1, 0, "rock"]],
   );
-  const r = applyAction(s, "up")!;
+  const r = applyAction(s, "up", NO_BURDENS)!;
   assert.equal(r.player.row, 2); // player did NOT advance
   assert.equal(r.player.col, 0);
   assert.equal(r.player.facing, "up"); // facing updated
@@ -300,7 +301,7 @@ test("ground push rock out of bounds returns null", () => {
     ],
     [[0, 0, "rock"]],
   );
-  assert.equal(applyAction(s, "up"), null);
+  assert.equal(applyAction(s, "up", NO_BURDENS), null);
 });
 
 test("ground push rock into wall returns null", () => {
@@ -316,7 +317,7 @@ test("ground push rock into wall returns null", () => {
     ],
     [[1, 0, "rock"]],
   );
-  assert.equal(applyAction(s, "up"), null);
+  assert.equal(applyAction(s, "up", NO_BURDENS), null);
 });
 
 test("ground push rock into another rock returns null", () => {
@@ -335,7 +336,7 @@ test("ground push rock into another rock returns null", () => {
       [1, 0, "rock"],
     ],
   );
-  assert.equal(applyAction(s, "up"), null);
+  assert.equal(applyAction(s, "up", NO_BURDENS), null);
 });
 
 test("ground push rock off glass: glass at rock origin breaks", () => {
@@ -351,7 +352,7 @@ test("ground push rock off glass: glass at rock origin breaks", () => {
     ],
     [[1, 0, "rock"]],
   );
-  const r = applyAction(s, "up")!;
+  const r = applyAction(s, "up", NO_BURDENS)!;
   assert.equal(r.board[1]![0], "empty"); // glass broke where rock stood
   assert.equal(r.entities[1]![0], "empty"); // rock vacated
   assert.equal(r.entities[0]![0], "rock"); // rock arrived at floor
@@ -371,7 +372,7 @@ test("ground push rock into void: rock disappears", () => {
     ], // row 0 left as empty/void
     [[1, 0, "rock"]],
   );
-  const r = applyAction(s, "up")!;
+  const r = applyAction(s, "up", NO_BURDENS)!;
   assert.equal(r.entities[0]![0], "empty"); // rock gone into void
   assert.equal(r.entities[1]![0], "empty"); // original spot also clear
   assert.equal(r.player.row, 2); // player stayed
@@ -432,12 +433,12 @@ test("renderBoard shows button tile", () => {
 
 test("renderBoard shows trap_inactive tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "trap_inactive"]]);
-  assert.ok(renderBoard(s).includes("ΘΘ"));
+  assert.ok(renderBoard(s).includes("◖◗"));
 });
 
 test("renderBoard shows trap_active tile", () => {
   const s = makeState(5, 5, "right", "empty", [[1, 1, "trap_active"]]);
-  assert.ok(renderBoard(s).includes("ϴϴ"));
+  assert.ok(renderBoard(s).includes("<>"));
 });
 
 test("renderBoard shows rock entity as R", () => {
