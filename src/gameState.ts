@@ -92,15 +92,6 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
   return entities;
 }
 
-function smartStringify(array: number[][]): string {
-  let str = "";
-  for (let i = 0; i < array.length; i++) {
-    str += String(array[i]![0]!)+","+String(array[i]![1]!)+" "
-  }
-  //console.log(str);
-  return str
-}
-
 function disperseTraps(board: Board, row: number, column: number): Board {
   let triggered_tiles: number[][] = [[row, column]];
   let done_anything: boolean = true;
@@ -113,9 +104,13 @@ function disperseTraps(board: Board, row: number, column: number): Board {
     for (let coord of array2) {
       let r: number = coord[0]!;
       let c: number = coord[1]!;
+      
+      const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
+        pair.toString(),
+      );
 
       if (
-        !smartStringify(triggered_tiles).includes(String([r - 1, c])) &&
+        !triggeredTileCoordStrings.includes(String([r - 1, c])) &&
         r >= 1 &&
         board[r - 1]![c]! === "trap_active"
       ) {
@@ -123,7 +118,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r - 1, c]);
       }
       if (
-        !smartStringify(triggered_tiles).includes(String([r, c - 1])) &&
+        !triggeredTileCoordStrings.includes(String([r, c - 1])) &&
         c >= 1 &&
         board[r]![c - 1]! === "trap_active"
       ) {
@@ -131,7 +126,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r, c - 1]);
       }
       if (
-        !smartStringify(triggered_tiles).includes(String([r + 1, c])) &&
+        !triggeredTileCoordStrings.includes(String([r + 1, c])) &&
         r <= 4 &&
         board[r + 1]![c]! === "trap_active"
       ) {
@@ -139,7 +134,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r + 1, c]);
       }
       if (
-        !smartStringify(triggered_tiles).includes(String([r, c + 1])) &&
+        !triggeredTileCoordStrings.includes(String([r, c + 1])) &&
         c <= 4 &&
         board[r]![c + 1]! === "trap_active"
       ) {
