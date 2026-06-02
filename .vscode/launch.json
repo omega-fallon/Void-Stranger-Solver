@@ -7,7 +7,14 @@
       "request": "launch",
       "runtimeArgs": ["--require", "ts-node/register"],
       "program": "${workspaceFolder}/src/index.ts",
-      "args": ["--brane", "Eus", "--brand", "Cif"],
+      "args": [
+        "--brane",
+        "${input:brane}",
+        "--brand",
+        "${input:brand}",
+        "--algorithm",
+        "${input:algorithm}"
+      ],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
@@ -32,6 +39,26 @@
       "outputCapture": "std",
       "enableContentValidation": false,
       "profileStartup": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "algorithm",
+      "type": "pickString",
+      "options": ["rbfs", "idaStar", "frontierAStar"],
+      "description": "Search algorithm to use"
+    },
+    {
+      "id": "brane",
+      "type": "pickString",
+      "options": ["Add", "Eus", "Bee", "Mon", "Tan", "Gor", "Lev", "Cif"],
+      "description": "Brane (level) to attempt the solution on"
+    },
+    {
+      "id": "brand",
+      "type": "pickString",
+      "options": ["Add", "Eus", "Bee", "Mon", "Tan", "Gor", "Lev", "Cif"],
+      "description": "Brand to attempt to carve"
     }
   ]
 }
