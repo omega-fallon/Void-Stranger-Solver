@@ -23,6 +23,7 @@ const { values } = parseArgs({
     cheatFirstNSteps: { type: "string" },
     verbose: { type: "string", short: "v" },
     slow: { type: "boolean", short: "s" },
+    algorithm: { type: "string", short: "a" },
   },
 });
 
@@ -40,6 +41,7 @@ Options:
   -s, --slow                      Add 100ms delay per node during search
       --initialThreshold <n>      Override initial IDA* cost threshold
       --cheatFirstNSteps <n>      Skip first N steps using the known correct path
+  -a, --algorithm <name>          Search algorithm: idaStar (default) | rbfs | frontierAStar
 
 Available branes:
 ${be_list}
@@ -132,7 +134,7 @@ async function main() {
   }
 
   console.log(
-    `Searching for solution... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
+    `Searching for solution with ${values.algorithm}... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
   );
   const start = performance.now();
   const { path, nodesExplored } = await search({
@@ -144,6 +146,10 @@ async function main() {
     initialThreshold,
     knownCorrectPath: knownCorrectPath.slice(cheatN),
     hasWings: values.wings ?? false,
+    algorithm: (values.algorithm ?? "idaStar") as
+      | "idaStar"
+      | "rbfs"
+      | "frontierAStar",
   });
   const elapsedMs = performance.now() - start;
   const nodesPerSec = Math.round((nodesExplored / elapsedMs) * 1000);
