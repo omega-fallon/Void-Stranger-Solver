@@ -141,23 +141,23 @@ export const BRANES: RawBraneInitial[] = [
   {
     name: "Gor",
     // prettier-ignore
-    board: [
+    board: parseBoard([
       "GG##GG",
       "GG##GG",
       "GGGGG#",
       "#GGGG#",
       "GG##GG",
       "WG##GS",
-    ],
+    ]),
     // prettier-ignore
-    entities: [
+    entities: parseEntities([
       "M     ",
       "      ",
       "      ",
       "     R",
       "      ",
       "R     ",
-    ],
+    ]),
     player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
   },
   {
