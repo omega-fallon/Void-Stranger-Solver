@@ -92,6 +92,15 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
   return entities;
 }
 
+function smartStringify(array: number[][]): string {
+  let str = "";
+  for (let i = 0; i < array.length; i++) {
+    str += String(array[i]![0]!)+","+String(array[i]![1]!)+" "
+  }
+  //console.log(str);
+  return str
+}
+
 function disperseTraps(board: Board, row: number, column: number): Board {
   let triggered_tiles: number[][] = [[row, column]];
   let done_anything: boolean = true;
@@ -106,7 +115,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
       let c: number = coord[1]!;
 
       if (
-        !String(triggered_tiles).includes(String([r - 1, c])) &&
+        !smartStringify(triggered_tiles).includes(String([r - 1, c])) &&
         r >= 1 &&
         board[r - 1]![c]! === "trap_active"
       ) {
@@ -114,7 +123,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r - 1, c]);
       }
       if (
-        !String(triggered_tiles).includes(String([r, c - 1])) &&
+        !smartStringify(triggered_tiles).includes(String([r, c - 1])) &&
         c >= 1 &&
         board[r]![c - 1]! === "trap_active"
       ) {
@@ -122,7 +131,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r, c - 1]);
       }
       if (
-        !String(triggered_tiles).includes(String([r + 1, c])) &&
+        !smartStringify(triggered_tiles).includes(String([r + 1, c])) &&
         r <= 4 &&
         board[r + 1]![c]! === "trap_active"
       ) {
@@ -130,7 +139,7 @@ function disperseTraps(board: Board, row: number, column: number): Board {
         triggered_tiles.push([r + 1, c]);
       }
       if (
-        !String(triggered_tiles).includes(String([r, c + 1])) &&
+        !smartStringify(triggered_tiles).includes(String([r, c + 1])) &&
         c <= 4 &&
         board[r]![c + 1]! === "trap_active"
       ) {
@@ -163,8 +172,8 @@ function triggerWatcher(entities: EntityGrid): EntityGrid {
   return entities;
 }
 
-// Handling for monster statues.
-function anyMonsters(entities: EntityGrid): boolean {
+// Monster detection.
+function anyHands(entities: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i < 6; i++) {
       if (getEntity(entities, i, i2) == "hand") {
@@ -175,10 +184,46 @@ function anyMonsters(entities: EntityGrid): boolean {
   return false;
 }
 
+function anyBeavers(entities: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i < 6; i++) {
+      if (getEntity(entities, i, i2) == "beaver") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function anyMimics(entities: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i < 6; i++) {
+      if (getEntity(entities, i, i2) == "mimic") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function anyBeaversOrMimics(entities: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i < 6; i++) {
+      if (
+        getEntity(entities, i, i2) == "beaver" ||
+        getEntity(entities, i, i2) == "mimic"
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 // Removes any and all monster statues if there are no monsters.
 function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
   let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
-  if (!anyMonsters(entities)) {
+  if (!anyHands(entities)) {
     for (let i = 0; i < 6; i++) {
       for (let i2 = 0; i < 6; i++) {
         if (getEntity(entities, i, i2) == "monster_statue") {
@@ -188,6 +233,84 @@ function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
     }
   }
   return newEntities;
+}
+
+// Big function for the entity-moving step.
+function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, player_row: number, player_col: number, action: Action): [Board, EntityGrid, boolean] | string {
+  // Search loop: only works for one enemy per brane. Luckily that's exactly our use case.
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      // Move mimic
+      if (action !== "staff" && getEntity(entities, i, i2) == "mimic") {
+        // Mimic facing direction doesn't matter since they can't interact. //
+        const { dr, dc } = DELTAS[action];
+        const mimic_target_r = i + dr;
+        const mimic_target_c = i2 - dc; // this is where the flipping happens!
+
+        // Check if the mimic is hitting OOB, wall, or chest. Because facing direction doesn't matter, this is a no-op for the mimic.
+        if (
+          !inBounds(mimic_target_r, mimic_target_c) ||
+          getCell(board, mimic_target_r, mimic_target_c) === "wall" ||
+          getEntity(entities, mimic_target_r, mimic_target_c) === "chest"
+        ) {
+          return [board,entities,activeWings];
+        }
+        // Hit the player, DIE.
+        else if (player_row === mimic_target_r && player_col === mimic_target_c) {
+          // Throw player down the pit.
+          if (getCell(board, player_row, player_col) === "empty") {
+            return [board,entities,false];
+          } else {
+            return "death"; // death!
+          }
+        }
+        // Pushing a rock.
+        else if (getEntity(entities, mimic_target_r, mimic_target_c) === "rock" || getEntity(entities, mimic_target_r, mimic_target_c) === "watcher_inactive" || getEntity(entities, mimic_target_r, mimic_target_c) === "watcher_active" || getEntity(entities, mimic_target_r, mimic_target_c) === "monster_statue") {
+          throw new Error("not yet implemented");
+        }
+        // Pushing something else??
+        else if (getEntity(entities, mimic_target_r, mimic_target_c) !== "empty") {
+          throw new Error("unrecognized entity: "+String(getEntity(entities, mimic_target_r, mimic_target_c)));
+        }
+        // Standard movement.
+        else {
+          let newEntities = entities;
+
+          // Break glass.
+          let newBoard =
+            getCell(board, i, i2) === "glass" ?
+              setCell(board, i, i2, "empty")
+            : board;
+
+          // Moving into empty space.
+          const movingToCell = getCell(board, mimic_target_r, mimic_target_c);
+          if (movingToCell === "empty") {
+            newEntities = setEntity(newEntities, i, i2, "empty");
+          }
+          // Moving onto inactive trap
+          else if (movingToCell === "trap_inactive") {
+            newEntities = setEntity(newEntities, i, i2, "empty");
+            newEntities = setEntity(newEntities, mimic_target_r, mimic_target_c, "mimic");
+            newBoard = setCell(newBoard, mimic_target_r, mimic_target_c, "trap_active");
+          }
+          // Moving onto ACTIVE trap
+          else if (movingToCell === "trap_active") {
+            newEntities = setEntity(newEntities, i, i2, "empty");
+            newBoard = disperseTraps(newBoard, mimic_target_r, mimic_target_c);
+          }
+          // Normal Move
+          else {
+            newEntities = setEntity(newEntities, i, i2, "empty");
+            newEntities = setEntity(newEntities, mimic_target_r, mimic_target_c, "mimic");
+          }
+          
+          return [newBoard, newEntities, activeWings];
+        }
+      }
+    }
+  }
+
+  return [board, entities, activeWings];
 }
 
 export function applyAction(
@@ -213,9 +336,31 @@ export function applyAction(
       getCell(board, newRow, newCol) === "wall" ||
       getEntity(entities, newRow, newCol) === "chest"
     ) {
-      if (facing === action && wingsActive === false) {
+      // Move entities
+      if (anyBeaversOrMimics(entities)) {
+        const statesAfterEntities = moveEntities(board, entities, wingsActive, row, col, action);
+        
+        if (typeof statesAfterEntities === "string") {
+          return null
+        }
+
+        return {
+          board: statesAfterEntities[0]!,
+          entities: statesAfterEntities[1]!,
+          player: {
+            row,
+            col,
+            facing: action,
+            staffContent,
+            wingsActive: false, // Bumping always disables
+          },
+        };
+      }
+      // Return null if unchanged.
+      else if (facing === action && wingsActive === false) {
         return null;
       }
+
       return {
         board,
         entities,
@@ -231,8 +376,12 @@ export function applyAction(
 
     const dest = getCell(board, newRow, newCol);
 
-    // Hands... hands!
-    if (getEntity(entities, newRow, newCol) === "hand") {
+    // Moving into an enemy
+    if (
+      getEntity(entities, newRow, newCol) === "beaver" ||
+      getEntity(entities, newRow, newCol) === "mimic" ||
+      getEntity(entities, newRow, newCol) === "hand"
+    ) {
       return null;
     }
 
@@ -252,6 +401,27 @@ export function applyAction(
           getCell(board, row, col) === "glass" ?
             setCell(board, row, col, "empty")
           : board;
+          
+        // Move entities
+        if (anyBeaversOrMimics(entities)) {
+          const statesAfterEntities = moveEntities(newBoard, entities, wingsActive, row, col, action);
+            
+          if (typeof statesAfterEntities === "string") {
+            return null
+          }
+
+          return {
+            board: statesAfterEntities[0]!,
+            entities: statesAfterEntities[1]!,
+            player: {
+              row,
+              col,
+              facing: action,
+              staffContent,
+              wingsActive: statesAfterEntities[2]!,
+            },
+          };
+        }
 
         return {
           board: newBoard,
@@ -276,6 +446,7 @@ export function applyAction(
     ) {
       const rockDestRow = newRow + dr;
       const rockDestCol = newCol + dc;
+      const startingEntity = getEntity(entities, newRow, newCol);
 
       // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
       if (
@@ -287,7 +458,28 @@ export function applyAction(
         getEntity(entities, rockDestRow, rockDestCol) === "chest" ||
         getEntity(entities, rockDestRow, rockDestCol) === "monster_statue"
       ) {
-        //console.log("f-f-f-failure");
+        
+        // Move entities
+        if (anyBeaversOrMimics(entities)) {
+          const statesAfterEntities = moveEntities(board, entities, wingsActive, row, col, action);
+        
+          if (typeof statesAfterEntities === "string") {
+            return null
+          }
+
+          return {
+            board: statesAfterEntities[0]!,
+            entities: statesAfterEntities[1]!,
+            player: {
+              row,
+              col,
+              facing: action,
+              staffContent,
+              wingsActive: false, // Bumping always disables
+            },
+          };
+        }
+        
         if (facing === action && wingsActive === false) {
           return null;
         } else {
@@ -336,7 +528,7 @@ export function applyAction(
           setEntity(entities, newRow, newCol, "empty"),
           rockDestRow,
           rockDestCol,
-          getEntity(entities, newRow, newCol),
+          startingEntity,
         );
       }
       // Pushing onto an ACTIVE trap.
@@ -349,7 +541,7 @@ export function applyAction(
           setEntity(entities, newRow, newCol, "empty"),
           rockDestRow,
           rockDestCol,
-          getEntity(entities, newRow, newCol),
+          startingEntity,
         );
 
         // ...and then trigger all fallings.
@@ -361,8 +553,29 @@ export function applyAction(
           setEntity(entities, newRow, newCol, "empty"),
           rockDestRow,
           rockDestCol,
-          getEntity(entities, newRow, newCol),
+          startingEntity,
         );
+      }
+      
+      // Move entities
+      if (anyBeaversOrMimics(newEntities)) {
+        const statesAfterEntities = moveEntities(newBoard, disperseMonsterStatues(newEntities), wingsActive, row, col, action);
+        
+        if (typeof statesAfterEntities === "string") {
+          return null
+        }
+
+        return {
+          board: statesAfterEntities[0]!,
+          entities: disperseMonsterStatues(statesAfterEntities[1]!),
+          player: {
+            row,
+            col,
+            facing: action,
+            staffContent,
+            wingsActive: false, // always false after a push
+          },
+        };
       }
 
       return {
@@ -401,6 +614,27 @@ export function applyAction(
 
         // Account for any fallen entities.
         newEntities = checkFallen(newBoard, newEntities);
+      }
+      
+      // Move entities
+      if (anyBeaversOrMimics(newEntities)) {
+        const statesAfterEntities = moveEntities(newBoard, newEntities, wingsActive, row, col, action);
+        
+        if (typeof statesAfterEntities === "string") {
+          return null
+        }
+
+        return {
+          board: statesAfterEntities[0]!,
+          entities: disperseMonsterStatues(statesAfterEntities[1]!),
+          player: {
+            row: newRow,
+            col: newCol,
+            facing: action,
+            staffContent,
+            wingsActive: false,
+          },
+        };
       }
 
       // Another void tile — fall to your doom. Origin was empty, so no glass to break.
@@ -442,6 +676,27 @@ export function applyAction(
       // Wings activate if the player steps into the void.
       const newWingsActive =
         hasWings && getCell(newBoard, newRow, newCol) === "empty";
+        
+      // Move entities
+      if (anyBeaversOrMimics(newEntities)) {
+        const statesAfterEntities = moveEntities(newBoard, newEntities, newWingsActive, row, col, action);
+        
+        if (typeof statesAfterEntities === "string") {
+          return null
+        }
+
+        return {
+          board: statesAfterEntities[0]!,
+          entities: disperseMonsterStatues(statesAfterEntities[1]!),
+          player: {
+            row: newRow,
+            col: newCol,
+            facing: action,
+            staffContent,
+            wingsActive: statesAfterEntities[2]!,
+          },
+        };
+      }
 
       return {
         board: newBoard,

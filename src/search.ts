@@ -232,7 +232,7 @@ async function idaDfs(
     ) {
       // The cornered rock is covering stairs.
       if (state.board[r]![c]! === "stairs") {
-        console.log("INF: cornered rock covering stairs" + String(coord));
+        //console.log("INF: cornered rock covering stairs" + String(coord));
         return Infinity;
       }
       // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it off.
@@ -240,9 +240,7 @@ async function idaDfs(
         target[r]![c]! === "empty" &&
         state.board[r]![c]! !== "trap_active"
       ) {
-        console.log(
-          "INF: cornered rock covering excess tile: " + String(coord),
-        );
+        //console.log("INF: cornered rock covering excess tile: " + String(coord));
         return Infinity;
       }
     }
@@ -294,7 +292,7 @@ async function idaDfs(
       if (blockers.includes(state.entities[r2]![c2]!)) {
         // The cornered rock is covering stairs.
         if (state.board[r]![c]! === "stairs") {
-          console.log("INF: side-cornered rock covering stairs");
+          //console.log("INF: side-cornered rock covering stairs");
           return Infinity;
         }
         // Rock is covering a land tile that shouldn't be there, and there's no conceivable way to get it or the cornered one off.
@@ -303,7 +301,7 @@ async function idaDfs(
           state.board[r]![c]! !== "trap_active" &&
           state.board[r2]![c2]! !== "trap_active"
         ) {
-          console.log("INF: side-cornered rock covering excess tile");
+          //console.log("INF: side-cornered rock covering excess tile");
           return Infinity;
         }
       }

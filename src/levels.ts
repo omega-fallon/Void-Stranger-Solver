@@ -137,28 +137,28 @@ export const BRANES: RawBraneInitial[] = [
     ],
     player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
   },
-  //{
-  //  name: "Gor",
-  //  // prettier-ignore
-  //  board: [
-  //    "GG##GG",
-  //    "GG##GG",
-  //    "GGGGG#",
-  //    "#GGGG#",
-  //    "GG##GG",
-  //    "WG##GS",
-  //  ],
-  //  // prettier-ignore
-  //  entities: [
-  //    "M     ",
-  //    "      ",
-  //    "      ",
-  //    "     R",
-  //    "      ",
-  //    "R     ",
-  //  ],
-  //  player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
-  //},
+  {
+    name: "Gor",
+    // prettier-ignore
+    board: [
+      "GG##GG",
+      "GG##GG",
+      "GGGGG#",
+      "#GGGG#",
+      "GG##GG",
+      "WG##GS",
+    ],
+    // prettier-ignore
+    entities: [
+      "M     ",
+      "      ",
+      "      ",
+      "     R",
+      "      ",
+      "R     ",
+    ],
+    player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
+  },
   {
     name: "Lev",
     // prettier-ignore
