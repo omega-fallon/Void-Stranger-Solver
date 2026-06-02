@@ -638,7 +638,7 @@ export function replayPath(
     );
     if (isGoal(state, target, requireFinalJump)) {
       console.log("Goal reached!");
-      console.log(actionsToString(path));
+      console.log(`${actionsToString(path)} - length ${path.length}`);
     }
   }
 }
