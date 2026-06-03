@@ -1,4 +1,4 @@
-import type { Board, Cell, GameState } from "./types";
+import type { Board, Cell, GameState, EntityGrid } from "./types";
 import { staffBanned } from "./search";
 import { anyMimics } from "./gameState";
 
@@ -51,18 +51,36 @@ export function heuristic(
   let finalJumpCost =
     requireFinalJump && board[player.row]![player.col]! !== "empty" ? 1 : 0;
 
+  function findMimic(entities: EntityGrid): [number, number] {
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (entities[i]![i2]! === "mimic") {
+          return [i,i2];
+        }
+      }
+    }
+    return [-1,-1];
+  }
+
+  const [ mimic_r, mimic_c ] = findMimic(entities); 
+  const mimics = mimic_r !== -1;
+
   // We wrap these in IIFEs so the profiler names each part individually
   (function calculateBoardDiff() {
     for (let r = 0; r < 6; r++) {
       for (let c = 0; c < 6; c++) {
         const cur = board[r]![c]!;
         const tgt = target[r]![c]!;
+        // Glass is not counted if it's closer to the mimic than it is to us.
+        if (mimics && cur === "glass" && manhattan(r,c,mimic_r,mimic_c) < manhattan(r,c,player.row,player.col)) {
+          continue;
+        }
         // Glass the player is standing on will break for free on their next move.
         // If the target wants that cell empty, the mismatch resolves at no extra cost —
         // and crucially, the glass cannot be transported (it simply breaks), so it must
         // not be added to excess. If the target wants empty here, the player must have
         // moved away by then, and the break is free.
-        if (
+        else if (
           r === player.row &&
           c === player.col &&
           cur === "glass" &&
@@ -183,12 +201,10 @@ export function heuristic(
     }
     return count;
   }
-  const theWatchers = staffBanned(entities) ? Infinity : 0;
-  const mimicFactor = anyMimics(entities) ? 10 : 1;
 
   return {
     total:
-      (mismatches + transportCost + travelCost)/mimicFactor + finalJumpCost + theWatchers,
+      mismatches + transportCost + travelCost + finalJumpCost,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
