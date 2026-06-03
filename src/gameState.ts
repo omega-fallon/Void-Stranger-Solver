@@ -169,10 +169,10 @@ function triggerWatcher(entities: EntityGrid): EntityGrid {
 }
 
 // Monster detection.
-function anyHands(entities: EntityGrid): boolean {
+function anyHands(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i < 6; i++) {
-      if (getEntity(entities, i, i2) === "hand") {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (getEntity(ent, i, i2) === "hand") {
         return true;
       }
     }
@@ -180,10 +180,10 @@ function anyHands(entities: EntityGrid): boolean {
   return false;
 }
 
-function anyBeavers(entities: EntityGrid): boolean {
+function anyBeavers(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i < 6; i++) {
-      if (getEntity(entities, i, i2) === "beaver") {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (getEntity(ent, i, i2) === "beaver") {
         return true;
       }
     }
@@ -191,10 +191,10 @@ function anyBeavers(entities: EntityGrid): boolean {
   return false;
 }
 
-function anyMimics(entities: EntityGrid): boolean {
+function anyMimics(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i < 6; i++) {
-      if (getEntity(entities, i, i2) === "mimic") {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (getEntity(ent, i, i2) === "mimic") {
         return true;
       }
     }
@@ -202,12 +202,12 @@ function anyMimics(entities: EntityGrid): boolean {
   return false;
 }
 
-function anyBeaversOrMimics(entities: EntityGrid): boolean {
+function anyBeaversOrMimics(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
       if (
-        getEntity(entities, i, i2) === "beaver" ||
-        getEntity(entities, i, i2) === "mimic"
+        getEntity(ent, i, i2) === "beaver" ||
+        getEntity(ent, i, i2) === "mimic"
       ) {
         return true;
       }
@@ -221,8 +221,8 @@ function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
   let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
   if (!anyHands(entities)) {
     for (let i = 0; i < 6; i++) {
-      for (let i2 = 0; i < 6; i++) {
-        if (getEntity(entities, i, i2) == "monster_statue") {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (getEntity(entities, i, i2) === "monster_statue") {
           newEntities[i]![i2]! = "empty";
         }
       }
@@ -234,6 +234,7 @@ function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
 // Big function for the entity-moving step.
 function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, player_row: number, player_col: number, action: Action): [Board, EntityGrid, boolean] | string {
   // Search loop: only works for one enemy per brane. Luckily that's exactly our use case.
+  console.log("Monsters present. Finding them...");
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       // Move mimic
@@ -242,6 +243,7 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
         const { dr, dc } = DELTAS[action];
         const mimic_target_r = i + dr;
         const mimic_target_c = i2 - dc; // this is where the flipping happens!
+        console.log("Moving mimic:",mimic_target_r,mimic_target_c);
 
         // Check if the mimic is hitting OOB, wall, or chest. Because facing direction doesn't matter, this is a no-op for the mimic.
         if (
@@ -285,8 +287,7 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
           }
           // Moving onto inactive trap
           else if (movingToCell === "trap_inactive") {
-            newEntities = setEntity(newEntities, i, i2, "empty");
-            newEntities = setEntity(newEntities, mimic_target_r, mimic_target_c, "mimic");
+            newEntities = setEntity(setEntity(newEntities, i, i2, "empty"), mimic_target_r, mimic_target_c, "mimic");
             newBoard = setCell(newBoard, mimic_target_r, mimic_target_c, "trap_active");
           }
           // Moving onto ACTIVE trap
@@ -296,8 +297,7 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
           }
           // Normal Move
           else {
-            newEntities = setEntity(newEntities, i, i2, "empty");
-            newEntities = setEntity(newEntities, mimic_target_r, mimic_target_c, "mimic");
+            newEntities = setEntity(setEntity(newEntities, i, i2, "empty"), mimic_target_r, mimic_target_c, "mimic");
           }
           
           return [newBoard, newEntities, activeWings];
@@ -675,6 +675,7 @@ export function applyAction(
         
       // Move entities
       if (anyBeaversOrMimics(newEntities)) {
+        console.log("everybody yeah yeah rock youre body yeah yeah");
         const statesAfterEntities = moveEntities(newBoard, newEntities, newWingsActive, row, col, action);
         
         if (typeof statesAfterEntities === "string") {
@@ -692,6 +693,9 @@ export function applyAction(
             wingsActive: statesAfterEntities[2]!,
           },
         };
+      }
+      else {
+        console.log((newEntities));
       }
 
       return {

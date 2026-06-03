@@ -74,7 +74,6 @@ export function applyPath(
       for (let st of states) {
         console.log(renderState(st));
       }
-      console.log(renderState(state));
       throw new Error(
         `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked`,
       );
