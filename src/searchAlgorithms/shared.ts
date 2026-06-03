@@ -163,14 +163,12 @@ export function isPruned(
     ) {
       // The cornered entity is covering stairs.
       if (state.board[r]![c]! === "stairs") {
-        console.log("INF: cornered rock covering stairs" + String(coord));
+        console.log("INF: cornered rock covering stairs: " + String(coord));
         return true;
       }
       // Entity is covering a land tile that shouldn't be there.
       if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active") {
-        console.log(
-          "INF: cornered rock covering excess tile: " + String(coord),
-        );
+        console.log("INF: cornered rock covering excess tile: " + String(coord));
         return true;
       }
     }

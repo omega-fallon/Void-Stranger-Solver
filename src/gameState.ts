@@ -169,7 +169,7 @@ function triggerWatcher(entities: EntityGrid): EntityGrid {
 }
 
 // Monster detection.
-function anyHands(ent: EntityGrid): boolean {
+export function anyHands(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (getEntity(ent, i, i2) === "hand") {
@@ -180,7 +180,7 @@ function anyHands(ent: EntityGrid): boolean {
   return false;
 }
 
-function anyBeavers(ent: EntityGrid): boolean {
+export function anyBeavers(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (getEntity(ent, i, i2) === "beaver") {
@@ -191,7 +191,7 @@ function anyBeavers(ent: EntityGrid): boolean {
   return false;
 }
 
-function anyMimics(ent: EntityGrid): boolean {
+export function anyMimics(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (getEntity(ent, i, i2) === "mimic") {
@@ -202,7 +202,7 @@ function anyMimics(ent: EntityGrid): boolean {
   return false;
 }
 
-function anyBeaversOrMimics(ent: EntityGrid): boolean {
+export function anyBeaversOrMimics(ent: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       if (
@@ -217,7 +217,7 @@ function anyBeaversOrMimics(ent: EntityGrid): boolean {
 }
 
 // Removes any and all monster statues if there are no monsters.
-function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
+export function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
   let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
   if (!anyHands(entities)) {
     for (let i = 0; i < 6; i++) {
@@ -234,7 +234,6 @@ function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
 // Big function for the entity-moving step.
 function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, player_row: number, player_col: number, action: Action): [Board, EntityGrid, boolean] | string {
   // Search loop: only works for one enemy per brane. Luckily that's exactly our use case.
-  console.log("Monsters present. Finding them...");
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       // Move mimic
@@ -243,7 +242,6 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
         const { dr, dc } = DELTAS[action];
         const mimic_target_r = i + dr;
         const mimic_target_c = i2 - dc; // this is where the flipping happens!
-        console.log("Moving mimic:",mimic_target_r,mimic_target_c);
 
         // Check if the mimic is hitting OOB, wall, or chest. Because facing direction doesn't matter, this is a no-op for the mimic.
         if (
@@ -675,7 +673,6 @@ export function applyAction(
         
       // Move entities
       if (anyBeaversOrMimics(newEntities)) {
-        console.log("everybody yeah yeah rock youre body yeah yeah");
         const statesAfterEntities = moveEntities(newBoard, newEntities, newWingsActive, row, col, action);
         
         if (typeof statesAfterEntities === "string") {
@@ -693,9 +690,6 @@ export function applyAction(
             wingsActive: statesAfterEntities[2]!,
           },
         };
-      }
-      else {
-        console.log((newEntities));
       }
 
       return {

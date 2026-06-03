@@ -1,5 +1,6 @@
 import type { Board, Cell, GameState } from "./types";
 import { staffBanned } from "./search";
+import { anyMimics } from "./gameState";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -186,7 +187,7 @@ export function heuristic(
 
   return {
     total:
-      mismatches + transportCost + travelCost + finalJumpCost + theWatchers,
+      (mismatches + transportCost + travelCost)/(Number(anyMimics(entities))*2) + finalJumpCost + theWatchers,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
