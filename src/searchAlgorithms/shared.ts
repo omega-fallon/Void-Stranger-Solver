@@ -1,5 +1,6 @@
 import { NO_BURDENS } from "../types";
-import type { Action, Board, Burdens, EntityGrid, GameState } from "../types";
+import type { Action, Board, Burdens, EntityGrid, GameState, Cell, Entity } from "../types";
+import { renderState } from "../gameState";
 
 const verbose = Number(process.env.VERBOSE);
 
@@ -152,23 +153,28 @@ export function isPruned(
     [5, 0],
     [5, 5],
   ]) {
-    const r = coord[0]!;
-    const c = coord[1]!;
+    const r : number = coord[0]!;
+    const c : number  = coord[1]!;
+    
+    const covered_tile : Cell = state.board[r]![c]!
+    const covering_entity : Entity = state.entities[r]![c]!;
 
     if (
-      state.entities[r]![c]! === "rock" ||
-      state.entities[r]![c]! === "watcher_inactive" ||
-      state.entities[r]![c]! === "watcher_active" ||
-      state.entities[r]![c]! === "chest"
+      covering_entity === "rock" ||
+      covering_entity === "watcher_inactive" ||
+      covering_entity === "watcher_active" ||
+      covering_entity === "chest"
     ) {
       // The cornered entity is covering stairs.
-      if (state.board[r]![c]! === "stairs") {
-        console.log("INF: cornered rock covering stairs: " + String(coord));
+      if (covered_tile === "stairs") {
+        console.log("INF: cornered rock covering stairs:",coord,covering_entity);
+        console.log(renderState(state));
         return true;
       }
       // Entity is covering a land tile that shouldn't be there.
       if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active") {
-        console.log("INF: cornered rock covering excess tile: " + String(coord));
+        console.log("INF: cornered rock covering excess tile:",coord,covered_tile,covering_entity);
+        console.log(renderState(state));
         return true;
       }
     }

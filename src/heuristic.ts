@@ -184,10 +184,11 @@ export function heuristic(
     return count;
   }
   const theWatchers = staffBanned(entities) ? Infinity : 0;
+  const mimicFactor = anyMimics(entities) ? 10 : 1;
 
   return {
     total:
-      (mismatches + transportCost + travelCost)/(Number(anyMimics(entities))*2) + finalJumpCost + theWatchers,
+      (mismatches + transportCost + travelCost)/mimicFactor + finalJumpCost + theWatchers,
     mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
