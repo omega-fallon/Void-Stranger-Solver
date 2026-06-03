@@ -262,7 +262,51 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
         }
         // Pushing a rock.
         else if (getEntity(entities, mimic_target_r, mimic_target_c) === "rock" || getEntity(entities, mimic_target_r, mimic_target_c) === "watcher_inactive" || getEntity(entities, mimic_target_r, mimic_target_c) === "watcher_active" || getEntity(entities, mimic_target_r, mimic_target_c) === "monster_statue") {
-          throw new Error("not yet implemented");
+          const rockDestRow = i + dr*2;
+          const rockDestCol = i2 - dc*2;
+          
+          const startingEntity = getEntity(entities, mimic_target_r, mimic_target_r);
+
+          // If any of these things are true, we push but nothing happens, equivalent to hitting a wall.
+          if (
+            !inBounds(rockDestRow, rockDestCol) ||
+            getCell(board, rockDestRow, rockDestCol) === "wall" ||
+            getEntity(entities, rockDestRow, rockDestCol) === "rock" ||
+            getEntity(entities, rockDestRow, rockDestCol) === "watcher_inactive" ||
+            getEntity(entities, rockDestRow, rockDestCol) === "watcher_active" ||
+            getEntity(entities, rockDestRow, rockDestCol) === "chest" ||
+            getEntity(entities, rockDestRow, rockDestCol) === "monster_statue"
+          ) {
+            return [board,entities,activeWings];
+          }
+          // Break any glass the rock was pushed off of.
+          let newBoard =
+            getCell(board, mimic_target_r, mimic_target_r) === "glass" ?
+              setCell(board, mimic_target_r, mimic_target_r, "empty")
+            : board;
+          let newEntities = entities;
+
+          // Pushing into void.
+          if (getCell(newBoard, rockDestRow, rockDestCol) === "empty") {
+            newEntities = setEntity(
+              setEntity(newEntities, mimic_target_r, mimic_target_r, "empty"),
+              rockDestRow,
+              rockDestCol,
+              "empty",
+            );
+          }
+          // UNNECESSARY TRAP TILE CODE
+          // Normal move
+          else {
+            newEntities = setEntity(
+              setEntity(newEntities, mimic_target_r, mimic_target_r, "empty"),
+              rockDestRow,
+              rockDestCol,
+              startingEntity,
+            );
+          }
+          
+          return [newBoard, newEntities, activeWings];
         }
         // Pushing something else??
         else if (getEntity(entities, mimic_target_r, mimic_target_c) !== "empty") {

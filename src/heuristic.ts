@@ -72,7 +72,7 @@ export function heuristic(
         const cur = board[r]![c]!;
         const tgt = target[r]![c]!;
         // Glass is not counted if it's closer to the mimic than it is to us.
-        if (mimics && cur === "glass" && manhattan(r,c,mimic_r,mimic_c) < manhattan(r,c,player.row,player.col)) {
+        if (mimics && cur === "glass" && manhattan(r,c,mimic_r,mimic_c) <= 1) {
           continue;
         }
         // Glass the player is standing on will break for free on their next move.
