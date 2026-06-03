@@ -172,7 +172,7 @@ function triggerWatcher(entities: EntityGrid): EntityGrid {
 function anyHands(entities: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i < 6; i++) {
-      if (getEntity(entities, i, i2) == "hand") {
+      if (getEntity(entities, i, i2) === "hand") {
         return true;
       }
     }
@@ -183,7 +183,7 @@ function anyHands(entities: EntityGrid): boolean {
 function anyBeavers(entities: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i < 6; i++) {
-      if (getEntity(entities, i, i2) == "beaver") {
+      if (getEntity(entities, i, i2) === "beaver") {
         return true;
       }
     }
@@ -194,7 +194,7 @@ function anyBeavers(entities: EntityGrid): boolean {
 function anyMimics(entities: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i < 6; i++) {
-      if (getEntity(entities, i, i2) == "mimic") {
+      if (getEntity(entities, i, i2) === "mimic") {
         return true;
       }
     }
@@ -206,8 +206,8 @@ function anyBeaversOrMimics(entities: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i < 6; i++) {
       if (
-        getEntity(entities, i, i2) == "beaver" ||
-        getEntity(entities, i, i2) == "mimic"
+        getEntity(entities, i, i2) === "beaver" ||
+        getEntity(entities, i, i2) === "mimic"
       ) {
         return true;
       }
@@ -237,7 +237,7 @@ function moveEntities(board: Board, entities: EntityGrid, activeWings: boolean, 
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       // Move mimic
-      if (action !== "staff" && getEntity(entities, i, i2) == "mimic") {
+      if (action !== "staff" && getEntity(entities, i, i2) === "mimic") {
         // Mimic facing direction doesn't matter since they can't interact. //
         const { dr, dc } = DELTAS[action];
         const mimic_target_r = i + dr;

@@ -71,7 +71,10 @@ export function applyPath(
       throw new Error(`Unknown path character "${char}" at index ${i}`);
     const next = applyAction(state, action, burdens);
     if (!next) {
-      if (VERBOSE >= 1) console.log(renderState(state));
+      for (let st of states) {
+        console.log(renderState(st));
+      }
+      console.log(renderState(state));
       throw new Error(
         `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked`,
       );
