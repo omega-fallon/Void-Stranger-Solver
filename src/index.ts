@@ -171,14 +171,19 @@ async function main() {
   }
 
   const fullPath = [...cheatPrefix, ...path];
-  console.log(`Solution found in ${fullPath.length} steps (${perf}):`);
-  console.log(actionsToString(fullPath));
 
   if (values.verbose)
     replayPath(INITIAL_STATE, fullPath, TARGET_BOARD, {
       wings: values.wings ?? false,
       sword: false,
     });
+
+  console.log(`Solution found in ${fullPath.length} steps (${perf}):`);
+  console.log(actionsToString(fullPath));
+  if (fullPath.length < knownCorrectPath.length)
+    console.log(
+      `New path is better than previous known best of ${knownCorrectPath.length}!!`,
+    );
 
   if (values.wings) {
     console.log(values.brane + "/" + values.brand + " with wings");
