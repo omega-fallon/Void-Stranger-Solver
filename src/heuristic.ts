@@ -1,6 +1,5 @@
 import type { Board, Cell, GameState, EntityGrid } from "./types";
 import { staffBanned } from "./search";
-import { anyMimics } from "./gameState";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -48,7 +47,7 @@ export function heuristic(
   const excess: [number, number, Cell][] = []; // cells with tiles that shouldn't be there
   const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
 
-  let finalJumpCost =
+  const finalJumpCost =
     requireFinalJump && board[player.row]![player.col]! !== "empty" ? 1 : 0;
 
   function findMimic(entities: EntityGrid): [number, number] {
@@ -61,9 +60,22 @@ export function heuristic(
     }
     return [-1,-1];
   }
+  function findBeaver(entities: EntityGrid): [number, number] {
+    for (let i = 0; i < 6; i++) {
+      for (let i2 = 0; i2 < 6; i2++) {
+        if (entities[i]![i2]! === "beaver") {
+          return [i,i2];
+        }
+      }
+    }
+    return [-1,-1];
+  }
 
   const [ mimic_r, mimic_c ] = findMimic(entities); 
-  const mimics = mimic_r !== -1;
+  const mimics : boolean = mimic_r !== -1;
+
+  const [ beaver_r, beaver_c ] = findBeaver(entities); 
+  const beavers : boolean = beaver_r !== -1;
 
   // We wrap these in IIFEs so the profiler names each part individually
   (function calculateBoardDiff() {
@@ -71,18 +83,13 @@ export function heuristic(
       for (let c = 0; c < 6; c++) {
         const cur = board[r]![c]!;
         const tgt = target[r]![c]!;
-        // Glass is not counted if it's closer to the mimic than it is to us.
-        if (mimics && cur === "glass" && manhattan(r,c,mimic_r,mimic_c) <= 1) {
-          continue;
-        }
         // Glass the player is standing on will break for free on their next move.
         // If the target wants that cell empty, the mismatch resolves at no extra cost —
         // and crucially, the glass cannot be transported (it simply breaks), so it must
         // not be added to excess. If the target wants empty here, the player must have
         // moved away by then, and the break is free.
-        else if (
-          r === player.row &&
-          c === player.col &&
+        if (
+          ((r === player.row && c === player.col) || (mimics && r === mimic_r && c === mimic_c) || (beavers && r === beaver_r && c === beaver_c)) &&
           cur === "glass" &&
           tgt === "empty"
         ) {
@@ -170,37 +177,11 @@ export function heuristic(
       // Player needs to reach an excess tile to start picking up.
       travelCost += Math.min(
         ...excess.map(([er, ec]) =>
-          Math.max(0, manhattan(player.row, player.col, er, ec) - 1),
+          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - 1, mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)),
         ),
       );
     }
   })();
-
-  // Trap tiles factor...?
-  function hasTrap(board: Board): boolean {
-    for (let i = 0; i < 6; i++) {
-      for (let i2 = 0; i2 < 6; i2++) {
-        if (
-          board[i]![i2]! === "trap_inactive" ||
-          board[i]![i2]! === "trap_active"
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-  function activeTraps(board: Board): number {
-    let count = 0;
-    for (let i = 0; i < 6; i++) {
-      for (let i2 = 0; i2 < 6; i2++) {
-        if (board[i]![i2]! === "trap_active") {
-          count++;
-        }
-      }
-    }
-    return count;
-  }
 
   return {
     total:
