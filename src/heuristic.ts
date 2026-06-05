@@ -180,7 +180,7 @@ export function heuristic(
     }
     
     function excessContainsGlass(ex: [number, number, Cell][]): boolean {
-      for (let ar of ex) {
+      for (const ar of ex) {
         if (ar[2] === "glass") {
           return true;
         }
