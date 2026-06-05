@@ -159,7 +159,11 @@ export function heuristic(
     // --- Player travel to first work item ---
     // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
     const holding = player.staffContent !== "empty";
-
+    
+    // Two variables: add the lowest?
+    let travelCostDeficits = 0;
+    let travelCostExcess = 0;
+    
     if (holding) {
       // Player is carrying a tile; find the nearest deficit it can fill.
       // If none exists, the tile will be placed temporarily — no travel cost charged.
@@ -167,7 +171,7 @@ export function heuristic(
         canFill(player.staffContent as Cell, dtype),
       );
       if (matchingDeficits.length > 0) {
-        travelCost += Math.min(
+        travelCostDeficits += Math.min(
           ...matchingDeficits.map(([dr, dc]) =>
             Math.max(0, manhattan(player.row, player.col, dr, dc) - 1),
           ),
@@ -186,7 +190,7 @@ export function heuristic(
     
     if (excess.length > 0 && excessContainsGlass(excess)) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
-      travelCost += Math.min(
+      travelCostExcess += Math.min(
         ...excess.map(([er, ec]) =>
           board[er]![ec]! == "glass" ?
           
@@ -198,6 +202,9 @@ export function heuristic(
         ),
       );
     }
+    
+    // Return the least.
+    travelCost += Math.min(travelCostDeficits,travelCostExcess);
   })();
 
   return {
