@@ -95,7 +95,7 @@ function checkFallen(board: Board, entities: EntityGrid): EntityGrid {
 }
 
 function disperseTraps(board: Board, row: number, column: number): Board {
-  let triggered_tiles: number[][] = [[row, column]];
+  let triggered_tiles: [number, number][] = [[row, column]];
   let done_anything: boolean = true;
 
   // Iterate through each triggered_tile's neighbors and add them to the list if they're also active traps. Repeatedly do this until nothing changes.
@@ -103,9 +103,9 @@ function disperseTraps(board: Board, row: number, column: number): Board {
     done_anything = false;
 
     const array2 = triggered_tiles.slice();
-    for (let coord of array2) {
-      let r: number = coord[0]!;
-      let c: number = coord[1]!;
+    for (const coord of array2) {
+      const r: number = coord[0];
+      const c: number = coord[1];
 
       const triggeredTileCoordStrings = triggered_tiles.map((pair) =>
         pair.toString(),
@@ -147,8 +147,8 @@ function disperseTraps(board: Board, row: number, column: number): Board {
 
   // Found them all, now remove them.
   let newBoard = board;
-  for (let coord of triggered_tiles) {
-    newBoard = setCell(newBoard, coord[0]!, coord[1]!, "empty");
+  for (const coord of triggered_tiles) {
+    newBoard = setCell(newBoard, coord[0], coord[1], "empty");
   }
 
   // All done!
