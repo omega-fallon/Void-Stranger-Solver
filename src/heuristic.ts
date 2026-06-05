@@ -173,11 +173,12 @@ export function heuristic(
           ),
         );
       }
-    } else if (excess.length > 0) {
+    }
+    if (excess.length > 0) {
       // Player needs to reach an excess tile to start picking up.
       travelCost += Math.min(
         ...excess.map(([er, ec]) =>
-          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - 1, mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)),
+          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1), mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)),
         ),
       );
     }
