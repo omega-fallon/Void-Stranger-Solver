@@ -174,11 +174,27 @@ export function heuristic(
         );
       }
     }
-    if (excess.length > 0) {
-      // Player needs to reach an excess tile to start picking up.
+    
+    function excessContainsGlass(ex: [number, number, Cell][]): boolean {
+      for (let ar of ex) {
+        if (ar[2] === "glass") {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    if (excess.length > 0 && excessContainsGlass(excess)) {
+      // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       travelCost += Math.min(
         ...excess.map(([er, ec]) =>
-          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1), mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)),
+          board[er]![ec]! == "glass" ?
+          
+          // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
+          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1), mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)) :
+          
+          // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
+          (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1)),
         ),
       );
     }
