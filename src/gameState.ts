@@ -61,10 +61,10 @@ function setEntity(
 function stairsActive(board: Board, grid: EntityGrid): boolean {
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
-      // Check if the cell is a button AND has a non-player entity on it.
+      // Check if the cell is a button and doesn't have an entity on it.
       if (
         getCell(board, i, i2) === "button" &&
-        getEntity(grid, i, i2) !== "empty"
+        getEntity(grid, i, i2) === "empty"
       ) {
         return false;
       }
@@ -964,6 +964,14 @@ function renderCellFloor(cell: Cell) {
       break;
   }
   return floorChar;
+}
+
+export function renderStates(states: GameState[]): string {
+  let str = "";
+  for (const state of states) {
+    str += renderState(state);
+  }
+  return str;
 }
 
 export function renderState(state: GameState, requiredTiles?: number): string {
