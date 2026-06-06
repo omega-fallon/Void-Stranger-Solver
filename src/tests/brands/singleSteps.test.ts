@@ -25,7 +25,7 @@ for (let algorithm of [
       let hasWings = !!hasWingsStr;
 
       test.suite(
-        `Testing each step of known path for ${brane}/${brand}`,
+        `Testing each step of known path for ${brane}/${brand} ${hasWings ? "wings" : ""}`,
         async () => {
           let level = BRANES.find((b) => b.name === brane)!;
           let partialSolveStates = applyPath(level, knownCorrectPath, {
