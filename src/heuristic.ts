@@ -1,5 +1,6 @@
 import type { Board, Cell, GameState, EntityGrid } from "./types";
 import { staffBanned } from "./search";
+import { inBounds } from "./gameState";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -189,8 +190,41 @@ export function heuristic(
       return false;
     }
     
-    function entityCost(er: number, ec: number): number {
-      return Number(entities[er]![ec]! === "rock" || entities[er]![ec]! === "watcher_inactive" || entities[er]![ec]! === "watcher_active" || entities[er]![ec]! === "monster_statue")
+    function blockerCost(board: Board, entities : EntityGrid, er: number, ec: number, breaker_r: number, breaker_c: number): number {
+      const blockers = ["rock", "watcher_inactive", "watcher_active", "chest"];
+      if (entities[er]![ec]! !== "chest" && blockers.includes(entities[er]![ec]!)) {
+        // Establish distance from pushing spots.
+        let cardinalDists : [[string, number],[string, number],[string, number],[string, number]] = [["n",manhattan(er - 1, ec, breaker_r, breaker_c)],["e",manhattan(er, ec + 1, breaker_r, breaker_c)],["w",manhattan(er, ec - 1, breaker_r, breaker_c)],["s",manhattan(er + 1, ec, breaker_r, breaker_c)]];
+        
+        // Sort shortest to longest distance.
+        function compDist(a: [string, number], b: [string, number]): number {
+          return a[1] - b[1];
+        }
+        cardinalDists.sort(compDist);
+        
+        // Check for valid pushing spots.
+        for (const cardinal of cardinalDists) {
+          const spot_r = er + (cardinal[0] === "n" ? -1 : (cardinal[0] === "s" ? 1 : 0));
+          const spot_c = ec + (cardinal[0] === "w" ? -1 : (cardinal[0] === "e" ? 1 : 0));
+          const oppositeSpot_r = er + (cardinal[0] === "n" ? 1 : (cardinal[0] === "s" ? -1 : 0));
+          const oppositeSpot_c = ec + (cardinal[0] === "w" ? 1 : (cardinal[0] === "e" ? -1 : 0));
+          
+          // Invalid spot, move to next-closest
+          if (!inBounds(spot_r, spot_c) || !inBounds(oppositeSpot_r,oppositeSpot_c) || board[spot_r]![spot_c]! === "empty" || blockers.includes(entities[spot_r]![spot_c]!) || blockers.includes(entities[oppositeSpot_r]![oppositeSpot_c]!)) {
+            continue;
+          }
+          // Valid spot. The returned factor is 1 (for the push) + the difference between the shortest viable pushing spot and the ideal pushing spot. We subtract one if the covered tile is glass since then, the entity wouldn't have to move onto the glass itself. (Or take it with the wand, if player & not holding)
+          else {
+            return 1 + (cardinal[1] - cardinalDists[0][1]) - (board[er]![ec]! === "glass" ? 1 : 0);
+          }
+        }
+        
+        // No valid spots.
+        return Infinity;
+      }
+      else {
+        return 0
+      }
     }
     
     if (excess.length > 0 && excessContainsGlass(excess)) {
@@ -200,10 +234,10 @@ export function heuristic(
           board[er]![ec]! == "glass" ?
           
           // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
-          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1), mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)) + entityCost(er,ec):
+          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1) + blockerCost(board,entities,er,ec,player.row,player.col), mimics ? manhattan(mimic_r, mimic_c, er, ec) + blockerCost(board,entities,er,ec,mimic_r, mimic_c) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity) + blockerCost(board,entities,er,ec,beaver_r, beaver_c)):
           
           // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
-          (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1)) + entityCost(er,ec),
+          (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1) + blockerCost(board,entities,er,ec,player.row, player.col)),
         ),
       );
     }

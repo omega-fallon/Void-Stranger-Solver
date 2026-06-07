@@ -23,7 +23,7 @@ const DELTAS: Record<Direction, { dr: number; dc: number }> = {
   right: { dr: 0, dc: 1 },
 };
 
-function inBounds(r: number, c: number): boolean {
+export function inBounds(r: number, c: number): boolean {
   return r >= 0 && r < 6 && c >= 0 && c < 6;
 }
 
