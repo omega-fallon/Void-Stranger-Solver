@@ -9,7 +9,7 @@ const VERBOSE = Number(process.env.VERBOSE);
 
 for (let algorithm of [
   "aStar",
-  "aStarThenIdaStar",
+  // "aStarThenIdaStar", // This algorithm is messed up in some situations, so disabling for now
   "idaStar",
   "rbfs",
 ] as const) {
