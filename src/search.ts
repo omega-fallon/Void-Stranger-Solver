@@ -27,5 +27,6 @@ export async function search(options: SearchOptions): Promise<SearchResult> {
   if (algorithm === "rbfs") return rbfs(options);
   if (algorithm === "aStar") return aStar(options);
   if (algorithm === "aStarThenIdaStar") return aStarThenIdaStar(options);
-  return idaStar(options);
+  if (algorithm === "idaStar") return idaStar(options);
+  throw Error("Unknown algorithm choice");
 }
