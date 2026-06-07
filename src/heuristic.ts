@@ -234,7 +234,15 @@ export function heuristic(
           board[er]![ec]! == "glass" ?
           
           // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
-          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1) + blockerCost(board,entities,er,ec,player.row,player.col), mimics ? manhattan(mimic_r, mimic_c, er, ec) + blockerCost(board,entities,er,ec,mimic_r, mimic_c) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity) + blockerCost(board,entities,er,ec,beaver_r, beaver_c)):
+          Math.max(0, Math.min(
+          
+          manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1) + blockerCost(board,entities,er,ec,player.row,player.col), 
+          
+          mimics ? manhattan(mimic_r, mimic_c, er, ec) + blockerCost(board,entities,er,ec,mimic_r, mimic_c) : Infinity,
+          
+          beavers ? manhattan(beaver_r, beaver_c, er, ec)  blockerCost(board,entities,er,ec,beaver_r, beaver_c) : Infinity)
+          
+          ) :
           
           // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
           (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1) + blockerCost(board,entities,er,ec,player.row, player.col)),
