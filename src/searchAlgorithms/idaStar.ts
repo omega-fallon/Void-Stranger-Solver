@@ -4,6 +4,7 @@ import {
   applyAction,
   isGoal,
   renderState,
+  replayPath,
   stateKey,
 } from "../gameState";
 import { heuristic } from "../heuristic";
@@ -59,7 +60,10 @@ export async function idaDfs(
       }
       return knownCorrectPath.length;
     })();
-    if (amountOfPathFound === path.length)
+    if (
+      amountOfPathFound === path.length &&
+      threshold >= knownCorrectPath.length
+    )
       console.warn(
         `Pruning state from correct path (above threshold): ${g} + ${h} > ${threshold}\n` +
           `${actionsToString(path)} / ${actionsToString(knownCorrectPath)}\n` +
@@ -78,17 +82,21 @@ export async function idaDfs(
   const nodeDecision = await onNode(state, path, g, h);
   if (nodeDecision === "found") return "found";
 
-  if (isPruned(state, target, burdens, numFloorTilesInSolution)) {
+  let pruneReason = isPruned(state, target, burdens, numFloorTilesInSolution);
+  if (pruneReason) {
     const amountOfPathFound = (() => {
       for (let i = 0; i < knownCorrectPath.length; i++) {
         if (knownCorrectPath[i] != path[i]) return i;
       }
       return knownCorrectPath.length;
     })();
-    if (amountOfPathFound === path.length)
+    if (amountOfPathFound === path.length) {
       console.warn(
-        "Pruning state from correct path (invalid):\n" + renderState(state),
+        `Pruning state from correct path (invalid): ${pruneReason}\npath length: ${path.length}\n` +
+          renderState(state),
       );
+      replayPath(state, path, target, burdens, false);
+    }
     return Infinity;
   }
 

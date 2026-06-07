@@ -631,6 +631,12 @@ export function replayPath(
   for (let i = 0; i < path.length; i++) {
     const action = path[i]!;
     state = applyAction(state, action, burdens)!;
+    if (!state) {
+      console.log(
+        `Step ${i + 1}: ${action} | h: Invalid state\n${renderState(state)}\n`,
+      );
+      break;
+    }
     console.log(
       `Step ${i + 1}: ${action} | h: ${
         heuristic(state, target, requireFinalJump).total
@@ -678,6 +684,18 @@ function renderCellFloor(cell: Cell) {
 }
 
 export function renderState(state: GameState, requiredTiles?: number): string {
+  if (!state) {
+    return `
+┌────────────┐
+│            │
+│            │
+│  invalid   │
+│   state    │
+│            │
+│            │
+└────────────┘
+`;
+  }
   const { board, entities, player } = state;
   const cellChar = (cell: Cell, r: number, c: number): string => {
     // Priority: player arrow > rock > board cell
