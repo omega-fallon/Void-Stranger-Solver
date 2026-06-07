@@ -215,7 +215,7 @@ export function heuristic(
           }
           // Valid spot. The returned factor is 1 (for the push) + the difference between the shortest viable pushing spot and the ideal pushing spot. We subtract one if the covered tile is glass since then, the entity wouldn't have to move onto the glass itself. (Or take it with the wand, if player & not holding)
           else {
-            return 1 + (cardinal[1] - cardinalDists[0][1]) - (board[er]![ec]! === "glass" ? 1 : 0);
+            return 1 + (cardinal[1] - cardinalDists[0][1]) - (board[er]![ec]! === "glass" ? 1 + (holding ? 0 : 1) : 0);
           }
         }
         
