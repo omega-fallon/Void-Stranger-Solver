@@ -204,13 +204,13 @@ export function isPruned(
         i === 0 || i === 2 ? 0
         : i === 4 || i === 6 ? 0
         : i === 8 || i === 10 ? 5
-        : i === 12 || i === 2 ? 5
+        : i === 12 || i === 14 ? 5
         : 256;
       const c2: number =
         i === 0 || i === 2 ? 0
         : i === 4 || i === 6 ? 5
         : i === 8 || i === 10 ? 0
-        : i === 12 || i === 2 ? 5
+        : i === 12 || i === 14 ? 5
         : 256;
 
       if (blockers.includes(state.entities[r2]![c2]!)) {
