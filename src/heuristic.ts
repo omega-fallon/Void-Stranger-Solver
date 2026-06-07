@@ -240,7 +240,7 @@ export function heuristic(
           
           mimics ? manhattan(mimic_r, mimic_c, er, ec) + blockerCost(board,entities,er,ec,mimic_r, mimic_c) : Infinity,
           
-          beavers ? manhattan(beaver_r, beaver_c, er, ec)  blockerCost(board,entities,er,ec,beaver_r, beaver_c) : Infinity)
+          beavers ? manhattan(beaver_r, beaver_c, er, ec) + blockerCost(board,entities,er,ec,beaver_r, beaver_c) : Infinity)
           
           ) :
           
