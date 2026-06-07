@@ -97,7 +97,8 @@ export function heuristic(
         }
         // Ignore activated traps, since they might get dropped for free, or they might
         // get used as floors for brand matching purposes
-        if (cur === "trap_active") {
+        // Ignoring them ensures admissibility.
+        else if (cur === "trap_active") {
           continue;
         }
         // The occupied tile is glass but the target wants a solid tile. The glass is doomed
@@ -128,7 +129,7 @@ export function heuristic(
       mismatches: 0,
       transportCost: 0,
       travelCost: 0,
-      finalJumpCost,
+      finalJumpCost: finalJumpCost,
     };
 
   let transportCost = 0;
@@ -188,6 +189,10 @@ export function heuristic(
       return false;
     }
     
+    function entityCost(er: number, ec: number): number {
+      return Number(entities[er]![ec]! === "rock" || entities[er]![ec]! === "watcher_inactive" || entities[er]![ec]! === "watcher_active" || entities[er]![ec]! === "monster_statue")
+    }
+    
     if (excess.length > 0 && excessContainsGlass(excess)) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       travelCostExcess += Math.min(
@@ -195,10 +200,10 @@ export function heuristic(
           board[er]![ec]! == "glass" ?
           
           // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
-          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1), mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)) :
+          Math.max(0, Math.min(manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1), mimics ? manhattan(mimic_r, mimic_c, er, ec) : Infinity, beavers ? manhattan(beaver_r, beaver_c, er, ec) : Infinity)) + entityCost(er,ec):
           
           // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
-          (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1)),
+          (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1)) + entityCost(er,ec),
         ),
       );
     }
@@ -210,9 +215,9 @@ export function heuristic(
   return {
     total:
       mismatches + transportCost + travelCost + finalJumpCost,
-    mismatches,
+    mismatches: mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
-    finalJumpCost,
+    finalJumpCost: finalJumpCost,
   };
 }
