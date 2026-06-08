@@ -5,7 +5,13 @@ import { heuristic } from "../heuristic";
 import { RawLevel } from "../levels";
 import { search } from "../search";
 import type { Action, Board, Cell } from "../types";
-import { actionsToString, applyPath, emptyEntityGrid, parseBoard, parseEntities } from "../utils";
+import {
+  actionsToString,
+  applyPath,
+  emptyEntityGrid,
+  parseBoard,
+  parseEntities,
+} from "../utils";
 
 const PATH_CHARS: Record<string, Action> = {
   U: "up",

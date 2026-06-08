@@ -72,7 +72,8 @@ export function applyPath(
     const next = applyAction(state, action, burdens);
     if (!next) {
       throw new Error(
-        `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked`+renderStates(states),
+        `Invalid action "${action}" (${char}) at step ${i + 1} — move blocked` +
+          renderStates(states),
       );
     }
     states.push(next);

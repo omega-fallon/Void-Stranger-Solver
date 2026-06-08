@@ -55,28 +55,28 @@ export function heuristic(
     for (let i = 0; i < 6; i++) {
       for (let i2 = 0; i2 < 6; i2++) {
         if (entities[i]![i2]! === "mimic") {
-          return [i,i2];
+          return [i, i2];
         }
       }
     }
-    return [-1,-1];
+    return [-1, -1];
   }
   function findBeaver(entities: EntityGrid): [number, number] {
     for (let i = 0; i < 6; i++) {
       for (let i2 = 0; i2 < 6; i2++) {
         if (entities[i]![i2]! === "beaver") {
-          return [i,i2];
+          return [i, i2];
         }
       }
     }
-    return [-1,-1];
+    return [-1, -1];
   }
 
-  const [ mimic_r, mimic_c ] = findMimic(entities); 
-  const mimics : boolean = mimic_r !== -1;
+  const [mimic_r, mimic_c] = findMimic(entities);
+  const mimics: boolean = mimic_r !== -1;
 
-  const [ beaver_r, beaver_c ] = findBeaver(entities); 
-  const beavers : boolean = beaver_r !== -1;
+  const [beaver_r, beaver_c] = findBeaver(entities);
+  const beavers: boolean = beaver_r !== -1;
 
   // We wrap these in IIFEs so the profiler names each part individually
   (function calculateBoardDiff() {
@@ -90,7 +90,9 @@ export function heuristic(
         // not be added to excess. If the target wants empty here, the player must have
         // moved away by then, and the break is free.
         if (
-          ((r === player.row && c === player.col) || (mimics && r === mimic_r && c === mimic_c) || (beavers && r === beaver_r && c === beaver_c)) &&
+          ((r === player.row && c === player.col) ||
+            (mimics && r === mimic_r && c === mimic_c) ||
+            (beavers && r === beaver_r && c === beaver_c)) &&
           cur === "glass" &&
           tgt === "empty"
         ) {
@@ -161,11 +163,11 @@ export function heuristic(
     // --- Player travel to first work item ---
     // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
     const holding = player.staffContent !== "empty";
-    
+
     // Two variables: add the lowest?
     let travelCostDeficits = 0;
     let travelCostExcess = 0;
-    
+
     if (holding) {
       // Player is carrying a tile; find the nearest deficit it can fill.
       // If none exists, the tile will be placed temporarily — no travel cost charged.
@@ -180,7 +182,7 @@ export function heuristic(
         );
       }
     }
-    
+
     function excessContainsGlass(ex: [number, number, Cell][]): boolean {
       for (const ar of ex) {
         if (ar[2] === "glass") {
@@ -189,75 +191,128 @@ export function heuristic(
       }
       return false;
     }
-    
-    function blockerCost(board: Board, entities : EntityGrid, er: number, ec: number, breaker_r: number, breaker_c: number): number {
+
+    function blockerCost(
+      board: Board,
+      entities: EntityGrid,
+      er: number,
+      ec: number,
+      breaker_r: number,
+      breaker_c: number,
+    ): number {
       //return 0;
       const blockers = ["rock", "watcher_inactive", "watcher_active", "chest"];
-      if (entities[er]![ec]! !== "chest" && blockers.includes(entities[er]![ec]!)) {
+      if (
+        entities[er]![ec]! !== "chest" &&
+        blockers.includes(entities[er]![ec]!)
+      ) {
         // Establish distance from pushing spots.
-        let cardinalDists : [[string, number],[string, number],[string, number],[string, number]] = [["n",manhattan(er - 1, ec, breaker_r, breaker_c)],["e",manhattan(er, ec + 1, breaker_r, breaker_c)],["w",manhattan(er, ec - 1, breaker_r, breaker_c)],["s",manhattan(er + 1, ec, breaker_r, breaker_c)]];
-        
+        let cardinalDists: [
+          [string, number],
+          [string, number],
+          [string, number],
+          [string, number],
+        ] = [
+          ["n", manhattan(er - 1, ec, breaker_r, breaker_c)],
+          ["e", manhattan(er, ec + 1, breaker_r, breaker_c)],
+          ["w", manhattan(er, ec - 1, breaker_r, breaker_c)],
+          ["s", manhattan(er + 1, ec, breaker_r, breaker_c)],
+        ];
+
         // Sort shortest to longest distance.
         function compDist(a: [string, number], b: [string, number]): number {
           return a[1] - b[1];
         }
         cardinalDists.sort(compDist);
-        
+
         // Check for valid pushing spots.
         for (const cardinal of cardinalDists) {
-          const spot_r = er + (cardinal[0] === "n" ? -1 : (cardinal[0] === "s" ? 1 : 0));
-          const spot_c = ec + (cardinal[0] === "w" ? -1 : (cardinal[0] === "e" ? 1 : 0));
-          const oppositeSpot_r = er + (cardinal[0] === "n" ? 1 : (cardinal[0] === "s" ? -1 : 0));
-          const oppositeSpot_c = ec + (cardinal[0] === "w" ? 1 : (cardinal[0] === "e" ? -1 : 0));
-          
+          const spot_r =
+            er +
+            (cardinal[0] === "n" ? -1
+            : cardinal[0] === "s" ? 1
+            : 0);
+          const spot_c =
+            ec +
+            (cardinal[0] === "w" ? -1
+            : cardinal[0] === "e" ? 1
+            : 0);
+          const oppositeSpot_r =
+            er +
+            (cardinal[0] === "n" ? 1
+            : cardinal[0] === "s" ? -1
+            : 0);
+          const oppositeSpot_c =
+            ec +
+            (cardinal[0] === "w" ? 1
+            : cardinal[0] === "e" ? -1
+            : 0);
+
           // Invalid spot, move to next-closest
-          if (!inBounds(spot_r, spot_c) || !inBounds(oppositeSpot_r,oppositeSpot_c) || board[spot_r]![spot_c]! === "empty" || blockers.includes(entities[spot_r]![spot_c]!) || blockers.includes(entities[oppositeSpot_r]![oppositeSpot_c]!)) {
+          if (
+            !inBounds(spot_r, spot_c) ||
+            !inBounds(oppositeSpot_r, oppositeSpot_c) ||
+            board[spot_r]![spot_c]! === "empty" ||
+            blockers.includes(entities[spot_r]![spot_c]!) ||
+            blockers.includes(entities[oppositeSpot_r]![oppositeSpot_c]!)
+          ) {
             continue;
           }
           // Valid spot. The returned factor is 1 (for the push) + the difference between the shortest viable pushing spot and the ideal pushing spot. We subtract one if the covered tile is glass since then, the entity wouldn't have to move onto the glass itself. (Or take it with the wand, if player & not holding)
           else {
-            return 1 + (cardinal[1] - cardinalDists[0][1]) - (board[er]![ec]! === "glass" ? 1 : 0);
+            return (
+              1 +
+              (cardinal[1] - cardinalDists[0][1]) -
+              (board[er]![ec]! === "glass" ? 1 : 0)
+            );
           }
         }
-        
+
         // No valid spots.
         return Infinity;
-      }
-      else {
-        return 0
+      } else {
+        return 0;
       }
     }
-    
+
     if (excess.length > 0 && excessContainsGlass(excess)) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       travelCostExcess += Math.min(
         ...excess.map(([er, ec]) =>
           board[er]![ec]! === "glass" ?
-          
-          // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
-          Math.max(0, Math.min(
-          
-          manhattan(player.row, player.col, er, ec) - (holding ? 0 : 1) + blockerCost(board,entities,er,ec,player.row,player.col), 
-          
-          mimics ? manhattan(mimic_r, mimic_c, er, ec) + blockerCost(board,entities,er,ec,mimic_r, mimic_c) : Infinity,
-          
-          beavers ? manhattan(beaver_r, beaver_c, er, ec) + blockerCost(board,entities,er,ec,beaver_r, beaver_c) : Infinity)
-          
-          ) :
-          
-          // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
-          (holding ? Infinity : Math.max(0,manhattan(player.row, player.col, er, ec) - 1) + blockerCost(board,entities,er,ec,player.row, player.col)),
+            // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
+            Math.max(
+              0,
+              Math.min(
+                manhattan(player.row, player.col, er, ec) -
+                  (holding ? 0 : 1) +
+                  blockerCost(board, entities, er, ec, player.row, player.col),
+
+                mimics ?
+                  manhattan(mimic_r, mimic_c, er, ec) +
+                    blockerCost(board, entities, er, ec, mimic_r, mimic_c)
+                : Infinity,
+
+                beavers ?
+                  manhattan(beaver_r, beaver_c, er, ec) +
+                    blockerCost(board, entities, er, ec, beaver_r, beaver_c)
+                : Infinity,
+              ),
+            )
+            // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
+          : holding ? Infinity
+          : Math.max(0, manhattan(player.row, player.col, er, ec) - 1) +
+            blockerCost(board, entities, er, ec, player.row, player.col),
         ),
       );
     }
-    
+
     // Return the least.
-    travelCost += Math.min(travelCostDeficits,travelCostExcess);
+    travelCost += Math.min(travelCostDeficits, travelCostExcess);
   })();
 
   return {
-    total:
-      mismatches + transportCost + travelCost + finalJumpCost,
+    total: mismatches + transportCost + travelCost + finalJumpCost,
     mismatches: mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
