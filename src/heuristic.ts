@@ -191,7 +191,7 @@ export function heuristic(
     }
     
     function blockerCost(board: Board, entities : EntityGrid, er: number, ec: number, breaker_r: number, breaker_c: number): number {
-      return 0;
+      //return 0;
       const blockers = ["rock", "watcher_inactive", "watcher_active", "chest"];
       if (entities[er]![ec]! !== "chest" && blockers.includes(entities[er]![ec]!)) {
         // Establish distance from pushing spots.
