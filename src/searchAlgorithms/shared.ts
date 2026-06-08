@@ -25,7 +25,12 @@ export interface SearchOptions {
   knownCorrectPath?: Action[] | undefined;
   burdens?: Burdens;
   actions?: Action[];
-  algorithm?: "idaStar" | "rbfs" | "aStar" | "aStarThenIdaStar" | "bidirectionalAStar";
+  algorithm?:
+    | "idaStar"
+    | "rbfs"
+    | "aStar"
+    | "aStarThenIdaStar"
+    | "bidirectionalAStar";
   /** Only used by `aStarThenIdaStar`: how many layers A* expands before handing off to IDA*. Default 10. */
   frontierDepth?: number;
 }
