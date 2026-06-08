@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { replayPath } from "../gameState";
+import { heuristic } from "../heuristic";
 import { RawLevel } from "../levels";
 import { search } from "../search";
 import type { Action, Board, Cell } from "../types";
-import { emptyEntityGrid, parseBoard, parseEntities } from "../utils";
+import { actionsToString, applyPath, emptyEntityGrid, parseBoard, parseEntities } from "../utils";
 
 const PATH_CHARS: Record<string, Action> = {
   U: "up",
@@ -67,6 +68,31 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
       `Path had length ${path.length} but should have been ${level.solutionLength}`,
     );
   else t.assert.snapshot(path.length);
+
+  // Check heuristic admissibility at every step along the found path,
+  // both forwards (from the start) and backwards (from the end).
+  const burdens = { wings: level.hasWings ?? false, sword: false };
+  const statesOnPath = applyPath(initial, actionsToString(path), burdens);
+  // Forward: state at index i has i steps taken, path.length - i remaining.
+  for (let i = 0; i < statesOnPath.length; i++) {
+    const stepsRemaining = path.length - i;
+    const h = heuristic(statesOnPath[i]!, target, requireFinalJump);
+    assert.ok(
+      h.total <= stepsRemaining,
+      `Forward step ${i}/${path.length}: h=${h.total} > ${stepsRemaining} steps remaining. ` +
+        `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}`,
+    );
+  }
+  // Backward: same states, iterated from the end to make failure messages clearer.
+  for (let i = statesOnPath.length - 1; i >= 0; i--) {
+    const stepsRemaining = path.length - i;
+    const h = heuristic(statesOnPath[i]!, target, requireFinalJump);
+    assert.ok(
+      h.total <= stepsRemaining,
+      `Backward step ${i}/${path.length}: h=${h.total} > ${stepsRemaining} steps remaining. ` +
+        `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}`,
+    );
+  }
 }
 
 async function assertSearchFailure(t: TestContext, level: TestLevel) {
