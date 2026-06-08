@@ -894,8 +894,8 @@ export function isGoal(
 ): boolean {
   if (requireFinalJump) {
     if (state.player.staffContent !== "stairs") return false;
-    if (getCell(state.board, state.player.row, state.player.col) !== "empty")
-      return false;
+    if (getCell(state.board, state.player.row, state.player.col) !== "empty") return false;
+    if (state.player.wingsActive) return false;
   }
   // console.debug(
   //   state.board.map((row, r) =>
