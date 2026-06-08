@@ -75,7 +75,7 @@ for (let algorithm of [
                   target,
                   verbose: VERBOSE,
                   requireFinalJump,
-                  initialThreshold: Number(level.name.replace(/\D*/, "")),
+                  initialThreshold: 1,
                   algorithm,
                   burdens: { wings: hasWings, sword: false },
                   knownCorrectPath: level.knownCorrectPath,
