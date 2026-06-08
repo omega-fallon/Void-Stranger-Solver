@@ -1,5 +1,5 @@
 import assert from "assert";
-import test from "node:test";
+import test, { after } from "node:test";
 import { renderState, renderBoard, replayPath } from "../../gameState";
 import { BRANES, KNOWN_CORRECT_PATHS, RawLevel } from "../../levels";
 import { search } from "../../search";
@@ -59,7 +59,7 @@ for (let algorithm of [
           }
 
           for (const level of TEST_LEVELS) {
-            test(`${algorithm} ${level.name}`, async () => {
+            test(`${algorithm} ${level.name}`, { timeout: 200 }, async (t) => {
               // console.log(`${level.name}`);
               const initial = {
                 board: level.initial.board,
@@ -69,16 +69,26 @@ for (let algorithm of [
               // console.log(renderBoard(level.initial));
               const target = level.target;
               const requireFinalJump = level.requireFinalJump ?? false;
-              const { path } = await search({
-                initial,
-                target,
-                verbose: VERBOSE,
-                requireFinalJump,
-                initialThreshold: Number(level.name.replace(/\D*/, "")),
-                algorithm,
-                burdens: { wings: hasWings, sword: false },
-                knownCorrectPath: level.knownCorrectPath,
-              });
+              const { path } = await Promise.race([
+                search({
+                  initial,
+                  target,
+                  verbose: VERBOSE,
+                  requireFinalJump,
+                  initialThreshold: Number(level.name.replace(/\D*/, "")),
+                  algorithm,
+                  burdens: { wings: hasWings, sword: false },
+                  knownCorrectPath: level.knownCorrectPath,
+                }),
+                new Promise<{ path: null }>((resolve) =>
+                  t.signal.addEventListener(
+                    "abort",
+                    () => resolve({ path: null }),
+                    { once: true },
+                  ),
+                ),
+              ]);
+              if (t.signal.aborted) return;
               // if (level.solutionLength) {
               //   assert.equal(level.solutionLength, path?.length);
               // }
@@ -109,3 +119,11 @@ for (let algorithm of [
     }
   });
 }
+
+after(() => {
+  // Defer exit by one event-loop tick so the test runner can write its
+  // trailing TAP plan line before the process is killed.  This is needed
+  // because any async search operations that are still running after a
+  // test times out will keep the process alive indefinitely.
+  setImmediate(() => process.exit(0));
+});

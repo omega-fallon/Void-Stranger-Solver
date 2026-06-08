@@ -77,6 +77,10 @@ export async function idaDfs(
 
   counters.nodesExplored++;
 
+  // Take an async break for unit tests to be able to cancel the run
+  if (counters.nodesExplored % 500 === 0)
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
   // Note: checking for goal before pruning means dying to a watcher while
   // flying and landing in the solution IS accounted for.
   const nodeDecision = await onNode(state, path, g, h);

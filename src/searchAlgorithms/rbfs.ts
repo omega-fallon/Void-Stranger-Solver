@@ -65,6 +65,10 @@ async function rbfsDfs(
 
   counters.nodesExplored++;
 
+  // Take an async break for unit tests to be able to cancel the run
+  if (counters.nodesExplored % 500 === 0)
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
   // Check for goal / request logging before pruning, so that landing on the
   // solution after falling into a watcher is handled correctly.
   const nodeDecision = await onNode(state, path, g, h);
