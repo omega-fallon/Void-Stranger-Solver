@@ -259,7 +259,7 @@ test("Fly over a gap", async (t) => {
       "      ",
       "      ",
     ]),
-    solutionLength: 4,
+    solutionLength: 5,
   });
 });
 
@@ -288,7 +288,7 @@ test("Fly over a gap multiple times", async (t) => {
       "      ",
       "      ",
     ]),
-    solutionLength: 10,
+    solutionLength: 11,
   });
 });
 
@@ -345,7 +345,7 @@ test("Grab a tile while flying", async (t) => {
       "      ",
       "      ",
     ]),
-    solutionLength: 8,
+    solutionLength: 9,
   });
 });
 

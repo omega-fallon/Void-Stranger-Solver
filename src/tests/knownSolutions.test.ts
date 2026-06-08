@@ -1,6 +1,6 @@
 import assert from "assert";
 import { test } from "node:test";
-import { isGoal } from "../gameState";
+import { isGoal, renderBoard, renderState } from "../gameState";
 import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "../levels";
 import { applyPath } from "../utils";
 
@@ -20,7 +20,7 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
     const finalState = states[states.length - 1]!;
     assert.ok(
       isGoal(finalState, brand.board, true),
-      `Path "${pathStr}" did not reach the ${brandName} brand from the ${braneName} brane`,
+      `Path "${pathStr}" did not reach the ${brandName} brand from the ${braneName} brane.\nExpected:\n${renderBoard(brand.board)}\nActual:\n${renderState(finalState)}`,
     );
   });
 }
