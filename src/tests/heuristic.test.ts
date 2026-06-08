@@ -321,22 +321,56 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
   }
 });
 
-for (let searchName of ["Add/Add", "Eus/Eus"]) {
-  const [braneName, brandName] = searchName.split("/");
-  let startState = BRANES.find((b) => b.name === braneName)!;
-  let pathStr = KNOWN_CORRECT_PATHS[searchName]!;
-  let statesOnPath = applyPath(startState, pathStr);
-  for (const [iStr, state] of Object.entries(statesOnPath)) {
-    let i = Number(iStr);
-    let h = heuristic(
-      state,
-      BRANDS.find((b) => b.name === brandName)!.board,
-      true,
-    );
-    console.log(
-      `${searchName} at step ${i} with h=${h.total} which underestimates by ${
-        pathStr.length - (i + h.total)
-      } (${JSON.stringify(h)})`,
-    );
-  }
+for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
+  const hasWings = searchName.endsWith(" wings");
+  const coreName =
+    hasWings ? searchName.slice(0, -" wings".length) : searchName;
+  const [braneName, brandName] = coreName.split("/");
+  const brane = BRANES.find((b) => b.name === braneName);
+  const brand = BRANDS.find((b) => b.name === brandName);
+  if (!brane || !brand) continue;
+
+  const burdens = { wings: hasWings, sword: false };
+
+  test(`Heuristic admissibility along known path — ${searchName}`, () => {
+    const statesOnPath = applyPath(brane, pathStr, burdens);
+    for (const [iStr, state] of Object.entries(statesOnPath)) {
+      const stepsTaken = Number(iStr);
+      const stepsRemaining = pathStr.length - stepsTaken;
+      const h = heuristic(state, brand.board, true);
+      const nextState = statesOnPath[Number(iStr) + 1];
+      assert.ok(
+        h.total <= stepsRemaining,
+        `Step ${stepsTaken}/${pathStr.length}: h=${h.total} > ${stepsRemaining} steps remaining. ` +
+          `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}\n${renderState(state)}\nTo:\n${nextState && renderState(nextState)}`,
+      );
+    }
+  });
+
+  test(`Heuristic backward admissibility along known path — ${searchName}`, () => {
+    const statesOnPath = applyPath(brane, pathStr, burdens);
+
+    // Mirror of the forward test above: instead of fixing the target at the
+    // final board and varying the starting step forward through the path,
+    // this fixes the starting step and varies the target BACKWARD through the
+    // path.  For each state at step i and each earlier board at step j < i,
+    // h(state[i], board[j]) must be ≤ i − j (the number of steps needed to
+    // go backward from state[i] to a state with board[j]).
+    //
+    // This tests the backward-A* heuristic used in bidirectional search:
+    // heuristic(state, initial.board, false).
+    for (let i = 1; i < statesOnPath.length; i++) {
+      const state = statesOnPath[i]!;
+      for (let j = 0; j < i; j++) {
+        const targetBoard = statesOnPath[j]!.board;
+        const stepsBack = i - j;
+        const h = heuristic(state, targetBoard, false);
+        assert.ok(
+          h.total <= stepsBack,
+          `Step ${i} → step ${j} board: h=${h.total} > ${stepsBack} steps back. ` +
+            `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}\n${renderState(state)}`,
+        );
+      }
+    }
+  });
 }

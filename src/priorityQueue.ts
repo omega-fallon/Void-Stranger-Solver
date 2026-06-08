@@ -12,6 +12,10 @@ export class MinHeap {
     this.siftUp(this.heap.length - 1);
   }
 
+  peek(): SearchNode | undefined {
+    return this.heap[0];
+  }
+
   pop(): SearchNode | undefined {
     if (this.heap.length === 0) return undefined;
     const top = this.heap[0]!;

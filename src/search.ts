@@ -1,5 +1,6 @@
 import { aStar } from "./searchAlgorithms/aStar";
 import { aStarThenIdaStar } from "./searchAlgorithms/aStarThenIdaStar";
+import { bidirectionalAStar } from "./searchAlgorithms/bidirectionalAStar";
 import { idaStar } from "./searchAlgorithms/idaStar";
 import { rbfs } from "./searchAlgorithms/rbfs";
 import type { SearchOptions, SearchResult } from "./searchAlgorithms/shared";
@@ -27,6 +28,7 @@ export async function search(options: SearchOptions): Promise<SearchResult> {
   if (algorithm === "rbfs") return rbfs(options);
   if (algorithm === "aStar") return aStar(options);
   if (algorithm === "aStarThenIdaStar") return aStarThenIdaStar(options);
+  if (algorithm === "bidirectionalAStar") return bidirectionalAStar(options);
   if (algorithm === "idaStar") return idaStar(options);
   throw Error("Unknown algorithm choice");
 }
