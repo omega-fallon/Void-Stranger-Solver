@@ -6,7 +6,8 @@ import { applyPath } from "../utils";
 
 for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
   const hasWings = searchName.endsWith(" wings");
-  const coreName = hasWings ? searchName.slice(0, -" wings".length) : searchName;
+  const coreName =
+    hasWings ? searchName.slice(0, -" wings".length) : searchName;
   const [braneName, brandName] = coreName.split("/");
   const brane = BRANES.find((b) => b.name === braneName);
   const brand = BRANDS.find((b) => b.name === brandName);
