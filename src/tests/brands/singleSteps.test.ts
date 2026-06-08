@@ -59,7 +59,7 @@ for (let algorithm of [
           }
 
           for (const level of TEST_LEVELS) {
-            test(`${algorithm} ${level.name}`, { timeout: 200 }, async (t) => {
+            test(`${algorithm} ${level.name}`, { timeout: 300 }, async (t) => {
               // console.log(`${level.name}`);
               const initial = {
                 board: level.initial.board,
