@@ -378,17 +378,17 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
           endStepI === statesOnPath.length - 1,
         );
         valuesOnPath.push(h.total);
-        await test(`Step ${startStepI} → step ${endStepI}`, () => {
+        await test(`${searchName} step ${startStepI} → step ${endStepI}`, () => {
           assert.ok(
             h.total <= stepsBack,
-            `Step ${startStepI} → step ${endStepI} board: h=${h.total} > ${stepsBack} required steps. ` +
-              `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}\n${renderState(initial)}\nTo:\n${renderBoard(target.board)}\nh-values as we move target state further away on path: ${valuesOnPath
+            `${searchName} step ${startStepI} → step ${endStepI}: h=${h.total} > ${stepsBack} required steps. ` +
+              `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}\n${renderState(initial)}\nTo:\n${renderState(target)}\nh-values as we move target state further away on path: ${valuesOnPath
                 .map((el, i) => [el, pathStr[startStepI + i]])
                 .flat()
                 .slice(0, -1) // cut off the following movement letter which isn't relevant
                 .join(
                   " → ",
-                )}\nThis means that the heuristic is over-estimating how hard it is to get from this starting state to this ending state, because of one of that last step jumping the heuristic up too high, but the heuristic may not do this from all starting points.`,
+                )}\nThis means that the heuristic is over-estimating how hard it is to get from this starting state to this ending state, because of one of those last steps jumping the heuristic up too high, but the heuristic may not do this from all starting/ending points that include this step.`,
           );
         });
       }
