@@ -191,6 +191,7 @@ export function heuristic(
     }
     
     function blockerCost(board: Board, entities : EntityGrid, er: number, ec: number, breaker_r: number, breaker_c: number): number {
+      return 0;
       const blockers = ["rock", "watcher_inactive", "watcher_active", "chest"];
       if (entities[er]![ec]! !== "chest" && blockers.includes(entities[er]![ec]!)) {
         // Establish distance from pushing spots.
@@ -231,7 +232,7 @@ export function heuristic(
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       travelCostExcess += Math.min(
         ...excess.map(([er, ec]) =>
-          board[er]![ec]! == "glass" ?
+          board[er]![ec]! === "glass" ?
           
           // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
           Math.max(0, Math.min(
