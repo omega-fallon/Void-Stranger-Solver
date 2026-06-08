@@ -103,13 +103,13 @@ export function isPruned(
   target: Board,
   burdens: Burdens,
   numFloorTilesInSolution: number,
-): boolean {
+): boolean | string {
   const { row, col } = state.player;
 
   // All Watcher statues triggered.
   if (allWatchersTriggeredQuestion(state.entities)) {
     if (verbose >= 3) console.log("INF: all watchers");
-    return true;
+    return "all watchers triggered";
   }
 
   // All but one watcher statue is triggered (staff usage banned) and the
@@ -121,7 +121,7 @@ export function isPruned(
   ) {
     if (verbose >= 3)
       console.log("INF: staff banned, not holding stairs, no wings");
-    return true;
+    return "staff banned";
   }
 
   // Player is in the void but not at goal — dead end.
@@ -129,7 +129,7 @@ export function isPruned(
   if (state.board[row]?.[col] === "empty" && !state.player.wingsActive) {
     if (verbose >= 3)
       console.log("INF: Player is on empty tile but wings are not active");
-    return true;
+    return "you have fallen (prematurely)";
   }
 
   // Not enough floor tiles remaining to satisfy the target.
@@ -142,7 +142,7 @@ export function isPruned(
       1
     : 0;
   if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
-    return true;
+    return "not enough tiles remain";
   }
 
   // A rock/watcher/chest in a corner it can never leave.
@@ -166,16 +166,16 @@ export function isPruned(
       covering_entity === "chest"
     ) {
       // The cornered entity is covering stairs.
-      if (covered_tile === "stairs") {
-        console.log("INF: cornered rock covering stairs:",coord,covering_entity);
-        console.log(renderState(state));
-        return true;
+      if (state.board[r]![c]! === "stairs") {
+        console.log("INF: cornered rock covering stairs" + String(coord));
+        return "There's a rock covering the stairs in a corner (so stairs are unreachable)";
       }
       // Entity is covering a land tile that shouldn't be there.
       if (target[r]![c]! === "empty" && state.board[r]![c]! !== "trap_active") {
-        console.log("INF: cornered rock covering excess tile:",coord,covered_tile,covering_entity);
-        console.log(renderState(state));
-        return true;
+        console.log(
+          "INF: cornered rock covering excess tile: " + String(coord),
+        );
+        return "There's a rock covering a that that must be removed in a corner";
       }
     }
   }
@@ -216,7 +216,7 @@ export function isPruned(
       if (blockers.includes(state.entities[r2]![c2]!)) {
         if (state.board[r]![c]! === "stairs") {
           console.log("INF: side-cornered rock covering stairs");
-          return true;
+          return "side-cornered rock covering stairs";
         }
         if (
           target[r]![c]! === "empty" &&
@@ -224,7 +224,7 @@ export function isPruned(
           state.board[r2]![c2]! !== "trap_active"
         ) {
           console.log("INF: side-cornered rock covering excess tile");
-          return true;
+          return "side-cornered rock covering excess tile";
         }
       }
     }

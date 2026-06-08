@@ -109,7 +109,15 @@ function buildPrefixVisited(
   let state = initial;
   visited.add(stateKey(state));
   for (const action of prefixActions) {
+    const prevState = state;
     state = applyAction(state, action, burdens)!;
+    if (!state) {
+      throw Error(
+        `Error while assembling states from prefix: ${actionsToString(
+          prefixActions,
+        )}\nFailed action: ${action}\n${renderState(prevState)}`,
+      );
+    }
     visited.add(stateKey(state));
   }
   return visited;
@@ -247,7 +255,7 @@ export async function aStarThenIdaStar({
         requireFinalJump,
         counters,
         actions,
-        knownCorrectPath,
+        knownCorrectPath.slice(prefixActions.length),
         async (state, subPath, g, h) => {
           const now = performance.now();
           if (showProgress && (verbose >= 3 || now - lastLogTime >= 3000)) {

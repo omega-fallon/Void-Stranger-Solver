@@ -70,6 +70,10 @@ export async function aStar({
     closed.add(currentKey);
     nodesExplored++;
 
+    // Take an async break for unit tests to be able to cancel the run
+    if (nodesExplored % 500 === 0)
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
     const now = performance.now();
     if (showProgress && (verbose >= 3 || now - lastLogTime >= 3000)) {
       lastLogTime = now;

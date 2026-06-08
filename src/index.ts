@@ -150,7 +150,7 @@ async function main() {
     initialThreshold,
     knownCorrectPath: knownCorrectPath.slice(cheatN),
     burdens: { wings: values.wings ?? false, sword: false },
-    algorithm: (values.algorithm ?? "idaStar") as
+    algorithm: values.algorithm as
       | "idaStar"
       | "rbfs"
       | "aStar"
