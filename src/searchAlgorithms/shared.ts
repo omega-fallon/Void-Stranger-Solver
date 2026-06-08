@@ -1,5 +1,13 @@
 import { NO_BURDENS } from "../types";
-import type { Action, Board, Burdens, EntityGrid, GameState, Cell, Entity } from "../types";
+import type {
+  Action,
+  Board,
+  Burdens,
+  EntityGrid,
+  GameState,
+  Cell,
+  Entity,
+} from "../types";
 import { renderState } from "../gameState";
 
 const verbose = Number(process.env.VERBOSE);
@@ -26,7 +34,12 @@ export interface SearchOptions {
   knownCorrectPath?: Action[] | undefined;
   burdens?: Burdens;
   actions?: Action[];
-  algorithm?: "idaStar" | "rbfs" | "aStar" | "aStarThenIdaStar" | "bidirectionalAStar";
+  algorithm?:
+    | "idaStar"
+    | "rbfs"
+    | "aStar"
+    | "aStarThenIdaStar"
+    | "bidirectionalAStar";
   /** Only used by `aStarThenIdaStar`: how many layers A* expands before handing off to IDA*. Default 10. */
   frontierDepth?: number;
 }
@@ -76,7 +89,7 @@ export function staffBanned(entities: EntityGrid): boolean {
     for (let i2 = 0; i2 < 6; i2++) {
       if (entities[i]![i2]! === "watcher_inactive") {
         found_inactive++;
-        
+
         // 2 inactive statues means we have at least one safe usage.
         if (found_inactive >= 2) {
           return false;
@@ -153,11 +166,11 @@ export function isPruned(
     [5, 0],
     [5, 5],
   ]) {
-    const r : number = coord[0]!;
-    const c : number  = coord[1]!;
-    
-    const covered_tile : Cell = state.board[r]![c]!
-    const covering_entity : Entity = state.entities[r]![c]!;
+    const r: number = coord[0]!;
+    const c: number = coord[1]!;
+
+    const covered_tile: Cell = state.board[r]![c]!;
+    const covering_entity: Entity = state.entities[r]![c]!;
 
     if (
       covering_entity === "rock" ||

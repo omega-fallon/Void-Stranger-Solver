@@ -14,7 +14,12 @@ import type {
   SearchNode,
   StaffContent,
 } from "../types";
-import { countFloorTiles, isPruned, type SearchOptions, type SearchResult } from "./shared";
+import {
+  countFloorTiles,
+  isPruned,
+  type SearchOptions,
+  type SearchResult,
+} from "./shared";
 import { reconstructPath } from "./aStar";
 
 const DIRECTION_DELTA: Record<Direction, [number, number]> = {
@@ -160,9 +165,9 @@ function generateGoalStates(
   const validCells = validEntityCells;
 
   // Split initial entities into mobile (enumerate) and fixed (keep in place).
-  let baseEntities: EntityGrid = initial.entities.map((row) =>
-    [...row],
-  ) as EntityGrid;
+  let baseEntities: EntityGrid = initial.entities.map((row) => [
+    ...row,
+  ]) as EntityGrid;
   const mobileSpecs: Array<{ variants: Entity[]; canDisappear: boolean }> = [];
 
   for (let r = 0; r < 6; r++) {
@@ -187,7 +192,14 @@ function generateGoalStates(
   }
 
   const entityGrids: EntityGrid[] = [];
-  enumerateEntityGrids(mobileSpecs, validCells, 0, new Set(), baseEntities, entityGrids);
+  enumerateEntityGrids(
+    mobileSpecs,
+    validCells,
+    0,
+    new Set(),
+    baseEntities,
+    entityGrids,
+  );
 
   // Cross entity grids with all valid player configs.
   const states: GameState[] = [];
@@ -252,11 +264,23 @@ function generateTrapChainBoards(
     const [r, c] = bfsQueue.shift()!;
     region.push([r, c]);
     if (region.length > MAX_TRAP_CHAIN) return []; // Too large — skip
-    for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+    for (const [dr, dc] of [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ] as const) {
       const nr = r + dr;
       const nc = c + dc;
       const nk = `${nr},${nc}`;
-      if (nr >= 0 && nr < 6 && nc >= 0 && nc < 6 && !regionSet.has(nk) && board[nr]?.[nc] === "empty") {
+      if (
+        nr >= 0 &&
+        nr < 6 &&
+        nc >= 0 &&
+        nc < 6 &&
+        !regionSet.has(nk) &&
+        board[nr]?.[nc] === "empty"
+      ) {
         regionSet.add(nk);
         bfsQueue.push([nr, nc]);
       }
@@ -291,7 +315,12 @@ function generateTrapChainBoards(
       // New frontier: neighbours of (fr, fc) that are in the region but not
       // yet in the chain, de-duplicated against the remaining frontier.
       const newFrontier = frontier.slice(i + 1);
-      for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+      for (const [dr, dc] of [
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1],
+      ] as const) {
         const nr = fr + dr;
         const nc = fc + dc;
         const nk = `${nr},${nc}`;
@@ -314,10 +343,21 @@ function generateTrapChainBoards(
 
   const startKey = `${destR},${destC}`;
   const initialFrontier: Array<[number, number]> = [];
-  for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+  for (const [dr, dc] of [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+  ] as const) {
     const nr = destR + dr;
     const nc = destC + dc;
-    if (nr >= 0 && nr < 6 && nc >= 0 && nc < 6 && regionSet.has(`${nr},${nc}`)) {
+    if (
+      nr >= 0 &&
+      nr < 6 &&
+      nc >= 0 &&
+      nc < 6 &&
+      regionSet.has(`${nr},${nc}`)
+    ) {
       initialFrontier.push([nr, nc]);
     }
   }
@@ -415,15 +455,30 @@ function movementCandidates(
   // Active traps adjacent to either the source or dest cell may have been
   // activated by this move; try predecessors where each such trap was inactive.
   const trapPositions: Array<[number, number]> = [
-    [srcR - 1, srcC], [srcR + 1, srcC], [srcR, srcC - 1], [srcR, srcC + 1],
-    [destR - 1, destC], [destR + 1, destC], [destR, destC - 1], [destR, destC + 1],
+    [srcR - 1, srcC],
+    [srcR + 1, srcC],
+    [srcR, srcC - 1],
+    [srcR, srcC + 1],
+    [destR - 1, destC],
+    [destR + 1, destC],
+    [destR, destC - 1],
+    [destR, destC + 1],
   ];
 
   const withTraps: Array<{ board: Board; entities: EntityGrid }> = [...base];
   for (const { board: b, entities: e } of base) {
     for (const [tr, tc] of trapPositions) {
-      if (tr >= 0 && tr < 6 && tc >= 0 && tc < 6 && b[tr]?.[tc] === "trap_active") {
-        withTraps.push({ board: setBoardCell(b, tr, tc, "trap_inactive"), entities: e });
+      if (
+        tr >= 0 &&
+        tr < 6 &&
+        tc >= 0 &&
+        tc < 6 &&
+        b[tr]?.[tc] === "trap_active"
+      ) {
+        withTraps.push({
+          board: setBoardCell(b, tr, tc, "trap_inactive"),
+          entities: e,
+        });
       }
     }
   }
@@ -471,7 +526,11 @@ function generatePredecessors(
 
       // Reverse of "place": staffContent = empty, front = X → pred has staff = X, front empty.
       // TODO: does not handle the chest→rock staff conversion (rare edge case).
-      if (staffContent === "empty" && frontCell !== "empty" && frontCell !== "wall") {
+      if (
+        staffContent === "empty" &&
+        frontCell !== "empty" &&
+        frontCell !== "wall"
+      ) {
         const candidate: GameState = {
           board: setBoardCell(board, fr, fc, "empty"),
           entities,
@@ -493,8 +552,18 @@ function generatePredecessors(
 
       const basePlayer = { ...player, row: srcR, col: srcC };
 
-      for (const { board: b, entities: e } of movementCandidates(state, srcR, srcC, dr, dc)) {
-        const candidate: GameState = { board: b, entities: e, player: basePlayer };
+      for (const { board: b, entities: e } of movementCandidates(
+        state,
+        srcR,
+        srcC,
+        dr,
+        dc,
+      )) {
+        const candidate: GameState = {
+          board: b,
+          entities: e,
+          player: basePlayer,
+        };
         const result = applyAction(candidate, action, burdens);
         if (result && stateKey(result) === targetKey)
           results.push({ predecessor: candidate, action });
@@ -506,8 +575,18 @@ function generatePredecessors(
         const src2C = srcC - dc;
         if (src2R >= 0 && src2R < 6 && src2C >= 0 && src2C < 6) {
           const basePlayer2 = { ...player, row: src2R, col: src2C };
-          for (const { board: b, entities: e } of movementCandidates(state, src2R, src2C, dr, dc)) {
-            const candidate: GameState = { board: b, entities: e, player: basePlayer2 };
+          for (const { board: b, entities: e } of movementCandidates(
+            state,
+            src2R,
+            src2C,
+            dr,
+            dc,
+          )) {
+            const candidate: GameState = {
+              board: b,
+              entities: e,
+              player: basePlayer2,
+            };
             const result = applyAction(candidate, action, burdens);
             if (result && stateKey(result) === targetKey)
               results.push({ predecessor: candidate, action });
@@ -575,7 +654,9 @@ export async function bidirectionalAStar({
       console.log(
         `  player=(${gs.player.row},${gs.player.col}) ${gs.player.facing}` +
           ` staff=${gs.player.staffContent}` +
-          (entitySummary.length ? `  entities=[${entitySummary.join(", ")}]` : ""),
+          (entitySummary.length ?
+            `  entities=[${entitySummary.join(", ")}]`
+          : ""),
       );
     }
     if (goalStates.length > 5)
@@ -719,7 +800,9 @@ export async function bidirectionalAStar({
           `${bwdLayer0Expanded - bwdLayer0Eliminated} produced successors`,
       );
     } else if (!bwdLayer0Logged && bwdLayer0Expanded === 0) {
-      console.log(`Backward layer 0: no backward states were expanded (forward search solved it first)`);
+      console.log(
+        `Backward layer 0: no backward states were expanded (forward search solved it first)`,
+      );
     }
     console.log(
       `Bidirectional A* | ${nodesExplored} nodes | ${elapsedMs.toFixed(0)}ms` +
