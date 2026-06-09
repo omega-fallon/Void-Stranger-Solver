@@ -279,11 +279,12 @@ export function heuristic(
       }
     }
 
+    // Removing excess. This is only possible if we're not holding something or if we have glass in the excess.
     if (excess.length > 0 && (!holding || excessContainsGlass(excess))) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       let excessGlass = 0;
       for (const x in excess) {
-        if (x[3] === "glass") {
+        if (x[2] === "glass") {
           excessGlass++;
         }
       }
