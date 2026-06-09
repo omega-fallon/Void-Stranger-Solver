@@ -66,6 +66,25 @@ export function countFloorTiles(board: Board): number {
     );
 }
 
+export function countUndisappearing(board: Board): number {
+  return board
+    .flat()
+    .reduce(
+      (n, cell) =>
+        n +
+        ((
+          [
+            "floor",
+            "wall",
+            "button",
+          ].includes(cell)
+        ) ?
+          1
+        : 0),
+      0,
+    );
+}
+
 // Returns true if all watchers are triggered.
 export function allWatchersTriggeredQuestion(entities: EntityGrid): boolean {
   let found_any: boolean = false;
@@ -118,6 +137,12 @@ export function isPruned(
   numFloorTilesInSolution: number,
 ): boolean | string {
   const { row, col } = state.player;
+
+  // Impossible setup.
+  if (!burdens.endless && countUndisappearing(state.board) > countUndisappearing(target)) {
+    if (verbose >= 3) console.log("INF: impossible to ever win, too many tiles and no endless void rod");
+    return "impossible to ever win, too many tiles and no endless void rod";
+  }
 
   // All Watcher statues triggered.
   if (allWatchersTriggeredQuestion(state.entities)) {

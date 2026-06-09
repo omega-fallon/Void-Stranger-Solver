@@ -160,7 +160,7 @@ function withWings(state: GameState): GameState {
 test("stepping into empty activates wings when hasWings=true", () => {
   // Player on floor, adjacent empty cell ahead
   const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, true);
@@ -168,7 +168,7 @@ test("stepping into empty activates wings when hasWings=true", () => {
 
 test("stepping into empty does not activate wings when hasWings=false", () => {
   const s = makeState(1, 0, "up", "empty", [[1, 0, "floor"]]);
-  const r = applyAction(s, "up", { wings: false, sword: false })!;
+  const r = applyAction(s, "up", { wings: false, sword: false, endless: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.wingsActive, false);
 });
@@ -176,7 +176,7 @@ test("stepping into empty does not activate wings when hasWings=false", () => {
 test("glass breaks when stepping off to fly", () => {
   // Player on glass, steps into empty void — glass breaks, wings activate
   const s = makeState(1, 0, "up", "empty", [[1, 0, "glass"]]);
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.wingsActive, true);
   assert.equal(r.board[1]![0], "empty"); // glass broke on departure
@@ -185,7 +185,7 @@ test("glass breaks when stepping off to fly", () => {
 test("flying from empty to empty loses wings (and you fall)", () => {
   // Player already airborne on empty, next cell also empty
   const s = withWings(makeState(2, 0, "up", "empty"));
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, false);
@@ -193,14 +193,14 @@ test("flying from empty to empty loses wings (and you fall)", () => {
 
 test("flying onto floor deactivates wings", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "floor"]]));
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.wingsActive, false);
 });
 
 test("flying onto glass deactivates wings; origin empty cell unchanged", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "glass"]]));
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 1);
   assert.equal(r.player.wingsActive, false);
   // Origin was empty — nothing to break
@@ -211,7 +211,7 @@ test("flying onto glass deactivates wings; origin empty cell unchanged", () => {
 
 test("flying into wall causes fall in place with facing update", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "wall"]]));
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   // Player stays at (2,0), facing updates, wings off
   assert.equal(r.player.row, 2);
   assert.equal(r.player.col, 0);
@@ -221,7 +221,7 @@ test("flying into wall causes fall in place with facing update", () => {
 
 test("flying into stairs is disallowed", () => {
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "stairs"]]));
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r, null);
 });
 
@@ -240,7 +240,7 @@ test("flying into rock entity causes fall in place; rock still moves", () => {
       [[1, 0, "rock"]],
     ),
   );
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 2);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, false);
@@ -250,7 +250,7 @@ test("flying into rock entity causes fall in place; rock still moves", () => {
 
 test("flying out of bounds makes you fall", () => {
   const s = withWings(makeState(0, 0, "up", "empty"));
-  const r = applyAction(s, "up", { wings: true, sword: false })!;
+  const r = applyAction(s, "up", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
   assert.equal(r.player.wingsActive, false);
@@ -259,7 +259,7 @@ test("flying out of bounds makes you fall", () => {
 test("staff action preserves wingsActive state", () => {
   // Player airborne, uses staff to pick up a floor tile ahead
   const s = withWings(makeState(2, 0, "up", "empty", [[1, 0, "floor"]]));
-  const r = applyAction(s, "staff", { wings: true, sword: false })!;
+  const r = applyAction(s, "staff", { wings: true, sword: false, endless: false })!;
   assert.equal(r.player.wingsActive, true); // still airborne
   assert.equal(r.player.staffContent, "floor");
   assert.equal(r.board[1]![0], "empty");

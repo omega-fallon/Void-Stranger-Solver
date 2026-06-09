@@ -469,7 +469,11 @@ export function applyAction(
     if (
       getEntity(entities, newRow, newCol) === "beaver" ||
       getEntity(entities, newRow, newCol) === "mimic" ||
-      getEntity(entities, newRow, newCol) === "hand"
+      getEntity(entities, newRow, newCol) === "hand" ||
+      getEntity(entities, newRow, newCol) === "maggot" ||
+      getEntity(entities, newRow, newCol) === "leech" ||
+      getEntity(entities, newRow, newCol) === "maggot_stopped" ||
+      getEntity(entities, newRow, newCol) === "leech_stopped"
     ) {
       return null;
     }

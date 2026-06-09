@@ -13,7 +13,7 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
   const brand = BRANDS.find((b) => b.name === brandName);
   if (!brane || !brand) continue;
 
-  const burdens = { wings: hasWings, sword: false };
+  const burdens = { wings: hasWings, sword: false, endless: false };
 
   test(`Known solution reaches target — ${searchName}`, () => {
     const states = applyPath(brane, pathStr, burdens);

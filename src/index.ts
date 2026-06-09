@@ -120,6 +120,7 @@ async function main() {
       const next = applyAction(searchState, action, {
         wings: values.wings ?? false,
         sword: false,
+        endless: false,
       });
       if (!next) {
         console.error(
@@ -149,7 +150,7 @@ async function main() {
     requireFinalJump: true,
     initialThreshold,
     knownCorrectPath: knownCorrectPath.slice(cheatN),
-    burdens: { wings: values.wings ?? false, sword: false },
+    burdens: { wings: values.wings ?? false, sword: false, endless: false },
     algorithm: values.algorithm as
       | "idaStar"
       | "rbfs"
@@ -176,6 +177,7 @@ async function main() {
     replayPath(INITIAL_STATE, fullPath, TARGET_BOARD, {
       wings: values.wings ?? false,
       sword: false,
+      endless: false,
     });
 
   console.log(`Solution found in ${fullPath.length} steps (${perf}):`);

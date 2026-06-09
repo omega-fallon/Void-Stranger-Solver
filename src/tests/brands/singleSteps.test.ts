@@ -40,7 +40,7 @@ for (let algorithm of [
           //   level,
           //   parseActions(knownCorrectPath),
           //   partialSolveStates.at(-1)!.board,
-          //   { wings: hasWings, sword: false },
+          //   { wings: hasWings, sword: false, endless: false },
           //   true,
           // );
           partialSolveStates.at(-1)!.requireFinalJump = true;
@@ -77,7 +77,7 @@ for (let algorithm of [
                   requireFinalJump,
                   initialThreshold: 1,
                   algorithm,
-                  burdens: { wings: hasWings, sword: false },
+                  burdens: { wings: hasWings, sword: false, endless: false },
                   knownCorrectPath: level.knownCorrectPath,
                 }),
                 new Promise<{ path: null }>((resolve) =>
@@ -102,7 +102,7 @@ for (let algorithm of [
                     initial,
                     path,
                     target,
-                    { wings: hasWings, sword: false },
+                    { wings: hasWings, sword: false, endless: false },
                     requireFinalJump,
                   );
                 console.log(

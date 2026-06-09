@@ -330,7 +330,7 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
   const brand = BRANDS.find((b) => b.name === brandName);
   if (!brane || !brand) continue;
 
-  const burdens = { wings: hasWings, sword: false };
+  const burdens = { wings: hasWings, sword: false, endless: false };
 
   test(`Heuristic admissibility along known path — ${searchName}`, () => {
     const statesOnPath = applyPath(brane, pathStr, burdens);
