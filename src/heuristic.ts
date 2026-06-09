@@ -169,8 +169,8 @@ export function heuristic(
     const holding = player.staffContent !== "empty";
 
     // Two variables: add the lowest?
-    let travelCostDeficits = 0;
-    let travelCostExcess = 0;
+    let travelCostDeficits = Infinity;
+    let travelCostExcess = Infinity;
 
     if (holding) {
       // Player is carrying a tile; find the nearest deficit it can fill.
@@ -179,7 +179,7 @@ export function heuristic(
         canFill(player.staffContent as Cell, dtype),
       );
       if (matchingDeficits.length > 0) {
-        travelCostDeficits += Math.min(
+        travelCostDeficits = Math.min(
           ...matchingDeficits.map(([dr, dc]) =>
             Math.max(0, manhattan(player.row, player.col, dr, dc) - 1),
           ),
@@ -194,6 +194,15 @@ export function heuristic(
         }
       }
       return false;
+    }
+    function countExcessGlass(ex: [number, number, Cell][]): number {
+      let counter = 0;
+      for (const ar of ex) {
+        if (ar[2] === "glass") {
+          counter++;
+        }
+      }
+      return counter;
     }
 
     function blockerCost(
@@ -282,14 +291,7 @@ export function heuristic(
     // Removing excess. This is only possible if we're not holding something or if we have glass in the excess.
     if (excess.length > 0 && (!holding || excessContainsGlass(excess))) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
-      let excessGlass = 0;
-      for (const x in excess) {
-        if (x[2] === "glass") {
-          excessGlass++;
-        }
-      }
-      
-      travelCostExcess += Math.min(
+      travelCostExcess = Math.min(
         ...excess.map(([er, ec]) =>
           board[er]![ec]! === "glass" ?
             // Glass logic. The player, or an entity, can step directly on the tile to remove it. If the player is not holding anything, they can also just pick it up from adjacent, reducing the player's distance by one.
@@ -320,13 +322,16 @@ export function heuristic(
       
       // Account for player walking over excess glass on the way there. Currently this assumes we hit every single piece of excess glass and no useful and necessary ones. This is a massive subtraction. Fix this.
       if (travelCostExcess > 1) {
-        travelCostExcess -= excessGlass;
+        travelCostExcess -= countExcessGlass(excess);
       }
       
     }
 
     // Return the least.
-    travelCost = Math.min(travelCostDeficits, travelCostExcess);
+    if (travelCostDeficits === Infinity && travelCostExcess === Infinity) {
+      throw new Error("Cannot calculate travelCost.")
+    }
+    travelCost = Math.max(Math.min(travelCostDeficits, travelCostExcess),0);
   })();
 
   return {
