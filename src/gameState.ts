@@ -553,6 +553,7 @@ function moveEntities(
           let delayedTrapDisperse: [number, number][] = [];
           // Place
           for (const entityPosition of newEntityPositions) {
+            // Onto an inactive trap; activate the trap
             if (
               getCell(board, entityPosition[0], entityPosition[1]) ===
               "trap_inactive"
@@ -563,7 +564,9 @@ function moveEntities(
                 entityPosition[1],
                 "trap_active",
               );
-            } else if (
+            }
+            // Onto an active trap; mark a dispersal needing to be triggered.
+            else if (
               getCell(board, entityPosition[0], entityPosition[1]) ===
               "trap_active"
             ) {
