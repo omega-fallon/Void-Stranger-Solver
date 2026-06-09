@@ -1,7 +1,7 @@
 import assert from "assert";
 import test from "node:test";
 import { PARTIAL_EUS_STATES } from "../data/PARTIAL_EUS_STATES";
-import { applyAction, renderState } from "../gameState";
+import { applyAction, renderBoard, renderState } from "../gameState";
 import { heuristic } from "../heuristic";
 import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "../levels";
 import { NO_BURDENS, type Action, type GameState } from "../types";
@@ -347,29 +347,50 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
     }
   });
 
-  test(`Heuristic backward admissibility along known path — ${searchName}`, () => {
+  test(`Heuristic backward admissibility along known path — ${searchName}`, async () => {
     const statesOnPath = applyPath(brane, pathStr, burdens);
 
     // Mirror of the forward test above: instead of fixing the target at the
     // final board and varying the starting step forward through the path,
-    // this fixes the starting step and varies the target BACKWARD through the
-    // path.  For each state at step i and each earlier board at step j < i,
+    // this fixes the starting step and varies the target backward through the
+    // path.  For each state at step i and each earlier board at step i < j,
     // h(state[i], board[j]) must be ≤ i − j (the number of steps needed to
-    // go backward from state[i] to a state with board[j]).
+    // go from from state[i] to a state with board[j]).
     //
-    // This tests the backward-A* heuristic used in bidirectional search:
-    // heuristic(state, initial.board, false).
-    for (let i = 1; i < statesOnPath.length; i++) {
-      const state = statesOnPath[i]!;
-      for (let j = 0; j < i; j++) {
-        const targetBoard = statesOnPath[j]!.board;
-        const stepsBack = i - j;
-        const h = heuristic(state, targetBoard, false);
-        assert.ok(
-          h.total <= stepsBack,
-          `Step ${i} → step ${j} board: h=${h.total} > ${stepsBack} steps back. ` +
-            `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}\n${renderState(state)}`,
+    // This tests the A* heuristic used in bidirectional search.
+    for (
+      let startStepI = 0;
+      startStepI < statesOnPath.length - 1;
+      startStepI++
+    ) {
+      let valuesOnPath = [];
+      for (
+        let endStepI = startStepI;
+        endStepI < statesOnPath.length;
+        endStepI++
+      ) {
+        const target = statesOnPath[endStepI]!;
+        const initial = statesOnPath[startStepI]!;
+        const stepsBack = endStepI - startStepI;
+        const h = heuristic(
+          initial,
+          target.board,
+          endStepI === statesOnPath.length - 1,
         );
+        valuesOnPath.push(h.total);
+        await test(`${searchName} step ${startStepI} → step ${endStepI}`, () => {
+          assert.ok(
+            h.total <= stepsBack,
+            `${searchName} step ${startStepI} → step ${endStepI}: h=${h.total} > ${stepsBack} required steps. ` +
+              `mismatches: ${h.mismatches}, transportCost: ${h.transportCost}, travelCost: ${h.travelCost}\n${renderState(initial)}\nTo:\n${renderState(target)}\nh-values as we move target state further away on path: ${valuesOnPath
+                .map((el, i) => [el, pathStr[startStepI + i]])
+                .flat()
+                .slice(0, -1) // cut off the following movement letter which isn't relevant
+                .join(
+                  " → ",
+                )}\nThis means that the heuristic is over-estimating how hard it is to get from this starting state to this ending state, because of one of those last steps jumping the heuristic up too high, but the heuristic may not do this from all starting/ending points that include this step.`,
+          );
+        });
       }
     }
   });
