@@ -139,7 +139,7 @@ export function isPruned(
   const { row, col } = state.player;
 
   // Impossible setup.
-  if (!burdens.endless && countUndisappearing(state.board) > countUndisappearing(target)) {
+  if (!burdens.endless && countUndisappearing(state.board) > numFloorTilesInSolution) {
     if (verbose >= 3) console.log("INF: impossible to ever win, too many tiles and no endless void rod");
     return "impossible to ever win, too many tiles and no endless void rod";
   }
