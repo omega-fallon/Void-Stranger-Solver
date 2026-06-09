@@ -19,6 +19,8 @@ const { values } = parseArgs({
     brane: { type: "string", short: "e" },
     brand: { type: "string", short: "d" },
     wings: { type: "boolean" },
+    sword: { type: "boolean" },
+    endless: { type: "boolean" },
     initialThreshold: { type: "string" },
     cheatFirstNSteps: { type: "string" },
     verbose: { type: "string", short: "v" },
@@ -37,7 +39,9 @@ Options:
   -h, --help                      Show this help message
   -e, --brane <name>              Brane (level) to solve
   -d, --brand <name>              Brand to carve
-      --wings                     Enable wings mechanic
+      --wings                     Enable Void Wings
+      --sword                     Enable Void Sword
+      --endless                     Enable Endless Void Rod
   -v, --verbose <level>           Verbosity level: 1 = log search progress, 2 = replay solution
   -s, --slow                      Add 100ms delay per node during search
       --initialThreshold <n>      Override initial IDA* cost threshold
@@ -82,7 +86,7 @@ const initialThreshold =
 
 const scenarioName = `${values.brane}/${values.brand}${
   values.wings ? " wings" : ""
-}`;
+}${values.sword ? " sword" : ""}`;
 const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
   .split("")
   .map((l) => {
@@ -119,8 +123,8 @@ async function main() {
       const action = knownCorrectPath[i]!;
       const next = applyAction(searchState, action, {
         wings: values.wings ?? false,
-        sword: false,
-        endless: false,
+        sword: values.sword ?? false,
+        endless: values.endless ?? false,
       });
       if (!next) {
         console.error(
@@ -150,7 +154,11 @@ async function main() {
     requireFinalJump: true,
     initialThreshold,
     knownCorrectPath: knownCorrectPath.slice(cheatN),
-    burdens: { wings: values.wings ?? false, sword: false, endless: false },
+    burdens: {
+      wings: values.wings ?? false,
+      sword: values.sword ?? false,
+      endless: values.endless ?? false,
+    },
     algorithm: values.algorithm as
       | "idaStar"
       | "rbfs"
@@ -176,8 +184,8 @@ async function main() {
   if (values.verbose)
     replayPath(INITIAL_STATE, fullPath, TARGET_BOARD, {
       wings: values.wings ?? false,
-      sword: false,
-      endless: false,
+      sword: values.sword ?? false,
+      endless: values.endless ?? false,
     });
 
   console.log(`Solution found in ${fullPath.length} steps (${perf}):`);

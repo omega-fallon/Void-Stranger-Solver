@@ -241,8 +241,8 @@ export const BRANES: RawBraneInitial[] = [
     entities: parseEntities([
       " A  H ",
       " R   ~",
+      "     W",
       "   RL ",
-      "      ",
       "      ",
       "R     ",
     ]),
@@ -447,4 +447,8 @@ export const KNOWN_CORRECT_PATHS = {
     "ZDD",
 
   // DIS
+  "DIS/Add wings sword":
+    "DDRUDRRRUUULDRDRUZURDDDLUZDRUZDDDZLLLLZUZDZDRZRRZRULLLRZLDLZLRZUZUUULURZDRRZLZRRZRZDLLZDLUZDLRZRDLZ",
+  "DIS/Eus wings sword":
+    "DDRUDRRRRUUULRZRDRDDDUZDLLLZLRDZLZUUZDLUURDZDDUZDRDZRZUZUUDZRULZRZDRZRDZUUZLLZRRDDZUULZRDZDULZDDUUDZRUUZ",
 } as { [name: string]: string };

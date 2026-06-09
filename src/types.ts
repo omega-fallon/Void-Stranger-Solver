@@ -7,7 +7,11 @@ export interface Burdens {
   endless: boolean;
 }
 
-export const NO_BURDENS: Burdens = { wings: false, sword: false, endless: false };
+export const NO_BURDENS: Burdens = {
+  wings: false,
+  sword: false,
+  endless: false,
+};
 export type Action = "up" | "down" | "left" | "right" | "staff";
 
 // "empty" = void, "floor" = walkable floor, "glass" = walkable but breaks when stepped off, "stairs" = the stairs, "wall" = impassable and immovable
@@ -35,10 +39,10 @@ export type Entity =
   | "watcher_active"
   | "chest"
   | "monster_statue"
-  | "maggot"
-  | "leech"
-  | "maggot_stopped"
-  | "leech_stopped";
+  | "maggot_up"
+  | "leech_left"
+  | "maggot_down"
+  | "leech_right";
 export type EntityGrid = Entity[][];
 
 // Staff can hold nothing, a floor, a glass, or the stairs

@@ -21,16 +21,19 @@ for (let algorithm of [
         requireFinalJump?: boolean;
       })[] = [];
 
-      let [brane, brand, hasWingsStr] = label.split(/\/| /);
+      let [brane, brand, hasWingsStr, hasSwordStr, hasEndlessStr] = label.split(/\/| /);
       let hasWings = !!hasWingsStr;
+      let hasSword = !!hasSwordStr;
+      let hasEndless = !!hasEndlessStr;
 
       test.suite(
-        `Testing each step of known path for ${brane}/${brand} ${hasWings ? "wings" : ""}`,
+        `Testing each step of known path for ${brane}/${brand} ${hasWings ? "wings" : ""} ${hasSword ? "sword" : ""} ${hasEndless ? "endless" : ""}`,
         async () => {
           let level = BRANES.find((b) => b.name === brane)!;
           let partialSolveStates = applyPath(level, knownCorrectPath, {
             wings: hasWings,
-            sword: false,
+            sword: hasSword,
+            endless: hasEndless,
           }).map((v, i) => ({
             ...v,
             name: `${brane}/${brand} step ${i}`,
@@ -40,7 +43,7 @@ for (let algorithm of [
           //   level,
           //   parseActions(knownCorrectPath),
           //   partialSolveStates.at(-1)!.board,
-          //   { wings: hasWings, sword: false, endless: false },
+          //   { wings: hasWings, sword: hasSword, endless: hasEndless },
           //   true,
           // );
           partialSolveStates.at(-1)!.requireFinalJump = true;
@@ -77,7 +80,7 @@ for (let algorithm of [
                   requireFinalJump,
                   initialThreshold: 1,
                   algorithm,
-                  burdens: { wings: hasWings, sword: false, endless: false },
+                  burdens: { wings: hasWings, sword: hasSword, endless: hasEndless },
                   knownCorrectPath: level.knownCorrectPath,
                 }),
                 new Promise<{ path: null }>((resolve) =>
@@ -102,7 +105,7 @@ for (let algorithm of [
                     initial,
                     path,
                     target,
-                    { wings: hasWings, sword: false, endless: false },
+                    { wings: hasWings, sword: hasSword, endless: hasEndless },
                     requireFinalJump,
                   );
                 console.log(

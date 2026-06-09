@@ -42,6 +42,8 @@ type TestLevel = Omit<RawLevel, "name"> & {
   solutionLength?: number;
   requireFinalJump?: boolean;
   hasWings?: boolean;
+  hasSword?: boolean;
+  hasEndless?: boolean;
 };
 
 async function runSearchTest(t: TestContext, level: TestLevel) {
@@ -56,14 +58,22 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
     initial,
     target,
     requireFinalJump,
-    burdens: { wings: level.hasWings ?? false, sword: false, endless: false },
+    burdens: {
+      wings: level.hasWings ?? false,
+      sword: level.hasSword ?? false,
+      endless: level.hasEndless ?? false,
+    },
   });
   if (process.env.VERBOSE && path)
     replayPath(
       initial,
       path,
       target,
-      { wings: level.hasWings ?? false, sword: false, endless: false },
+      {
+        wings: level.hasWings ?? false,
+        sword: level.hasSword ?? false,
+        endless: level.hasEndless ?? false,
+      },
       requireFinalJump,
     );
   assert.ok(path !== null, "No solution found");
@@ -77,7 +87,11 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
 
   // Check heuristic admissibility at every step along the found path,
   // both forwards (from the start) and backwards (from the end).
-  const burdens = { wings: level.hasWings ?? false, sword: false, endless: false };
+  const burdens = {
+    wings: level.hasWings ?? false,
+    sword: level.hasSword ?? false,
+    endless: level.hasEndless ?? false,
+  };
   const statesOnPath = applyPath(initial, actionsToString(path), burdens);
   // Forward: state at index i has i steps taken, path.length - i remaining.
   for (let i = 0; i < statesOnPath.length; i++) {
@@ -113,14 +127,22 @@ async function assertSearchFailure(t: TestContext, level: TestLevel) {
     initial,
     target,
     requireFinalJump,
-    burdens: { wings: level.hasWings ?? false, sword: false, endless: false },
+    burdens: {
+      wings: level.hasWings ?? false,
+      sword: level.hasSword ?? false,
+      endless: level.hasEndless ?? false,
+    },
   });
   if (process.env.VERBOSE && path)
     replayPath(
       initial,
       path,
       target,
-      { wings: level.hasWings ?? false, sword: false, endless: false },
+      {
+        wings: level.hasWings ?? false,
+        sword: level.hasSword ?? false,
+        endless: level.hasEndless ?? false,
+      },
       requireFinalJump,
     );
   assert.equal(path, null, "Solution was found, but should not have been");

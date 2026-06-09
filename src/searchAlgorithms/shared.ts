@@ -70,17 +70,7 @@ export function countUndisappearing(board: Board): number {
   return board
     .flat()
     .reduce(
-      (n, cell) =>
-        n +
-        ((
-          [
-            "floor",
-            "wall",
-            "button",
-          ].includes(cell)
-        ) ?
-          1
-        : 0),
+      (n, cell) => n + (["floor", "wall", "button"].includes(cell) ? 1 : 0),
       0,
     );
 }
@@ -139,8 +129,14 @@ export function isPruned(
   const { row, col } = state.player;
 
   // Impossible setup.
-  if (!burdens.endless && countUndisappearing(state.board) > numFloorTilesInSolution) {
-    if (verbose >= 3) console.log("INF: impossible to ever win, too many tiles and no endless void rod");
+  if (
+    !burdens.endless &&
+    countUndisappearing(state.board) > numFloorTilesInSolution
+  ) {
+    if (verbose >= 3)
+      console.log(
+        "INF: impossible to ever win, too many tiles and no endless void rod",
+      );
     return "impossible to ever win, too many tiles and no endless void rod";
   }
 

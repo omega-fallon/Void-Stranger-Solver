@@ -216,10 +216,28 @@ export function anyBeaversOrMimics(ent: EntityGrid): boolean {
   return false;
 }
 
+export function anyMovers(ent: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (
+        getEntity(ent, i, i2) === "beaver" ||
+        getEntity(ent, i, i2) === "mimic" ||
+        getEntity(ent, i, i2) === "maggot_up" ||
+        getEntity(ent, i, i2) === "maggot_down" ||
+        getEntity(ent, i, i2) === "leech_left" ||
+        getEntity(ent, i, i2) === "leech_right"
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 // Removes any and all monster statues if there are no monsters.
 export function disperseMonsterStatues(entities: EntityGrid): EntityGrid {
   let newEntities = entities.map((row) => row.map((v) => v)) as EntityGrid;
-  if (!anyHands(entities)) {
+  if (!anyHands(entities) && !anyMovers(entities)) {
     for (let i = 0; i < 6; i++) {
       for (let i2 = 0; i2 < 6; i2++) {
         if (getEntity(entities, i, i2) === "monster_statue") {
@@ -236,15 +254,28 @@ function moveEntities(
   board: Board,
   entities: EntityGrid,
   activeWings: boolean,
+  hasWings: boolean,
   player_row: number,
   player_col: number,
   action: Action,
 ): [Board, EntityGrid, boolean] | string {
-  // Search loop: only works for one enemy per brane. Luckily that's exactly our use case.
+  // Search loop: find the monsters. In the case of mimic and beaver we can skip the second part and just immediately return since they're singlets.
+  const maggots_and_leeches = [
+    "maggot_up",
+    "maggot_down",
+    "leech_left",
+    "leech_right",
+  ];
+  let to_move: [number, number][] = [];
+
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
+      // Move maggot & leech
+      if (maggots_and_leeches.includes(getEntity(entities, i, i2))) {
+        to_move.push([i, i2]);
+      }
       // Move mimic
-      if (action !== "staff" && getEntity(entities, i, i2) === "mimic") {
+      else if (action !== "staff" && getEntity(entities, i, i2) === "mimic") {
         // Mimic facing direction doesn't matter since they can't interact. //
         const { dr, dc } = DELTAS[action];
         const mimic_target_r = i + dr;
@@ -392,6 +423,203 @@ function moveEntities(
     }
   }
 
+  // Move leeches and maggots
+  if (to_move.length < 1) {
+    const blockers = [
+      "rock",
+      "watcher_inactive",
+      "watcher_active",
+      "chest",
+      "maggot_up",
+      "maggot_down",
+      "leech_left",
+      "leech_right",
+    ];
+    const unmoveables = ["empty", "wall"];
+
+    let newEntityPositions: [number, number, Entity][] = [];
+    let playerHit = false;
+
+    for (const coord of to_move) {
+      if (getEntity(entities, coord[0], coord[1]) === "maggot_up") {
+        // Player is there
+        if (player_col === coord[0] - 1 && player_row === coord[1]) {
+          playerHit = true;
+        }
+
+        // Blocked
+        if (
+          !inBounds(coord[0] - 1, coord[1]) ||
+          blockers.includes(getEntity(entities, coord[0] - 1, coord[1])) ||
+          unmoveables.includes(getCell(board, coord[0] - 1, coord[1]))
+        ) {
+          entities = setEntity(entities, coord[0], coord[1], "maggot_down");
+        }
+        // Continue
+        else {
+          board =
+            getCell(board, coord[0], coord[1]) === "glass" ?
+              setCell(board, coord[0], coord[1], "empty")
+            : board;
+          entities = setEntity(entities, coord[0], coord[1], "empty");
+          newEntityPositions.push([coord[0] - 1, coord[1], "maggot_up"]);
+        }
+      } else if (getEntity(entities, coord[0], coord[1]) === "maggot_down") {
+        // Player is there
+        if (player_col === coord[0] + 1 && player_row === coord[1]) {
+          playerHit = true;
+        }
+
+        // Blocked
+        if (
+          !inBounds(coord[0] + 1, coord[1]) ||
+          blockers.includes(getEntity(entities, coord[0] + 1, coord[1])) ||
+          unmoveables.includes(getCell(board, coord[0] + 1, coord[1]))
+        ) {
+          entities = setEntity(entities, coord[0], coord[1], "maggot_up");
+        }
+        // Continue
+        else {
+          board =
+            getCell(board, coord[0], coord[1]) === "glass" ?
+              setCell(board, coord[0], coord[1], "empty")
+            : board;
+          entities = setEntity(entities, coord[0], coord[1], "empty");
+          newEntityPositions.push([coord[0] + 1, coord[1], "maggot_down"]);
+        }
+      } else if (getEntity(entities, coord[0], coord[1]) === "leech_left") {
+        // Player is there
+        if (player_col === coord[0] && player_row - 1 === coord[1]) {
+          playerHit = true;
+        }
+
+        // Blocked
+        if (
+          !inBounds(coord[0], coord[1] - 1) ||
+          blockers.includes(getEntity(entities, coord[0], coord[1] - 1)) ||
+          unmoveables.includes(getCell(board, coord[0], coord[1] - 1))
+        ) {
+          entities = setEntity(entities, coord[0], coord[1], "leech_right");
+        }
+        // Continue
+        else {
+          board =
+            getCell(board, coord[0], coord[1]) === "glass" ?
+              setCell(board, coord[0], coord[1], "empty")
+            : board;
+          entities = setEntity(entities, coord[0], coord[1], "empty");
+          newEntityPositions.push([coord[0], coord[1] - 1, "leech_left"]);
+        }
+      } else if (getEntity(entities, coord[0], coord[1]) === "leech_right") {
+        // Player is there
+        if (player_col === coord[0] && player_row + 1 === coord[1]) {
+          playerHit = true;
+        }
+
+        // Blocked
+        if (
+          !inBounds(coord[0], coord[1] + 1) ||
+          blockers.includes(getEntity(entities, coord[0], coord[1] + 1)) ||
+          unmoveables.includes(getCell(board, coord[0], coord[1] + 1))
+        ) {
+          entities = setEntity(entities, coord[0], coord[1], "leech_left");
+        }
+        // Continue
+        else {
+          board =
+            getCell(board, coord[0], coord[1]) === "glass" ?
+              setCell(board, coord[0], coord[1], "empty")
+            : board;
+          entities = setEntity(entities, coord[0], coord[1], "empty");
+          newEntityPositions.push([coord[0], coord[1] + 1, "leech_right"]);
+        }
+      }
+    }
+
+    // Begin moving
+    if (newEntityPositions.length > 2) {
+      throw new Error("moveEntity found more than two movers");
+    } else if (newEntityPositions.length > 0) {
+      if (newEntityPositions.length === 2) {
+        // Check for collision; if so we've already removed them from the board, return nothing.
+        if (
+          newEntityPositions[0]![0]! === newEntityPositions[1]![0]! &&
+          newEntityPositions[0]![1]! === newEntityPositions[1]![1]!
+        ) {
+          return [board, entities, activeWings];
+        }
+        // Otherwise, place in accordance to newEntityPositions
+        else {
+          let delayedTrapDisperse: [number, number][] = [];
+          // Place
+          for (const entityPosition of newEntityPositions) {
+            if (
+              getCell(board, entityPosition[0], entityPosition[1]) ===
+              "trap_inactive"
+            ) {
+              board = setCell(
+                board,
+                entityPosition[0],
+                entityPosition[1],
+                "trap_active",
+              );
+            } else if (
+              getCell(board, entityPosition[0], entityPosition[1]) ===
+              "trap_active"
+            ) {
+              delayedTrapDisperse.push([entityPosition[0], entityPosition[1]]);
+            }
+            entities = setEntity(
+              entities,
+              entityPosition[0],
+              entityPosition[1],
+              entityPosition[2],
+            );
+          }
+
+          // Disperse traps.
+          for (const trapSource of delayedTrapDisperse) {
+            // Check to make sure previous pass didn't eliminate it already.
+            if (
+              getCell(board, trapSource[0], trapSource[1]) === "trap_active"
+            ) {
+              board = disperseTraps(board, trapSource[0], trapSource[1]);
+            }
+          }
+
+          // Drop floaters
+          entities = checkFallen(board, entities);
+
+          // Throw player down the pit.
+          if (playerHit) {
+            if (getCell(board, player_row, player_col) === "empty") {
+              return [board, entities, false];
+            } else {
+              return "death"; // death!
+            }
+          }
+          // PLayer got floor taken out from underneath them.
+          else if (getCell(board, player_row, player_col) === "empty") {
+            // unsure how this case is handled in-game
+            if (activeWings) {
+              throw new Error("unaccounted situation occurred in moveEntities");
+            }
+            // wings activate
+            else if (hasWings) {
+              return [board, entities, true];
+            }
+            // no wings to activate
+            else {
+              return [board, entities, false];
+            }
+          }
+
+          return [board, entities, activeWings];
+        }
+      }
+    }
+  }
+
   return [board, entities, activeWings];
 }
 
@@ -419,11 +647,12 @@ export function applyAction(
       getEntity(entities, newRow, newCol) === "chest"
     ) {
       // Move entities
-      if (anyBeaversOrMimics(entities)) {
+      if (anyMovers(entities)) {
         const statesAfterEntities = moveEntities(
           board,
           entities,
           wingsActive,
+          burdens.wings,
           row,
           col,
           action,
@@ -470,10 +699,10 @@ export function applyAction(
       getEntity(entities, newRow, newCol) === "beaver" ||
       getEntity(entities, newRow, newCol) === "mimic" ||
       getEntity(entities, newRow, newCol) === "hand" ||
-      getEntity(entities, newRow, newCol) === "maggot" ||
-      getEntity(entities, newRow, newCol) === "leech" ||
-      getEntity(entities, newRow, newCol) === "maggot_stopped" ||
-      getEntity(entities, newRow, newCol) === "leech_stopped"
+      getEntity(entities, newRow, newCol) === "maggot_up" ||
+      getEntity(entities, newRow, newCol) === "leech_left" ||
+      getEntity(entities, newRow, newCol) === "maggot_down" ||
+      getEntity(entities, newRow, newCol) === "leech_right"
     ) {
       return null;
     }
@@ -496,11 +725,12 @@ export function applyAction(
           : board;
 
         // Move entities
-        if (anyBeaversOrMimics(entities)) {
+        if (anyMovers(entities)) {
           const statesAfterEntities = moveEntities(
             newBoard,
             entities,
             wingsActive,
+            burdens.wings,
             row,
             col,
             action,
@@ -559,11 +789,12 @@ export function applyAction(
         getEntity(entities, rockDestRow, rockDestCol) === "monster_statue"
       ) {
         // Move entities
-        if (anyBeaversOrMimics(entities)) {
+        if (anyMovers(entities)) {
           const statesAfterEntities = moveEntities(
             board,
             entities,
             wingsActive,
+            burdens.wings,
             row,
             col,
             action,
@@ -664,11 +895,12 @@ export function applyAction(
       }
 
       // Move entities
-      if (anyBeaversOrMimics(newEntities)) {
+      if (anyMovers(newEntities)) {
         const statesAfterEntities = moveEntities(
           newBoard,
           disperseMonsterStatues(newEntities),
           wingsActive,
+          burdens.wings,
           row,
           col,
           action,
@@ -730,11 +962,12 @@ export function applyAction(
       }
 
       // Move entities
-      if (anyBeaversOrMimics(newEntities)) {
+      if (anyMovers(newEntities)) {
         const statesAfterEntities = moveEntities(
           newBoard,
           newEntities,
           wingsActive,
+          burdens.wings,
           row,
           col,
           action,
@@ -798,11 +1031,12 @@ export function applyAction(
         burdens.wings && getCell(newBoard, newRow, newCol) === "empty";
 
       // Move entities
-      if (anyBeaversOrMimics(newEntities)) {
+      if (anyMovers(newEntities)) {
         const statesAfterEntities = moveEntities(
           newBoard,
           newEntities,
           newWingsActive,
+          burdens.wings,
           row,
           col,
           action,
@@ -846,7 +1080,7 @@ export function applyAction(
 
     const front = getCell(board, fr, fc);
 
-    // Chest and upwards?
+    // Chest and upwards? (no need for enemy movement, chests do not overlap with them)
     if (facing === "up" && getEntity(entities, fr, fc) === "chest") {
       // Turn chest into rock and face downward.
       return {
@@ -861,9 +1095,69 @@ export function applyAction(
         },
       };
     }
-    // Check for other entities in front cell.
+    // Check for other entities in front cell. Either kill with sword or return null
     else if (getEntity(entities, fr, fc) !== "empty") {
-      return null;
+      // She's got a sword!
+      if (
+        burdens.sword &&
+        [
+          "hand",
+          "beaver",
+          "mimic",
+          "maggot_up",
+          "maggot_down",
+          "leech_left",
+          "leech_right",
+        ].includes(getEntity(entities, fr, fc))
+      ) {
+        let newEntities = entities;
+        newEntities = setEntity(newEntities, fr, fc, "empty");
+
+        // Move entities
+        if (anyMovers(entities)) {
+          const statesAfterEntities = moveEntities(
+            board,
+            newEntities,
+            wingsActive,
+            burdens.wings,
+            player.row,
+            player.col,
+            action,
+          );
+
+          if (typeof statesAfterEntities === "string") {
+            return null;
+          }
+
+          return {
+            board: statesAfterEntities[0],
+            entities: disperseMonsterStatues(statesAfterEntities[1]),
+            player: {
+              row,
+              col,
+              facing,
+              staffContent,
+              wingsActive: statesAfterEntities[2],
+            },
+          };
+        }
+        // No entities to move
+        else {
+          return {
+            board,
+            entities: newEntities,
+            player: {
+              row,
+              col,
+              facing,
+              staffContent,
+              wingsActive: player.wingsActive ?? false,
+            },
+          };
+        }
+      } else {
+        return null;
+      }
     } else {
       const newEntities = triggerWatcher(entities);
 
@@ -1111,13 +1405,13 @@ export function renderState(state: GameState, requiredTiles?: number): string {
       overlayChar = "C";
     } else if (entities[r]?.[c] === "monster_statue") {
       overlayChar = "~";
-    } else if (entities[r]?.[c] === "maggot") {
+    } else if (entities[r]?.[c] === "maggot_up") {
       overlayChar = "A";
-    } else if (entities[r]?.[c] === "leech") {
+    } else if (entities[r]?.[c] === "leech_left") {
       overlayChar = "L";
-    } else if (entities[r]?.[c] === "maggot_stopped") {
+    } else if (entities[r]?.[c] === "maggot_down") {
       overlayChar = "Ä";
-    } else if (entities[r]?.[c] === "leech_stopped") {
+    } else if (entities[r]?.[c] === "leech_right") {
       overlayChar = "Ꞁ";
     }
     let floorChar = renderCellFloor(cell);
