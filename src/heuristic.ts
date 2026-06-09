@@ -99,8 +99,13 @@ export function heuristic(
           continue;
         }
         // Quick-and-dirty admissibility assurance, disable when we figure out something smarter.
-        else if (cur === "glass" && mimics && manhattan(r,c,mimic_r,mimic_c) < manhattan(r,c,player.row,player.col)) {
-          continue
+        else if (
+          cur === "glass" &&
+          mimics &&
+          manhattan(r, c, mimic_r, mimic_c) <
+            manhattan(r, c, player.row, player.col)
+        ) {
+          continue;
         }
         // Ignore activated traps, since they might get dropped for free, or they might
         // get used as floors for brand matching purposes
@@ -162,7 +167,7 @@ export function heuristic(
     }
   })();
 
-  let travelCost = 0;
+  let travelCost = Infinity;
   (function calculateTravelCost() {
     function excessContainsGlass(ex: [number, number, Cell][]): boolean {
       for (const ar of ex) {
@@ -189,6 +194,7 @@ export function heuristic(
       ec: number,
       breaker_r: number,
       breaker_c: number,
+      player: boolean,
     ): number {
       //return 0;
       const blockers = ["rock", "watcher_inactive", "watcher_active", "chest"];
@@ -261,10 +267,15 @@ export function heuristic(
         // No valid spots.
         return Infinity;
       } else {
-        return 0;
+        // Not holding means you can just take the tile directly.
+        if (player) {
+          return holding ? 0 : -1;
+        } else {
+          return 0;
+        }
       }
     }
-  
+
     // --- Player travel to first work item ---
     // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
     const holding = player.staffContent !== "empty";
@@ -273,6 +284,7 @@ export function heuristic(
     let travelCostDeficits = Infinity;
     let travelCostExcess = Infinity;
 
+    // Filling deficits.
     if (holding) {
       // Player is carrying a tile; find the nearest deficit it can fill.
       // If none exists, the tile will be placed temporarily — no travel cost charged.
@@ -287,7 +299,6 @@ export function heuristic(
         );
       }
     }
-
     // Removing excess. This is only possible if we're not holding something or if we have glass in the excess.
     if (excess.length > 0 && (!holding || excessContainsGlass(excess))) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
@@ -298,40 +309,62 @@ export function heuristic(
             Math.max(
               0,
               Math.min(
-                manhattan(player.row, player.col, er, ec) -
-                  (holding ? 0 : 1) +
-                  blockerCost(board, entities, er, ec, player.row, player.col),
+                manhattan(player.row, player.col, er, ec) +
+                  blockerCost(
+                    board,
+                    entities,
+                    er,
+                    ec,
+                    player.row,
+                    player.col,
+                    true,
+                  ),
 
                 mimics ?
                   manhattan(mimic_r, mimic_c, er, ec) +
-                    blockerCost(board, entities, er, ec, mimic_r, mimic_c)
+                    blockerCost(
+                      board,
+                      entities,
+                      er,
+                      ec,
+                      mimic_r,
+                      mimic_c,
+                      false,
+                    )
                 : Infinity,
 
                 beavers ?
                   manhattan(beaver_r, beaver_c, er, ec) +
-                    blockerCost(board, entities, er, ec, beaver_r, beaver_c)
+                    blockerCost(
+                      board,
+                      entities,
+                      er,
+                      ec,
+                      beaver_r,
+                      beaver_c,
+                      false,
+                    )
                 : Infinity,
               ),
             )
             // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
           : holding ? Infinity
-          : Math.max(0, manhattan(player.row, player.col, er, ec) - 1) +
-            blockerCost(board, entities, er, ec, player.row, player.col),
+          : manhattan(player.row, player.col, er, ec) +
+            blockerCost(board, entities, er, ec, player.row, player.col, true),
         ),
       );
-      
+
       // Account for player walking over excess glass on the way there. Currently this assumes we hit every single piece of excess glass and no useful and necessary ones. This is a massive subtraction. Fix this.
       if (travelCostExcess > 1) {
         travelCostExcess -= countExcessGlass(excess);
       }
-      
     }
 
     // Return the least.
-    if (travelCostDeficits === Infinity && travelCostExcess === Infinity) {
-      throw new Error("Cannot calculate travelCost.")
+    travelCost = Math.max(Math.min(travelCostDeficits, travelCostExcess), 0);
+    if (travelCost === Infinity) {
+      travelCost = 0;
     }
-    travelCost = Math.max(Math.min(travelCostDeficits, travelCostExcess),0);
   })();
 
   return {

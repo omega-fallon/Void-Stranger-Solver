@@ -351,6 +351,7 @@ export const BRANDS: RawBrand[] = [
   },
 ];
 
+// prettier-ignore
 export const KNOWN_CORRECT_PATHS = {
   // Add
   "Add/Add":
