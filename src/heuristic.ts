@@ -98,6 +98,10 @@ export function heuristic(
         ) {
           continue;
         }
+        // Quick-and-dirty admissibility assurance, disable when we figure out something smarter.
+        else if (cur === "glass" && mimics && manhattan(r,c,mimic_r,mimic_c) < manhattan(r,c,player.row,player.col)) {
+          continue
+        }
         // Ignore activated traps, since they might get dropped for free, or they might
         // get used as floors for brand matching purposes
         // Ignoring them ensures admissibility.
@@ -275,8 +279,15 @@ export function heuristic(
       }
     }
 
-    if (excess.length > 0 && excessContainsGlass(excess)) {
+    if (excess.length > 0 && (!holding || excessContainsGlass(excess))) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
+      let excessGlass = 0;
+      for (const x in excess) {
+        if (x[3] === "glass") {
+          excessGlass++;
+        }
+      }
+      
       travelCostExcess += Math.min(
         ...excess.map(([er, ec]) =>
           board[er]![ec]! === "glass" ?
@@ -305,10 +316,16 @@ export function heuristic(
             blockerCost(board, entities, er, ec, player.row, player.col),
         ),
       );
+      
+      // Account for player walking over excess glass on the way there. Currently this assumes we hit every single piece of excess glass and no useful and necessary ones. This is a massive subtraction. Fix this.
+      if (travelCostExcess > 1) {
+        travelCostExcess -= excessGlass;
+      }
+      
     }
 
     // Return the least.
-    travelCost += Math.min(travelCostDeficits, travelCostExcess);
+    travelCost = Math.min(travelCostDeficits, travelCostExcess);
   })();
 
   return {
