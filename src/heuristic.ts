@@ -164,29 +164,6 @@ export function heuristic(
 
   let travelCost = 0;
   (function calculateTravelCost() {
-    // --- Player travel to first work item ---
-    // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
-    const holding = player.staffContent !== "empty";
-
-    // Two variables: add the lowest?
-    let travelCostDeficits = Infinity;
-    let travelCostExcess = Infinity;
-
-    if (holding) {
-      // Player is carrying a tile; find the nearest deficit it can fill.
-      // If none exists, the tile will be placed temporarily — no travel cost charged.
-      const matchingDeficits = deficit.filter(([, , dtype]) =>
-        canFill(player.staffContent as Cell, dtype),
-      );
-      if (matchingDeficits.length > 0) {
-        travelCostDeficits = Math.min(
-          ...matchingDeficits.map(([dr, dc]) =>
-            Math.max(0, manhattan(player.row, player.col, dr, dc) - 1),
-          ),
-        );
-      }
-    }
-
     function excessContainsGlass(ex: [number, number, Cell][]): boolean {
       for (const ar of ex) {
         if (ar[2] === "glass") {
@@ -285,6 +262,29 @@ export function heuristic(
         return Infinity;
       } else {
         return 0;
+      }
+    }
+  
+    // --- Player travel to first work item ---
+    // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
+    const holding = player.staffContent !== "empty";
+
+    // Two variables: add the lowest?
+    let travelCostDeficits = Infinity;
+    let travelCostExcess = Infinity;
+
+    if (holding) {
+      // Player is carrying a tile; find the nearest deficit it can fill.
+      // If none exists, the tile will be placed temporarily — no travel cost charged.
+      const matchingDeficits = deficit.filter(([, , dtype]) =>
+        canFill(player.staffContent as Cell, dtype),
+      );
+      if (matchingDeficits.length > 0) {
+        travelCostDeficits = Math.min(
+          ...matchingDeficits.map(([dr, dc]) =>
+            Math.max(0, manhattan(player.row, player.col, dr, dc) - 1),
+          ),
+        );
       }
     }
 
