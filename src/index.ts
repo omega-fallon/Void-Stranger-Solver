@@ -100,6 +100,12 @@ const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
   });
 
 async function main() {
+  // Disable sword if we're in an enemy-less brane.
+  if (values.sword && values.brane && ["Add","Eus","Mon","Lev","Cif"].includes(values.brane)) {
+    console.log("Sword has no function in a brane with no enemies; disabling.");
+    values.sword = false;
+  }
+
   // Advance the initial state by applying the first N steps of the known
   // correct path, so the search can skip ahead past already-solved prefixes.
   const cheatN = values.cheatFirstNSteps ? Number(values.cheatFirstNSteps) : 0;
@@ -145,6 +151,7 @@ async function main() {
   console.log(
     `Searching for solution with ${values.algorithm}... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
   );
+  
   const start = performance.now();
   const { path, nodesExplored } = await search({
     initial: searchState,
