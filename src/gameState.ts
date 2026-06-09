@@ -1107,6 +1107,14 @@ export function renderState(state: GameState, requiredTiles?: number): string {
       overlayChar = "C";
     } else if (entities[r]?.[c] === "monster_statue") {
       overlayChar = "~";
+    } else if (entities[r]?.[c] === "maggot") {
+      overlayChar = "A";
+    } else if (entities[r]?.[c] === "leech") {
+      overlayChar = "L";
+    } else if (entities[r]?.[c] === "maggot_stopped") {
+      overlayChar = "Ä";
+    } else if (entities[r]?.[c] === "leech_stopped") {
+      overlayChar = "Ꞁ";
     }
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
