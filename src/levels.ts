@@ -226,6 +226,28 @@ export const BRANES: RawBraneInitial[] = [
     ]),
     player: { row: 4, col: 3, facing: "down", staffContent: "empty" },
   },
+  {
+    name: "DIS",
+    // prettier-ignore
+    board: parseBoard([
+      "##T #G",
+      "##GT #",
+      "GT####",
+      "#GT## ",
+      " ##G#T",
+      "A ##GS",
+    ]),
+    // prettier-ignore
+    entities: parseEntities([
+      " A  H ",
+      " R   ~",
+      "   RL ",
+      "      ",
+      "      ",
+      "R     ",
+    ]),
+    player: { row: 0, col: 0, facing: "down", staffContent: "empty" },
+  },
 ];
 
 export const BRANDS: RawBrand[] = [
@@ -335,6 +357,18 @@ export const BRANDS: RawBrand[] = [
       "##  ##",
       "      ",
       "# ## #"
+    ]),
+  },
+  {
+    name: "DIS",
+    // prettier-ignore
+    board: parseBoard([
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      "
     ]),
   },
   {

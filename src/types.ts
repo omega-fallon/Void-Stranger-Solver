@@ -34,6 +34,8 @@ export type Entity =
   | "watcher_active"
   | "chest"
   | "monster_statue";
+  | "maggot",
+  | "leech",
 export type EntityGrid = Entity[][];
 
 // Staff can hold nothing, a floor, a glass, or the stairs
