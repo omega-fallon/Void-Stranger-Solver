@@ -203,7 +203,6 @@ async function main() {
     );
 
   console.log(values.brane + "/" + values.brand + " ${values.wings ? 'wings' : ''} ${values.sword ? 'sword' : ''} ${values.endless ? 'endless' : ''}");
-  }
 }
 
 main();
