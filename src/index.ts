@@ -202,10 +202,7 @@ async function main() {
       `New path is better than previous known best of ${knownCorrectPath.length}!!`,
     );
 
-  if (values.wings) {
-    console.log(values.brane + "/" + values.brand + " with wings");
-  } else {
-    console.log(values.brane + "/" + values.brand);
+  console.log(values.brane + "/" + values.brand + " ${values.wings ? 'wings' : ''} ${values.sword ? 'sword' : ''} ${values.endless ? 'endless' : ''}");
   }
 }
 
