@@ -217,7 +217,7 @@ for (const {
     const after = applyAction(before, action, NO_BURDENS);
     assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
     const targetBoard = parseBoard(target);
-    const hBefore = heuristic(before, targetBoard, requireFinalJump, burdens);
+    const hBefore = heuristic(before, targetBoard, requireFinalJump, NO_BURDENS);
     // console.log(`Heuristic admissibility — ${name}, hBefore: ${hBefore.total}`);
     assert.ok(
       hBefore.total <= solutionLength,
@@ -277,7 +277,7 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
         state,
         target,
         level.requireFinalJump ?? false,
-        burdens,
+        NO_BURDENS,
       );
       const combined = stepsTaken + heuristicValues.total;
 
@@ -313,7 +313,7 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
         }, transportCost: ${heuristicValues.transportCost}, travelCost: ${
           heuristicValues.travelCost
         }\n${JSON.stringify(
-          heuristic(state, target, level.requireFinalJump ?? false, burdens),
+          heuristic(state, target, level.requireFinalJump ?? false, NO_BURDENS),
           null,
           2,
         )}\n${renderState(state)}`,

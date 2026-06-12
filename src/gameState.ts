@@ -1,6 +1,7 @@
 import { heuristic } from "./heuristic";
 import { countFloorTiles } from "./search";
 import { NO_BURDENS } from "./types";
+import { floorInStaff } from "./searchAlgorithms/shared";
 import type {
   Action,
   Board,
@@ -1072,7 +1073,8 @@ export function applyAction(
         },
       };
     }
-  } else {
+  }
+  else {
     // ── Staff action — player does not move; wingsActive passes through unchanged ─
     const { dr, dc } = DELTAS[facing];
     const fr = row + dr;
@@ -1162,10 +1164,18 @@ export function applyAction(
       } else {
         return null;
       }
-    } else {
+    }
+    // Using the Void Rod
+    else {
+      // Create newEntities by trigger watchers. In the case that we hit the ELSE block below, doing this won't matter at all since we return null anyways.
       const newEntities = triggerWatcher(entities);
 
-      if (staffContent === "empty" && front !== "empty" && front !== "wall") {
+      function staffCanTake(staffContent: StaffContent[]): boolean {
+        return burdens.endless || staffContent.length === 0
+      }
+
+      // Taking
+      if (staffCanTake(staffContent) && front !== "empty" && front !== "wall") {
         return {
           board: setCell(board, fr, fc, "empty"),
           entities: disperseMonsterStatues(newEntities),
@@ -1173,23 +1183,27 @@ export function applyAction(
             row,
             col,
             facing,
-            staffContent: front as StaffContent,
+            staffContent: [...staffContent, front as StaffContent],
             wingsActive: player.wingsActive ?? false,
           },
         };
-      } else if (staffContent !== "empty" && front === "empty") {
+      }
+      // Placing
+      else if (staffContent.length > 0 && front === "empty") {
         return {
-          board: setCell(board, fr, fc, staffContent as Cell),
+          board: setCell(board, fr, fc, staffContent[-1] as Cell),
           entities: disperseMonsterStatues(newEntities),
           player: {
             row,
             col,
             facing,
-            staffContent: [],
+            staffContent: staffContent.slice(0, -1),
             wingsActive: player.wingsActive ?? false,
           },
         };
-      } else {
+      }
+      // Unable to use Void Rod
+      else {
         return null;
       }
     }
@@ -1243,19 +1257,23 @@ export function stateKey(state: GameState): string {
       return state.player;
     })();
   const staffStr = (function getStaffStr() {
-    return (
-      staffContent === "empty" ? "e"
-      : staffContent === "floor" ? "f"
-      : staffContent === "glass" ? "g"
-      : staffContent === "button" ? "b"
-      : staffContent === "trap_inactive" ? "t"
-      : staffContent === "trap_active" ? "a"
-      : "s"
-    );
+    if (staffContent.length === 0) {
+      return "e"
+    }
+  
+    let str = "";
+    
+    for (const x of staffContent) {
+      str += x === "floor" ? "f"
+      : x === "glass" ? "g"
+      : x === "button" ? "b"
+      : x === "trap_inactive" ? "t"
+      : x === "trap_active" ? "a"
+      : "s";
+    }
+    return str;
   })();
   const wingsStr = wingsActive ? "W" : "0";
-  //const swordStr = swordActive ? "S" : "0";
-  //const endlessStr = endlessActive ? "E" : "0";
   return (function combineString() {
     return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
   })();
@@ -1280,7 +1298,7 @@ export function isGoal(
   requireFinalJump = true,
 ): boolean {
   if (requireFinalJump) {
-    if (state.player.staffContent !== "stairs") return false;
+    if (!state.player.staffContent.includes("stairs")) return false;
     if (getCell(state.board, state.player.row, state.player.col) !== "empty")
       return false;
     if (state.player.wingsActive) return false;
@@ -1316,7 +1334,7 @@ export function replayPath(
     }
     console.log(
       `Step ${i + 1}: ${action} | h: ${
-        heuristic(state, target, requireFinalJump).total
+        heuristic(state, target, requireFinalJump, burdens).total
       }\n${renderState(state)}\n`,
     );
     if (isGoal(state, target, requireFinalJump)) {
@@ -1326,38 +1344,39 @@ export function replayPath(
   }
 }
 
-function renderCellFloor(cell: Cell) {
-  let floorChar = "  ";
+function renderStaffContent(staffContent: StaffContent[]): string {
+  if (staffContent.length === 0) {
+    return ""
+  }
+
+  let str = "";
+  for (const x of staffContent) {
+    str += renderCellFloor(x as string);
+  }
+  return str;
+}
+
+function renderCellFloor(cell: string): string {
   switch (cell) {
     case "floor":
-      floorChar = "██";
-      break;
+      return "██";
     case "glass":
-      floorChar = "░░";
-      break;
+      return "░░";
     case "stairs":
-      floorChar = "S ";
-      break;
+      return "S ";
     case "wall":
-      floorChar = "▓▓";
-      break;
+      return "▓▓";
     case "button":
-      floorChar = "█B";
-      break;
+      return "█B";
     case "trap_inactive":
-      floorChar = "◖◗";
-      break;
+      return "◖◗";
     case "trap_active":
-      floorChar = "<>";
-      break;
+      return "<>";
     case "empty":
-      floorChar = "  ";
-      break;
+      return "  ";
     default:
-      floorChar = "??";
-      break;
+      return "??";
   }
-  return floorChar;
 }
 
 export function renderStates(states: GameState[]): string {
@@ -1425,8 +1444,7 @@ export function renderState(state: GameState, requiredTiles?: number): string {
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
   );
   const numFloorTilesRemaining =
-    countFloorTiles(board) +
-    (["floor", "glass"].includes(state.player.staffContent) ? 1 : 0);
+    countFloorTiles(board) + floorInStaff(state.player.staffContent);
   const wingsIndicator = state.player.wingsActive ? " 🦋" : "";
   //const swordIndicator = state.player.swordActive ? " 🗡️" : "";
   //const endlessIndicator = state.player.endlessActive ? " 🪄" : "";
@@ -1435,7 +1453,7 @@ export function renderState(state: GameState, requiredTiles?: number): string {
       requiredTiles ? ` out of a necessary ${requiredTiles}` : ""
     }\n` +
     ["┌────────────┐", ...rows, "└────────────┘"].join("\n") +
-    `\nstaff: [${renderCellFloor(
+    `\nstaff: [${renderStaffContent(
       state.player.staffContent,
     )}]${wingsIndicator}\n`
   );
