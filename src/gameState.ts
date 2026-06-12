@@ -634,8 +634,6 @@ export function applyAction(
   const { board, entities, player } = state;
   const { row, col, facing, staffContent } = player;
   const wingsActive = burdens.wings && (player.wingsActive ?? false);
-  //const swordActive = hasSword && (player.swordActive ?? false);
-  //const endlessActive = hasEndless && (player.endlessActive ?? false);
 
   // Movement!
   if (action !== "staff") {
@@ -1113,13 +1111,16 @@ export function applyAction(
           "leech_right",
         ].includes(getEntity(entities, fr, fc))
       ) {
-        let newEntities = entities;
-        newEntities = setEntity(newEntities, fr, fc, "empty");
+        // If hand on glass, remove glass.
+        const newBoard = getEntity(entities, fr, fc) === "hand" && getCell(board, fr, fc) === "glass" ? setCell(board, fr, fc, "empty") : board;
+        
+        // Delete entity.
+        const newEntities = setEntity(entities, fr, fc, "empty")
 
         // Move entities
         if (anyMovers(entities)) {
           const statesAfterEntities = moveEntities(
-            board,
+            newBoard,
             newEntities,
             wingsActive,
             burdens.wings,
@@ -1147,7 +1148,7 @@ export function applyAction(
         // No entities to move
         else {
           return {
-            board,
+            board: newBoard,
             entities: newEntities,
             player: {
               row,
