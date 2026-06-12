@@ -1283,7 +1283,7 @@ export function stateKey(state: GameState): string {
 // requires "solid tile present" or "empty", not a specific solid type.
 export function cellMatchesTarget(cell: Cell, target: Cell): boolean {
   if (cell === "stairs") {
-    return cell === "stairs";
+    return false;
   } else if (target === "empty") {
     return cell === "empty";
   } else {
