@@ -217,7 +217,12 @@ for (const {
     const after = applyAction(before, action, NO_BURDENS);
     assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
     const targetBoard = parseBoard(target);
-    const hBefore = heuristic(before, targetBoard, requireFinalJump, NO_BURDENS);
+    const hBefore = heuristic(
+      before,
+      targetBoard,
+      requireFinalJump,
+      NO_BURDENS,
+    );
     // console.log(`Heuristic admissibility — ${name}, hBefore: ${hBefore.total}`);
     assert.ok(
       hBefore.total <= solutionLength,
@@ -326,7 +331,11 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
   const hasWings = searchName.includes(" wings");
   const hasSword = searchName.includes(" sword");
   const hasEndless = searchName.includes(" endless");
-  const coreName = searchName.replace(" wings","").replace(" sword","").replace(" endless","").trim();
+  const coreName = searchName
+    .replace(" wings", "")
+    .replace(" sword", "")
+    .replace(" endless", "")
+    .trim();
   const [braneName, brandName] = coreName.split("/");
   const brane = BRANES.find((b) => b.name === braneName);
   const brand = BRANDS.find((b) => b.name === brandName);

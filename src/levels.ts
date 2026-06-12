@@ -401,7 +401,9 @@ export const KNOWN_CORRECT_PATHS = {
     "LRURDRZLLZLZRRZRDLZDZDZLDR",
   "Eus/Eus wings":
     "LLRRURDRRLDLZDZDZLDUD",
-  "Eus/Eus wings endless",
+  "Eus/Eus endless":
+    "LZRURDRZDLZDZDZLDU",
+  "Eus/Eus wings endless":
     "LZRURDRZDLZDZDZLDUD",
   
   "Eus/Bee wings":

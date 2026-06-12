@@ -113,7 +113,9 @@ export function staffBanned(entities: EntityGrid): boolean {
 export function floorInStaff(heldTiles: StaffContent[]): number {
   let counter = 0;
   for (const x in heldTiles) {
-    if (["floor", "glass", "button", "trap_inactive", "trap_active"].includes(x)) {
+    if (
+      ["floor", "glass", "button", "trap_inactive", "trap_active"].includes(x)
+    ) {
       counter++;
     }
   }
@@ -178,7 +180,10 @@ export function isPruned(
   }
 
   // Not enough floor tiles remaining to satisfy the target.
-  if (countFloorTiles(state.board) + floorInStaff(state.player.staffContent) < numFloorTilesInSolution) {
+  if (
+    countFloorTiles(state.board) + floorInStaff(state.player.staffContent) <
+    numFloorTilesInSolution
+  ) {
     return "not enough tiles remain";
   }
 

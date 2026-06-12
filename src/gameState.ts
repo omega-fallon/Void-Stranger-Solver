@@ -1073,8 +1073,7 @@ export function applyAction(
         },
       };
     }
-  }
-  else {
+  } else {
     // ── Staff action — player does not move; wingsActive passes through unchanged ─
     const { dr, dc } = DELTAS[facing];
     const fr = row + dr;
@@ -1114,10 +1113,16 @@ export function applyAction(
         ].includes(getEntity(entities, fr, fc))
       ) {
         // If hand on glass, remove glass.
-        const newBoard = getEntity(entities, fr, fc) === "hand" && getCell(board, fr, fc) === "glass" ? setCell(board, fr, fc, "empty") : board;
-        
+        const newBoard =
+          (
+            getEntity(entities, fr, fc) === "hand" &&
+            getCell(board, fr, fc) === "glass"
+          ) ?
+            setCell(board, fr, fc, "empty")
+          : board;
+
         // Delete entity.
-        const newEntities = setEntity(entities, fr, fc, "empty")
+        const newEntities = setEntity(entities, fr, fc, "empty");
 
         // Move entities
         if (anyMovers(entities)) {
@@ -1171,7 +1176,7 @@ export function applyAction(
       const newEntities = triggerWatcher(entities);
 
       function staffCanTake(staffContent: StaffContent[]): boolean {
-        return burdens.endless || staffContent.length === 0
+        return burdens.endless || staffContent.length === 0;
       }
 
       // Taking
@@ -1191,13 +1196,13 @@ export function applyAction(
       // Placing
       else if (staffContent.length > 0 && front === "empty") {
         return {
-          board: setCell(board, fr, fc, staffContent[staffContent.length-1]!),
+          board: setCell(board, fr, fc, staffContent[staffContent.length - 1]!),
           entities: disperseMonsterStatues(newEntities),
           player: {
             row,
             col,
             facing,
-            staffContent: staffContent.slice(0, staffContent.length-1),
+            staffContent: staffContent.slice(0, staffContent.length - 1),
             wingsActive: player.wingsActive ?? false,
           },
         };
@@ -1258,22 +1263,24 @@ export function stateKey(state: GameState): string {
     })();
   const staffStr = (function getStaffStr() {
     if (staffContent.length === 0) {
-      return "e"
+      return "e";
     }
-  
+
     let str = "";
-    
+
     for (const x of staffContent) {
-      str += x === "floor" ? "f"
-      : x === "glass" ? "g"
-      : x === "button" ? "b"
-      : x === "trap_inactive" ? "t"
-      : x === "trap_active" ? "a"
-      : "s";
+      str +=
+        x === "floor" ? "f"
+        : x === "glass" ? "g"
+        : x === "button" ? "b"
+        : x === "trap_inactive" ? "t"
+        : x === "trap_active" ? "a"
+        : "s";
     }
     return str;
   })();
   const wingsStr = wingsActive ? "W" : "0";
+  // "so burdens aren't kept as part of the state bc they don't change in a run, so we don't need to store a lot of copies of them"
   return (function combineString() {
     return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
   })();
@@ -1346,7 +1353,7 @@ export function replayPath(
 
 function renderStaffContent(staffContent: StaffContent[]): string {
   if (staffContent.length === 0) {
-    return ""
+    return "";
   }
 
   let str = "";
@@ -1440,13 +1447,18 @@ export function renderState(state: GameState, requiredTiles?: number): string {
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
   };
-  
+
   for (const row of board) {
     if (row.length !== 6) {
-      throw new Error("Invalid length row of "+String(row.length)+" printing: "+String(row));
+      throw new Error(
+        "Invalid length row of " +
+          String(row.length) +
+          " printing: " +
+          String(row),
+      );
     }
   }
-  
+
   const rows = board.map(
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
   );

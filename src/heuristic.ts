@@ -301,7 +301,10 @@ export function heuristic(
       }
     }
     // Removing excess. This is only possible if we can take with the Void Rod or if we have glass in the excess.
-    if (excess.length > 0 && (!holding || burdens.endless || excessContainsGlass(excess))) {
+    if (
+      excess.length > 0 &&
+      (!holding || burdens.endless || excessContainsGlass(excess))
+    ) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       travelCostExcess = Math.min(
         ...excess.map(([er, ec]) =>
@@ -349,7 +352,7 @@ export function heuristic(
               ),
             )
             // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
-          : (!burdens.endless && holding) ? Infinity
+          : !burdens.endless && holding ? Infinity
           : manhattan(player.row, player.col, er, ec) +
             blockerCost(board, entities, er, ec, player.row, player.col, true),
         ),

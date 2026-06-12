@@ -24,7 +24,11 @@ for (let algorithm of [
       const hasWings = label.includes(" wings");
       const hasSword = label.includes(" sword");
       const hasEndless = label.includes(" endless");
-      const coreName = label.replace(" wings","").replace(" sword","").replace(" endless","").trim();
+      const coreName = label
+        .replace(" wings", "")
+        .replace(" sword", "")
+        .replace(" endless", "")
+        .trim();
       const [brane, brand] = coreName.split("/");
 
       test.suite(
@@ -81,7 +85,11 @@ for (let algorithm of [
                   requireFinalJump,
                   initialThreshold: 1,
                   algorithm,
-                  burdens: { wings: hasWings, sword: hasSword, endless: hasEndless },
+                  burdens: {
+                    wings: hasWings,
+                    sword: hasSword,
+                    endless: hasEndless,
+                  },
                   knownCorrectPath: level.knownCorrectPath,
                 }),
                 new Promise<{ path: null }>((resolve) =>

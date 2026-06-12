@@ -86,7 +86,7 @@ const initialThreshold =
 
 const scenarioName = `${values.brane}/${values.brand}${
   values.wings ? " wings" : ""
-}${values.sword ? " sword" : ""}`;
+}${values.sword ? " sword" : ""}${values.endless ? " endless" : ""}`;
 const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
   .split("")
   .map((l) => {
@@ -101,7 +101,11 @@ const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
 
 async function main() {
   // Disable sword if we're in an enemy-less brane.
-  if (values.sword && values.brane && ["Add","Eus","Mon","Lev","Cif"].includes(values.brane)) {
+  if (
+    values.sword &&
+    values.brane &&
+    ["Add", "Eus", "Mon", "Lev", "Cif"].includes(values.brane)
+  ) {
     console.log("Sword has no function in a brane with no enemies; disabling.");
     values.sword = false;
   }
@@ -151,7 +155,7 @@ async function main() {
   console.log(
     `Searching for solution with ${values.algorithm}... ${scenarioName}, known path is ${KNOWN_CORRECT_PATHS[scenarioName]}`,
   );
-  
+
   const start = performance.now();
   const { path, nodesExplored } = await search({
     initial: searchState,
@@ -202,7 +206,14 @@ async function main() {
       `New path is better than previous known best of ${knownCorrectPath.length}!!`,
     );
 
-  console.log(values.brane + "/" + values.brand + (values.wings ? " wings" : "") + (values.sword ? " sword" : "") + (values.endless ? " endless" : ""));
+  console.log(
+    values.brane +
+      "/" +
+      values.brand +
+      (values.wings ? " wings" : "") +
+      (values.sword ? " sword" : "") +
+      (values.endless ? " endless" : ""),
+  );
 }
 
 main();

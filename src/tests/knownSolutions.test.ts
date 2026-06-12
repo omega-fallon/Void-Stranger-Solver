@@ -8,7 +8,11 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
   const hasWings = searchName.includes(" wings");
   const hasSword = searchName.includes(" sword");
   const hasEndless = searchName.includes(" endless");
-  const coreName = searchName.replace(" wings","").replace(" sword","").replace(" endless","").trim();
+  const coreName = searchName
+    .replace(" wings", "")
+    .replace(" sword", "")
+    .replace(" endless", "")
+    .trim();
   const [braneName, brandName] = coreName.split("/");
   const brane = BRANES.find((b) => b.name === braneName);
   const brand = BRANDS.find((b) => b.name === brandName);

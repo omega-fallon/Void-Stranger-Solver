@@ -215,7 +215,8 @@ export async function aStarThenIdaStar({
   // ── Phase 2: IDA* tails with iterative threshold ────────────────────────
 
   let threshold =
-    initialThreshold ?? heuristic(initial, target, requireFinalJump, burdens).total;
+    initialThreshold ??
+    heuristic(initial, target, requireFinalJump, burdens).total;
 
   while (true) {
     let minNextThreshold = Infinity;

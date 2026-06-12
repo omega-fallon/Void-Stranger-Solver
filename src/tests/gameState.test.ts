@@ -29,10 +29,16 @@ function makeState(
 // Movement
 
 test("move into floor updates position and facing", () => {
-  const s = makeState(1, 0, "down", [], [
-    [0, 0, "floor"],
-    [1, 0, "floor"],
-  ]);
+  const s = makeState(
+    1,
+    0,
+    "down",
+    [],
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+    ],
+  );
   const r = applyAction(s, "up", NO_BURDENS)!;
   assert.equal(r.player.row, 0);
   assert.equal(r.player.col, 0);
@@ -54,30 +60,48 @@ test("move out of bounds returns null", () => {
 });
 
 test("move onto stairs returns null (stairs is not walkable)", () => {
-  const s = makeState(1, 0, "down", [], [
-    [0, 0, "stairs"],
-    [1, 0, "floor"],
-  ]);
+  const s = makeState(
+    1,
+    0,
+    "down",
+    [],
+    [
+      [0, 0, "stairs"],
+      [1, 0, "floor"],
+    ],
+  );
   assert.equal(applyAction(s, "up", NO_BURDENS), null);
 });
 
 // Glass
 
 test("stepping off glass breaks it", () => {
-  const s = makeState(0, 0, "right", [], [
-    [0, 0, "glass"],
-    [0, 1, "floor"],
-  ]);
+  const s = makeState(
+    0,
+    0,
+    "right",
+    [],
+    [
+      [0, 0, "glass"],
+      [0, 1, "floor"],
+    ],
+  );
   const r = applyAction(s, "right", NO_BURDENS)!;
   assert.equal(r.player.col, 1);
   assert.equal(r.board[0]![0], "empty"); // glass broke
 });
 
 test("standing on glass and using staff does not break glass", () => {
-  const s = makeState(0, 0, "right", [], [
-    [0, 0, "glass"],
-    [0, 1, "floor"],
-  ]);
+  const s = makeState(
+    0,
+    0,
+    "right",
+    [],
+    [
+      [0, 0, "glass"],
+      [0, 1, "floor"],
+    ],
+  );
   const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.board[0]![0], "glass"); // glass intact
   assert.equal(r.player.staffContent, "floor");
@@ -87,10 +111,16 @@ test("standing on glass and using staff does not break glass", () => {
 // Staff
 
 test("store floor into empty staff", () => {
-  const s = makeState(1, 0, "up", [], [
-    [0, 0, "floor"],
-    [1, 0, "floor"],
-  ]);
+  const s = makeState(
+    1,
+    0,
+    "up",
+    [],
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+    ],
+  );
   const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.player.staffContent, "floor");
   assert.equal(r.board[0]![0], "empty");
@@ -98,10 +128,16 @@ test("store floor into empty staff", () => {
 });
 
 test("store stairs into empty staff", () => {
-  const s = makeState(1, 0, "up", [], [
-    [0, 0, "stairs"],
-    [1, 0, "floor"],
-  ]);
+  const s = makeState(
+    1,
+    0,
+    "up",
+    [],
+    [
+      [0, 0, "stairs"],
+      [1, 0, "floor"],
+    ],
+  );
   const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.player.staffContent, "stairs");
   assert.equal(r.board[0]![0], "empty");
@@ -115,10 +151,16 @@ test("place floor from staff onto empty cell", () => {
 });
 
 test("staff full + front occupied returns null", () => {
-  const s = makeState(1, 0, "up", ["floor"], [
-    [0, 0, "floor"],
-    [1, 0, "floor"],
-  ]);
+  const s = makeState(
+    1,
+    0,
+    "up",
+    ["floor"],
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+    ],
+  );
   assert.equal(applyAction(s, "staff", NO_BURDENS), null);
 });
 
@@ -135,11 +177,17 @@ test("staff use with front out of bounds returns null", () => {
 // Combination: glass + movement + staff storage
 
 test("step off glass then store front floor", () => {
-  const s0 = makeState(0, 0, "right", [], [
-    [0, 0, "glass"],
-    [0, 1, "floor"],
-    [0, 2, "floor"],
-  ]);
+  const s0 = makeState(
+    0,
+    0,
+    "right",
+    [],
+    [
+      [0, 0, "glass"],
+      [0, 1, "floor"],
+      [0, 2, "floor"],
+    ],
+  );
   // Step 1: move right — glass breaks
   const s1 = applyAction(s0, "right", NO_BURDENS)!;
   assert.equal(s1.board[0]![0], "empty");
@@ -486,14 +534,7 @@ test("renderBoard shows trap_active tile", () => {
 });
 
 test("renderBoard shows rock entity as R", () => {
-  const s = makeState(
-    5,
-    5,
-    "right",
-    [],
-    [[1, 1, "floor"]],
-    [[1, 1, "rock"]],
-  );
+  const s = makeState(5, 5, "right", [], [[1, 1, "floor"]], [[1, 1, "rock"]]);
   assert.ok(renderState(s).includes("R"));
 });
 
@@ -508,11 +549,17 @@ test("renderBoard omits wings indicator when player is grounded", () => {
 });
 
 test("renderBoard first line reports floor tile count (floor + glass combined)", () => {
-  const s = makeState(5, 5, "right", [], [
-    [0, 0, "floor"],
-    [0, 1, "glass"],
-    [0, 2, "floor"],
-  ]);
+  const s = makeState(
+    5,
+    5,
+    "right",
+    [],
+    [
+      [0, 0, "floor"],
+      [0, 1, "glass"],
+      [0, 2, "floor"],
+    ],
+  );
   const firstLine = renderState(s).split("\n")[0]!;
   assert.ok(
     firstLine.startsWith("3 floor tiles remain"),
@@ -551,18 +598,30 @@ test("renderBoard omits requiredTiles phrase when not provided", () => {
 // replayPath (lines 301-323)
 
 test("replayPath with empty path does not throw", () => {
-  const initial = makeState(1, 0, "up", [], [
-    [0, 0, "floor"],
-    [1, 0, "floor"],
-  ]);
+  const initial = makeState(
+    1,
+    0,
+    "up",
+    [],
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+    ],
+  );
   assert.doesNotThrow(() => replayPath(initial, [], initial.board));
 });
 
 test("replayPath with one valid step does not throw", () => {
   // Player at (1,0) facing up, moves to floor at (0,0)
-  const initial = makeState(1, 0, "up", [], [
-    [0, 0, "floor"],
-    [1, 0, "floor"],
-  ]);
+  const initial = makeState(
+    1,
+    0,
+    "up",
+    [],
+    [
+      [0, 0, "floor"],
+      [1, 0, "floor"],
+    ],
+  );
   assert.doesNotThrow(() => replayPath(initial, ["up"], initial.board));
 });

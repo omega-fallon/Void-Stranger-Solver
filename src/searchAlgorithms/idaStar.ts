@@ -233,7 +233,8 @@ export async function idaStar({
     : undefined;
 
   let threshold =
-    initialThreshold ?? heuristic(initial, target, requireFinalJump, burdens).total;
+    initialThreshold ??
+    heuristic(initial, target, requireFinalJump, burdens).total;
   const counters: DfsCounters = {
     nodesExplored: 0,
     loopsPrevented: 0,

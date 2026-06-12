@@ -534,7 +534,10 @@ function generatePredecessors(
         const candidate: GameState = {
           board: setBoardCell(board, fr, fc, "empty"),
           entities,
-          player: { ...player, staffContent: [...staffContent, frontCell as StaffContent] },
+          player: {
+            ...player,
+            staffContent: [...staffContent, frontCell as StaffContent],
+          },
         };
         const result = applyAction(candidate, "staff", burdens);
         if (result && stateKey(result) === targetKey)
