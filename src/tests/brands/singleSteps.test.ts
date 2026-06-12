@@ -41,7 +41,7 @@ for (let algorithm of [
             endless: hasEndless,
           }).map((v, i) => ({
             ...v,
-            name: `${brane}/${brand} step ${i}`,
+            name: `${brane}/${brand} ${hasWings ? "wings" : ""} ${hasSword ? "sword" : ""} ${hasEndless ? "endless" : ""} step ${i}`,
             requireFinalJump: false,
           }));
           // replayPath(
