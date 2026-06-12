@@ -21,10 +21,11 @@ for (let algorithm of [
         requireFinalJump?: boolean;
       })[] = [];
 
-      let [brane, brand, hasWingsStr, hasSwordStr, hasEndlessStr] = label.split(/\/| /);
-      let hasWings = !!hasWingsStr;
-      let hasSword = !!hasSwordStr;
-      let hasEndless = !!hasEndlessStr;
+      const hasWings = label.includes(" wings");
+      const hasSword = label.includes(" sword");
+      const hasEndless = label.includes(" endless");
+      const coreName = label.replace(" wings","").replace(" sword","").replace(" endless","").trim();
+      const [brane, brand] = coreName.split("/");
 
       test.suite(
         `Testing each step of known path for ${brane}/${brand} ${hasWings ? "wings" : ""} ${hasSword ? "sword" : ""} ${hasEndless ? "endless" : ""}`,

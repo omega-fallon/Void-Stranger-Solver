@@ -35,7 +35,7 @@ const CONSISTENCY_CASES: {
         "      ",
       ]),
       entities: emptyEntityGrid(),
-      player: { row: 0, col: 4, facing: "right", staffContent: "empty" },
+      player: { row: 0, col: 4, facing: "right", staffContent: [] },
     },
     solutionLength: 1,
     action: "staff",
@@ -70,7 +70,7 @@ const CONSISTENCY_CASES: {
         "      ",
         "     R",
       ]),
-      player: { row: 1, col: 4, facing: "right", staffContent: "empty" },
+      player: { row: 1, col: 4, facing: "right", staffContent: [] },
     },
     solutionLength: 1,
     action: "staff",
@@ -106,7 +106,7 @@ const CONSISTENCY_CASES: {
         "      ",
         "     R",
       ]),
-      player: { row: 1, col: 4, facing: "right", staffContent: "empty" },
+      player: { row: 1, col: 4, facing: "right", staffContent: [] },
     },
     solutionLength: 1,
     action: "staff",
@@ -146,7 +146,7 @@ const CONSISTENCY_CASES: {
         row: 2,
         col: 3,
         facing: "left",
-        staffContent: "floor",
+        staffContent: ["floor"],
         wingsActive: false,
       },
     },
@@ -187,7 +187,7 @@ const CONSISTENCY_CASES: {
         row: 1,
         col: 3,
         facing: "left",
-        staffContent: "empty",
+        staffContent: [],
         wingsActive: false,
       },
     },
@@ -322,13 +322,10 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
 });
 
 for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
-  const hasWings = searchName.endsWith(" wings");
-  const hasSword = searchName.endsWith(" sword");
-  const hasEndless = searchName.endsWith(" endless");
-  const coreName =
-    hasWings ? searchName.slice(0, -" wings".length) : searchName;
-    hasSword ? searchName.slice(0, -" sword".length) : searchName;
-    hasEndless ? searchName.slice(0, -" endless".length) : searchName;
+  const hasWings = searchName.includes(" wings");
+  const hasSword = searchName.includes(" sword");
+  const hasEndless = searchName.includes(" endless");
+  const coreName = searchName.replace(" wings","").replace(" sword","").replace(" endless","").trim();
   const [braneName, brandName] = coreName.split("/");
   const brane = BRANES.find((b) => b.name === braneName);
   const brand = BRANDS.find((b) => b.name === brandName);

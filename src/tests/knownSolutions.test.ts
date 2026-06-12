@@ -5,13 +5,10 @@ import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "../levels";
 import { applyPath } from "../utils";
 
 for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
-  const hasWings = searchName.endsWith(" wings");
-  const hasSword = searchName.endsWith(" sword");
-  const hasEndless = searchName.endsWith(" endless");
-  const coreName =
-    hasWings ? searchName.slice(0, -" wings".length) : searchName;
-    hasSword ? searchName.slice(0, -" sword".length) : searchName;
-    hasEndless ? searchName.slice(0, -" endless".length) : searchName;
+  const hasWings = searchName.includes(" wings");
+  const hasSword = searchName.includes(" sword");
+  const hasEndless = searchName.includes(" endless");
+  const coreName = searchName.replace(" wings","").replace(" sword","").replace(" endless","").trim();
   const [braneName, brandName] = coreName.split("/");
   const brane = BRANES.find((b) => b.name === braneName);
   const brand = BRANDS.find((b) => b.name === brandName);
