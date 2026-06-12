@@ -48,7 +48,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "      ",
     ]),
-    player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 3, col: 2, facing: "down", staffContent: [] },
   },
   {
     name: "Eus",
@@ -70,7 +70,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "     R",
     ]),
-    player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "down", staffContent: [] },
   },
   //{
   //  name: "Bee",
@@ -92,7 +92,7 @@ export const BRANES: RawBraneInitial[] = [
   //    "      ",
   //    "R     ",
   //  ]),
-  //  player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
+  //  player: { row: 3, col: 3, facing: "down", staffContent: [] },
   //},
   {
     name: "Mon",
@@ -114,7 +114,7 @@ export const BRANES: RawBraneInitial[] = [
       "    R ",
       "R     ",
     ]),
-    player: { row: 3, col: 3, facing: "down", staffContent: "empty" },
+    player: { row: 3, col: 3, facing: "down", staffContent: [] },
   },
   {
     name: "Tan",
@@ -136,7 +136,7 @@ export const BRANES: RawBraneInitial[] = [
       " H~ H ",
       "  HH  ",
     ]),
-    player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 0, col: 2, facing: "down", staffContent: [] },
   },
   {
     name: "Gor",
@@ -158,7 +158,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "R     ",
     ]),
-    player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
+    player: { row: 0, col: 5, facing: "down", staffContent: [] },
   },
   {
     name: "Lev",
@@ -180,7 +180,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "W     ",
     ]),
-    player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
+    player: { row: 0, col: 5, facing: "down", staffContent: [] },
   },
   {
     name: "Lev-glass",
@@ -202,7 +202,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "W     ",
     ]),
-    player: { row: 0, col: 5, facing: "down", staffContent: "empty" },
+    player: { row: 0, col: 5, facing: "down", staffContent: [] },
   },
   {
     name: "Cif",
@@ -224,7 +224,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "      ",
     ]),
-    player: { row: 4, col: 3, facing: "down", staffContent: "empty" },
+    player: { row: 4, col: 3, facing: "down", staffContent: [] },
   },
   {
     name: "DIS",
@@ -246,7 +246,7 @@ export const BRANES: RawBraneInitial[] = [
       "      ",
       "R     ",
     ]),
-    player: { row: 0, col: 0, facing: "down", staffContent: "empty" },
+    player: { row: 0, col: 0, facing: "down", staffContent: [] },
   },
 ];
 

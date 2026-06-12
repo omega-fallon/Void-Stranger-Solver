@@ -21,7 +21,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 3, facing: "up", staffContent: "empty" },
+    player: { row: 2, col: 3, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 1",
@@ -43,7 +43,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "up", staffContent: "empty" },
+    player: { row: 1, col: 3, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 2",
@@ -65,7 +65,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "up", staffContent: "floor" },
+    player: { row: 1, col: 3, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 3",
@@ -87,7 +87,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 4",
@@ -109,7 +109,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 2, facing: "down", staffContent: "floor" },
+    player: { row: 2, col: 2, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 5",
@@ -131,7 +131,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "down", staffContent: "floor" },
+    player: { row: 3, col: 2, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 6",
@@ -153,7 +153,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 2, facing: "up", staffContent: "floor" },
+    player: { row: 2, col: 2, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 7",
@@ -175,7 +175,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 2, facing: "up", staffContent: "empty" },
+    player: { row: 2, col: 2, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 8",
@@ -197,7 +197,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "up", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 9",
@@ -219,7 +219,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "up", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 10",
@@ -241,7 +241,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 1, facing: "left", staffContent: "floor" },
+    player: { row: 1, col: 1, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 11",
@@ -263,7 +263,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 12",
@@ -285,7 +285,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "right", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 13",
@@ -307,7 +307,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "empty" },
+    player: { row: 1, col: 3, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 14",
@@ -329,7 +329,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "glass" },
+    player: { row: 1, col: 3, facing: "right", staffContent: ["glass"] },
   },
   {
     name: "Mon step 15",
@@ -351,7 +351,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "glass" },
+    player: { row: 1, col: 2, facing: "left", staffContent: ["glass"] },
   },
   {
     name: "Mon step 16",
@@ -373,7 +373,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 17",
@@ -395,7 +395,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 2, col: 2, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 18",
@@ -417,7 +417,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 1, facing: "left", staffContent: "empty" },
+    player: { row: 2, col: 1, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 19",
@@ -439,7 +439,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 1, facing: "up", staffContent: "empty" },
+    player: { row: 1, col: 1, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 20",
@@ -461,7 +461,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 1, facing: "up", staffContent: "floor" },
+    player: { row: 1, col: 1, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 21",
@@ -483,7 +483,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 22",
@@ -505,7 +505,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 3, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 23",
@@ -527,7 +527,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 24",
@@ -549,7 +549,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 25",
@@ -571,7 +571,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 1, facing: "left", staffContent: "empty" },
+    player: { row: 1, col: 1, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 26",
@@ -593,7 +593,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 1, facing: "left", staffContent: "floor" },
+    player: { row: 1, col: 1, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 27",
@@ -615,7 +615,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 28",
@@ -637,7 +637,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 3, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 29",
@@ -659,7 +659,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "empty" },
+    player: { row: 1, col: 3, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 30",
@@ -681,7 +681,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 31",
@@ -703,7 +703,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 32",
@@ -725,7 +725,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 3, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 33",
@@ -747,7 +747,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 4, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 4, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 34",
@@ -769,7 +769,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 4, facing: "down", staffContent: "floor" },
+    player: { row: 2, col: 4, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 35",
@@ -791,7 +791,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 4, facing: "up", staffContent: "floor" },
+    player: { row: 1, col: 4, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 36",
@@ -813,7 +813,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 0, col: 4, facing: "up", staffContent: "floor" },
+    player: { row: 0, col: 4, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 37",
@@ -835,7 +835,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 4, facing: "down", staffContent: "floor" },
+    player: { row: 1, col: 4, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 38",
@@ -857,7 +857,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 4, facing: "down", staffContent: "empty" },
+    player: { row: 1, col: 4, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 39",
@@ -879,7 +879,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "left", staffContent: "empty" },
+    player: { row: 1, col: 3, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 40",
@@ -901,7 +901,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "empty" },
+    player: { row: 1, col: 2, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 41",
@@ -923,7 +923,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "empty" },
+    player: { row: 1, col: 3, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 42",
@@ -945,7 +945,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "floor" },
+    player: { row: 1, col: 3, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 43",
@@ -967,7 +967,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "floor" },
+    player: { row: 1, col: 2, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 44",
@@ -989,7 +989,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 2, facing: "down", staffContent: "floor" },
+    player: { row: 2, col: 2, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 45",
@@ -1011,7 +1011,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 2, col: 2, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 46",
@@ -1033,7 +1033,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 3, col: 2, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 47",
@@ -1055,7 +1055,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 4, col: 2, facing: "down", staffContent: "empty" },
+    player: { row: 4, col: 2, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 48",
@@ -1077,7 +1077,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "up", staffContent: "empty" },
+    player: { row: 3, col: 2, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 49",
@@ -1099,7 +1099,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "up", staffContent: "floor" },
+    player: { row: 3, col: 2, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 50",
@@ -1121,7 +1121,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "left", staffContent: "floor" },
+    player: { row: 3, col: 1, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 51",
@@ -1143,7 +1143,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "right", staffContent: "floor" },
+    player: { row: 3, col: 2, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 52",
@@ -1165,7 +1165,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 3, facing: "right", staffContent: "floor" },
+    player: { row: 3, col: 3, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 53",
@@ -1187,7 +1187,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "left", staffContent: "floor" },
+    player: { row: 3, col: 2, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 54",
@@ -1209,7 +1209,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "left", staffContent: "empty" },
+    player: { row: 3, col: 2, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 55",
@@ -1231,7 +1231,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 3, facing: "right", staffContent: "empty" },
+    player: { row: 3, col: 3, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 56",
@@ -1253,7 +1253,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 4, col: 3, facing: "down", staffContent: "empty" },
+    player: { row: 4, col: 3, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 57",
@@ -1275,7 +1275,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 4, col: 3, facing: "down", staffContent: "floor" },
+    player: { row: 4, col: 3, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 58",
@@ -1297,7 +1297,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 3, facing: "up", staffContent: "floor" },
+    player: { row: 3, col: 3, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 59",
@@ -1319,7 +1319,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "left", staffContent: "floor" },
+    player: { row: 3, col: 2, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 60",
@@ -1341,7 +1341,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "left", staffContent: "floor" },
+    player: { row: 3, col: 1, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 61",
@@ -1363,7 +1363,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 4, col: 1, facing: "down", staffContent: "floor" },
+    player: { row: 4, col: 1, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 62",
@@ -1385,7 +1385,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "up", staffContent: "floor" },
+    player: { row: 3, col: 1, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 63",
@@ -1407,7 +1407,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "up", staffContent: "empty" },
+    player: { row: 3, col: 1, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 64",
@@ -1429,7 +1429,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "right", staffContent: "empty" },
+    player: { row: 3, col: 2, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 65",
@@ -1451,7 +1451,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "left", staffContent: "empty" },
+    player: { row: 3, col: 1, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 66",
@@ -1473,7 +1473,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "left", staffContent: "floor" },
+    player: { row: 3, col: 1, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 67",
@@ -1495,7 +1495,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 1, facing: "up", staffContent: "floor" },
+    player: { row: 2, col: 1, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 68",
@@ -1517,7 +1517,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 2, col: 1, facing: "up", staffContent: "empty" },
+    player: { row: 2, col: 1, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 69",
@@ -1539,7 +1539,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 1, facing: "down", staffContent: "empty" },
+    player: { row: 3, col: 1, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 70",
@@ -1561,7 +1561,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 2, facing: "right", staffContent: "empty" },
+    player: { row: 3, col: 2, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 71",
@@ -1583,7 +1583,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 3, facing: "right", staffContent: "empty" },
+    player: { row: 3, col: 3, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 72",
@@ -1605,7 +1605,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 4, facing: "right", staffContent: "empty" },
+    player: { row: 3, col: 4, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 73",
@@ -1627,7 +1627,7 @@ export const PARTIAL_MON_STATES = [
       "    R ",
       "R     "
     ],
-    player: { row: 3, col: 4, facing: "right", staffContent: "floor" },
+    player: { row: 3, col: 4, facing: "right", staffContent: ["floor"] },
   },
   {
     name: "Mon step 74",
@@ -1649,7 +1649,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R   R "
     ],
-    player: { row: 3, col: 4, facing: "down", staffContent: "floor" },
+    player: { row: 3, col: 4, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 75",
@@ -1671,7 +1671,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R   R "
     ],
-    player: { row: 3, col: 4, facing: "down", staffContent: "empty" },
+    player: { row: 3, col: 4, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 76",
@@ -1693,7 +1693,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R   R "
     ],
-    player: { row: 4, col: 4, facing: "down", staffContent: "empty" },
+    player: { row: 4, col: 4, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 77",
@@ -1715,7 +1715,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R   R "
     ],
-    player: { row: 4, col: 5, facing: "right", staffContent: "empty" },
+    player: { row: 4, col: 5, facing: "right", staffContent: [] },
   },
   {
     name: "Mon step 78",
@@ -1737,7 +1737,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R   R "
     ],
-    player: { row: 5, col: 5, facing: "down", staffContent: "empty" },
+    player: { row: 5, col: 5, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 79",
@@ -1759,7 +1759,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 5, col: 5, facing: "left", staffContent: "empty" },
+    player: { row: 5, col: 5, facing: "left", staffContent: [] },
   },
   {
     name: "Mon step 80",
@@ -1781,7 +1781,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 5, col: 5, facing: "left", staffContent: "floor" },
+    player: { row: 5, col: 5, facing: "left", staffContent: ["floor"] },
   },
   {
     name: "Mon step 81",
@@ -1803,7 +1803,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 4, col: 5, facing: "up", staffContent: "floor" },
+    player: { row: 4, col: 5, facing: "up", staffContent: ["floor"] },
   },
   {
     name: "Mon step 82",
@@ -1825,7 +1825,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 4, col: 5, facing: "up", staffContent: "empty" },
+    player: { row: 4, col: 5, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 83",
@@ -1847,7 +1847,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 3, col: 5, facing: "up", staffContent: "empty" },
+    player: { row: 3, col: 5, facing: "up", staffContent: [] },
   },
   {
     name: "Mon step 84",
@@ -1869,7 +1869,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 4, col: 5, facing: "down", staffContent: "empty" },
+    player: { row: 4, col: 5, facing: "down", staffContent: [] },
   },
   {
     name: "Mon step 85",
@@ -1891,7 +1891,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 4, col: 5, facing: "down", staffContent: "floor" },
+    player: { row: 4, col: 5, facing: "down", staffContent: ["floor"] },
   },
   {
     name: "Mon step 86",
@@ -1913,7 +1913,7 @@ export const PARTIAL_MON_STATES = [
       "      ",
       "R  R  "
     ],
-    player: { row: 5, col: 5, facing: "down", staffContent: "floor" },
+    player: { row: 5, col: 5, facing: "down", staffContent: ["floor"] },
     requireFinalJump: true,
   },
 ];

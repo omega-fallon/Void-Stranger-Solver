@@ -160,7 +160,7 @@ test("Solves Add's brand", async (t) => {
         " ##   ",
         "#    #",
       ]),
-      player: { row: 3, col: 2, facing: "down", staffContent: "empty" },
+      player: { row: 3, col: 2, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -187,7 +187,7 @@ test("Walks over glass", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 0, col: 0, facing: "down", staffContent: "empty" },
+      player: { row: 0, col: 0, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -214,7 +214,7 @@ test("Moves a piece of glass", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 0, col: 2, facing: "down", staffContent: "empty" },
+      player: { row: 0, col: 2, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -241,7 +241,7 @@ test("Move a piece of glass to destroy all the glass", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 1, col: 2, facing: "down", staffContent: "empty" },
+      player: { row: 1, col: 2, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -269,7 +269,7 @@ test("Fly over a gap", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+      player: { row: 1, col: 1, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -298,7 +298,7 @@ test("Fly over a gap multiple times", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+      player: { row: 1, col: 1, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -327,7 +327,7 @@ test("Should not fly over a gap more than 1 wide", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+      player: { row: 1, col: 1, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -355,7 +355,7 @@ test("Grab a tile while flying", async (t) => {
         "      ",
         "      ",
       ]),
-      player: { row: 1, col: 1, facing: "down", staffContent: "empty" },
+      player: { row: 1, col: 1, facing: "down", staffContent: [] },
     },
     // prettier-ignore
     target: parseBoard([
@@ -396,7 +396,7 @@ test("Eus/Eus search correctness regression", async (t) => {
         row: 2,
         col: 3,
         facing: "left",
-        staffContent: "floor",
+        staffContent: ["floor"],
         wingsActive: false,
       },
     },

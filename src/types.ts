@@ -45,9 +45,8 @@ export type Entity =
   | "leech_right";
 export type EntityGrid = Entity[][];
 
-// Staff can hold nothing, a floor, a glass, or the stairs
+// Staff-valid tiles
 export type StaffContent =
-  | "empty"
   | "floor"
   | "glass"
   | "stairs"
@@ -59,7 +58,7 @@ export interface PlayerState {
   row: number;
   col: number;
   facing: Direction;
-  staffContent: StaffContent;
+  staffContent: StaffContent[];
   /** True while the player is gliding over the void using the wings burden. */
   wingsActive?: boolean;
 }

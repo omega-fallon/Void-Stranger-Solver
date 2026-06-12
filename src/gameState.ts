@@ -1185,7 +1185,7 @@ export function applyAction(
             row,
             col,
             facing,
-            staffContent: "empty",
+            staffContent: [],
             wingsActive: player.wingsActive ?? false,
           },
         };
