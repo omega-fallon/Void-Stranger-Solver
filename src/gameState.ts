@@ -1073,8 +1073,9 @@ export function applyAction(
         },
       };
     }
-  } else {
-    // ── Staff action — player does not move; wingsActive passes through unchanged ─
+  }
+  // ── Staff action — player does not move; wingsActive passes through unchanged ─
+  else {
     const { dr, dc } = DELTAS[facing];
     const fr = row + dr;
     const fc = col + dc;

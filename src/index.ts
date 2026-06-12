@@ -84,9 +84,7 @@ const TARGET_BOARD: Board = rawBrand.board;
 const initialThreshold =
   values.initialThreshold ? Number(values.initialThreshold) : undefined;
 
-const scenarioName = `${values.brane}/${values.brand}${
-  values.wings ? " wings" : ""
-}${values.sword ? " sword" : ""}${values.endless ? " endless" : ""}`;
+const scenarioName = `${values.brane}/${values.brand}${values.wings ? " wings" : ""}${values.sword ? " sword" : ""}${values.endless ? " endless" : ""}`;
 const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
   .split("")
   .map((l) => {
