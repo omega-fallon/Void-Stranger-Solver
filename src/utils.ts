@@ -106,7 +106,7 @@ const ENTITY_CHARS: Record<Entity, string> = {
   monster_statue: "~",
   maggot_up: "A",
   leech_left: "L",
-  maggot_down: "Ä",
+  maggot_down: "Ɐ",
   leech_right: "Ꞁ",
 };
 /** Converts a Board back to the compact string-array notation used in levels.ts. */
@@ -152,7 +152,7 @@ export function parseEntities(rows: string[]): EntityGrid {
     "~": "monster_statue",
     A: "maggot_up",
     L: "leech_left",
-    Ä: "maggot_down",
+    Ɐ: "maggot_down",
     Ꞁ: "leech_right",
   };
   return rows.map((row) =>

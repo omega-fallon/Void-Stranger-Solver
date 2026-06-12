@@ -1433,7 +1433,7 @@ export function renderState(state: GameState, requiredTiles?: number): string {
     } else if (entities[r]?.[c] === "leech_left") {
       overlayChar = "L";
     } else if (entities[r]?.[c] === "maggot_down") {
-      overlayChar = "Ä";
+      overlayChar = "Ɐ";
     } else if (entities[r]?.[c] === "leech_right") {
       overlayChar = "Ꞁ";
     }
