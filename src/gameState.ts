@@ -1183,7 +1183,7 @@ export function applyAction(
             row,
             col,
             facing,
-            staffContent: [...staffContent, front as StaffContent],
+            staffContent: [...staffContent, front],
             wingsActive: player.wingsActive ?? false,
           },
         };
@@ -1191,13 +1191,13 @@ export function applyAction(
       // Placing
       else if (staffContent.length > 0 && front === "empty") {
         return {
-          board: setCell(board, fr, fc, staffContent[-1] as Cell),
+          board: setCell(board, fr, fc, staffContent[staffContent.length-1]!),
           entities: disperseMonsterStatues(newEntities),
           player: {
             row,
             col,
             facing,
-            staffContent: staffContent.slice(0, -1),
+            staffContent: staffContent.slice(0, staffContent.length-1),
             wingsActive: player.wingsActive ?? false,
           },
         };
@@ -1375,7 +1375,7 @@ function renderCellFloor(cell: string): string {
     case "empty":
       return "  ";
     default:
-      return "??";
+      return cell;
   }
 }
 
@@ -1440,6 +1440,13 @@ export function renderState(state: GameState, requiredTiles?: number): string {
     let floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
   };
+  
+  for (const row of board) {
+    if (row.length !== 6) {
+      throw new Error("Invalid length row of "+String(row.length)+" printing: "+String(row));
+    }
+  }
+  
   const rows = board.map(
     (row, r) => "│" + row.map((cell, c) => cellChar(cell, r, c)).join("") + "│",
   );

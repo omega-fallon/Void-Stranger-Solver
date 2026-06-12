@@ -349,7 +349,7 @@ export function heuristic(
               ),
             )
             // Non-glass logic - we can return infinity here because an earlier check ensures this mapping has at least one finite value.
-          : holding ? Infinity
+          : (!burdens.endless && holding) ? Infinity
           : manhattan(player.row, player.col, er, ec) +
             blockerCost(board, entities, er, ec, player.row, player.col, true),
         ),
