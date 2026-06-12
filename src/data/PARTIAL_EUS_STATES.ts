@@ -101,7 +101,7 @@ export const PARTIAL_EUS_STATES = [
       "GGG GG",
       "GGGSGW"
     ],
-    player: { row: 1, col: 4, facing: "right", staffContent: "glass" },
+    player: { row: 1, col: 4, facing: "right", staffContent: ["glass"] },
   },
   {
     name: "Eus step 8",
@@ -114,7 +114,7 @@ export const PARTIAL_EUS_STATES = [
       "GGG GG",
       "GGGSGW"
     ],
-    player: { row: 1, col: 3, facing: "left", staffContent: "glass" },
+    player: { row: 1, col: 3, facing: "left", staffContent: ["glass"] },
   },
   {
     name: "Eus step 9",
@@ -127,7 +127,7 @@ export const PARTIAL_EUS_STATES = [
       "GGG GG",
       "GGGSGW"
     ],
-    player: { row: 1, col: 2, facing: "left", staffContent: "glass" },
+    player: { row: 1, col: 2, facing: "left", staffContent: ["glass"] },
   },
   {
     name: "Eus step 10",
@@ -166,7 +166,7 @@ export const PARTIAL_EUS_STATES = [
       "GGG GG",
       "GGGSGW"
     ],
-    player: { row: 1, col: 1, facing: "left", staffContent: "glass" },
+    player: { row: 1, col: 1, facing: "left", staffContent: ["glass"] },
   },
   {
     name: "Eus step 13",
@@ -179,7 +179,7 @@ export const PARTIAL_EUS_STATES = [
       "GGG GG",
       "GGGSGW"
     ],
-    player: { row: 1, col: 2, facing: "right", staffContent: "glass" },
+    player: { row: 1, col: 2, facing: "right", staffContent: ["glass"] },
   },
   {
     name: "Eus step 14",
@@ -192,7 +192,7 @@ export const PARTIAL_EUS_STATES = [
       "GGG GG",
       "GGGSGW"
     ],
-    player: { row: 1, col: 3, facing: "right", staffContent: "glass" },
+    player: { row: 1, col: 3, facing: "right", staffContent: ["glass"] },
   },
   {
     name: "Eus step 15",

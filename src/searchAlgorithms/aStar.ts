@@ -48,7 +48,7 @@ export async function aStar({
   const closed = new Set<string>();
   let nodesExplored = 0;
 
-  const initialH = heuristic(initial, target, requireFinalJump).total;
+  const initialH = heuristic(initial, target, requireFinalJump, burdens).total;
   open.push({
     state: initial,
     gCost: 0,
@@ -110,7 +110,7 @@ export async function aStar({
       if (!next) continue;
       if (closed.has(stateKey(next))) continue;
 
-      const nextH = heuristic(next, target, requireFinalJump).total;
+      const nextH = heuristic(next, target, requireFinalJump, burdens).total;
       open.push({
         state: next,
         gCost: current.gCost + 1,

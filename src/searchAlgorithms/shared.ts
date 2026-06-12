@@ -1,4 +1,4 @@
-import { NO_BURDENS } from "../types";
+import { NO_BURDENS, StaffContent } from "../types";
 import type {
   Action,
   Board,
@@ -109,6 +109,17 @@ export function staffBanned(entities: EntityGrid): boolean {
   return found_inactive === 1;
 }
 
+// Counts floor tiles in staff
+export function floorInStaff(heldTiles: StaffContent[]): number {
+  let counter = 0;
+  for (const x in heldTiles) {
+    if (["floor", "glass", "button", "trap_inactive", "trap_active"].includes(x)) {
+      counter++;
+    }
+  }
+  return counter;
+}
+
 /**
  * Returns true if this state is a dead end and should be pruned from the search.
  *
@@ -150,7 +161,7 @@ export function isPruned(
   // player doesn't have wings (can't do the watcher-strike into pit strat).
   if (
     staffBanned(state.entities) &&
-    state.player.staffContent !== "stairs" &&
+    !state.player.staffContent.includes("stairs") &&
     !burdens.wings
   ) {
     if (verbose >= 3)
@@ -167,15 +178,7 @@ export function isPruned(
   }
 
   // Not enough floor tiles remaining to satisfy the target.
-  const floorInStaff =
-    (
-      ["floor", "glass", "button", "trap_inactive", "trap_active"].includes(
-        state.player.staffContent,
-      )
-    ) ?
-      1
-    : 0;
-  if (countFloorTiles(state.board) + floorInStaff < numFloorTilesInSolution) {
+  if (countFloorTiles(state.board) + floorInStaff(state.player.staffContent) < numFloorTilesInSolution) {
     return "not enough tiles remain";
   }
 

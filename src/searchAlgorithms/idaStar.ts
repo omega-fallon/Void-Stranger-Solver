@@ -50,7 +50,7 @@ export async function idaDfs(
     h: number,
   ) => Promise<"found" | "continue">,
 ): Promise<"found" | number> {
-  const h = heuristic(state, target, requireFinalJump).total;
+  const h = heuristic(state, target, requireFinalJump, burdens).total;
   const f = g + h;
 
   if (f > threshold) {
@@ -67,7 +67,7 @@ export async function idaDfs(
       console.warn(
         `Pruning state from correct path (above threshold): ${g} + ${h} > ${threshold}\n` +
           `${actionsToString(path)} / ${actionsToString(knownCorrectPath)}\n` +
-          JSON.stringify(heuristic(state, target, requireFinalJump)) +
+          JSON.stringify(heuristic(state, target, requireFinalJump, burdens)) +
           "\n" +
           renderState(state),
       );
@@ -233,7 +233,7 @@ export async function idaStar({
     : undefined;
 
   let threshold =
-    initialThreshold ?? heuristic(initial, target, requireFinalJump).total;
+    initialThreshold ?? heuristic(initial, target, requireFinalJump, burdens).total;
   const counters: DfsCounters = {
     nodesExplored: 0,
     loopsPrevented: 0,

@@ -31,14 +31,14 @@ const DIRECTION_DELTA: Record<Direction, [number, number]> = {
 
 const ALL_FACINGS: Direction[] = ["up", "down", "left", "right"];
 
-const ALL_STAFF_CONTENTS: StaffContent[] = [
-  "empty",
-  "floor",
-  "glass",
-  "stairs",
-  "button",
-  "trap_inactive",
-  "trap_active",
+const ALL_STAFF_CONTENTS: StaffContent[][] = [
+  [] as StaffContent[],
+  ["floor"] as StaffContent[],
+  ["glass"] as StaffContent[],
+  ["stairs"] as StaffContent[],
+  ["button"] as StaffContent[],
+  ["trap_inactive"] as StaffContent[],
+  ["trap_active"] as StaffContent[],
 ];
 
 // Entities whose positions can change during gameplay.
@@ -145,7 +145,7 @@ function generateGoalStates(
 
   // Valid cells and staff contents for the player depend on the win condition.
   let validPlayerCells: Array<[number, number]>;
-  let validStaffContents: StaffContent[];
+  let validStaffContents: StaffContent[][];
   if (requireFinalJump) {
     // Player must be in the void (empty cell) holding stairs.
     validPlayerCells = [];
@@ -154,7 +154,7 @@ function generateGoalStates(
         if (target[r]![c]! === "empty") validPlayerCells.push([r, c]);
       }
     }
-    validStaffContents = ["stairs"];
+    validStaffContents = [["stairs"]] as StaffContent[][];
   } else {
     validPlayerCells = [...validEntityCells];
     validStaffContents = ALL_STAFF_CONTENTS;
@@ -513,9 +513,9 @@ function generatePredecessors(
       const frontCell = board[fr]![fc]!;
 
       // Reverse of "pick up": staffContent = X, front is empty → pred has empty staff, front = X.
-      if (staffContent !== "empty" && frontCell === "empty") {
+      if (staffContent.length > 0 && frontCell === "empty") {
         const candidate: GameState = {
-          board: setBoardCell(board, fr, fc, staffContent as Cell),
+          board: setBoardCell(board, fr, fc, staffContent[-1] as Cell),
           entities,
           player: { ...player, staffContent: [] },
         };
@@ -527,14 +527,14 @@ function generatePredecessors(
       // Reverse of "place": staffContent = empty, front = X → pred has staff = X, front empty.
       // TODO: does not handle the chest→rock staff conversion (rare edge case).
       if (
-        staffContent === "empty" &&
+        (staffContent.length === 0 || burdens.endless) &&
         frontCell !== "empty" &&
         frontCell !== "wall"
       ) {
         const candidate: GameState = {
           board: setBoardCell(board, fr, fc, "empty"),
           entities,
-          player: { ...player, staffContent: frontCell as StaffContent },
+          player: { ...player, staffContent: [...staffContent, frontCell as StaffContent] },
         };
         const result = applyAction(candidate, "staff", burdens);
         if (result && stateKey(result) === targetKey)
@@ -630,7 +630,7 @@ export async function bidirectionalAStar({
   fwdOpen.push({
     state: initial,
     gCost: 0,
-    hCost: heuristic(initial, target, requireFinalJump).total,
+    hCost: heuristic(initial, target, requireFinalJump, burdens).total,
     action: null,
     parent: null,
   });
@@ -667,7 +667,7 @@ export async function bidirectionalAStar({
     bwdOpen.push({
       state: goalState,
       gCost: 0,
-      hCost: heuristic(goalState, initial.board, false).total,
+      hCost: heuristic(goalState, initial.board, false, burdens).total,
       action: null,
       parent: null,
     });
@@ -742,7 +742,7 @@ export async function bidirectionalAStar({
         fwdOpen.push({
           state: next,
           gCost: current.gCost + 1,
-          hCost: heuristic(next, target, requireFinalJump).total,
+          hCost: heuristic(next, target, requireFinalJump, burdens).total,
           action,
           parent: current,
         });
@@ -780,7 +780,7 @@ export async function bidirectionalAStar({
         bwdOpen.push({
           state: predecessor,
           gCost: current.gCost + 1,
-          hCost: heuristic(predecessor, initial.board, false).total,
+          hCost: heuristic(predecessor, initial.board, false, burdens).total,
           action,
           parent: current,
         });

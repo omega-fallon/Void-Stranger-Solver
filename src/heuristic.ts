@@ -1,4 +1,4 @@
-import type { Board, Cell, GameState, EntityGrid } from "./types";
+import type { Board, Cell, GameState, EntityGrid, Burdens } from "./types";
 import { staffBanned } from "./search";
 import { inBounds } from "./gameState";
 
@@ -41,6 +41,7 @@ export function heuristic(
   state: GameState,
   target: Board,
   requireFinalJump: boolean,
+  burdens: Burdens,
 ): HeuristicResult {
   const { board, player, entities } = state;
 
@@ -278,7 +279,7 @@ export function heuristic(
 
     // --- Player travel to first work item ---
     // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
-    const holding = player.staffContent !== "empty";
+    const holding = player.staffContent.length > 0;
 
     // Two variables: add the lowest?
     let travelCostDeficits = Infinity;
@@ -289,7 +290,7 @@ export function heuristic(
       // Player is carrying a tile; find the nearest deficit it can fill.
       // If none exists, the tile will be placed temporarily — no travel cost charged.
       const matchingDeficits = deficit.filter(([, , dtype]) =>
-        canFill(player.staffContent as Cell, dtype),
+        canFill(player.staffContent[-1] as Cell, dtype),
       );
       if (matchingDeficits.length > 0) {
         travelCostDeficits = Math.min(
@@ -299,8 +300,8 @@ export function heuristic(
         );
       }
     }
-    // Removing excess. This is only possible if we're not holding something or if we have glass in the excess.
-    if (excess.length > 0 && (!holding || excessContainsGlass(excess))) {
+    // Removing excess. This is only possible if we can take with the Void Rod or if we have glass in the excess.
+    if (excess.length > 0 && (!holding || burdens.endless || excessContainsGlass(excess))) {
       // Player needs to reach adjacent to an excess tile and be holding nothing to start picking up, OR if the tile is glass, can also step directly on it.
       travelCostExcess = Math.min(
         ...excess.map(([er, ec]) =>

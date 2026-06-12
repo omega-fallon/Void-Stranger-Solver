@@ -43,7 +43,7 @@ function buildFrontier(
   const frontier: SearchNode[] = [];
   const earlyGoals: SearchNode[] = [];
 
-  const initialH = heuristic(initial, target, requireFinalJump).total;
+  const initialH = heuristic(initial, target, requireFinalJump, burdens).total;
   open.push({
     state: initial,
     gCost: 0,
@@ -79,7 +79,7 @@ function buildFrontier(
       if (!next) continue;
       if (closed.has(stateKey(next))) continue;
 
-      const nextH = heuristic(next, target, requireFinalJump).total;
+      const nextH = heuristic(next, target, requireFinalJump, burdens).total;
       open.push({
         state: next,
         gCost: current.gCost + 1,
@@ -215,7 +215,7 @@ export async function aStarThenIdaStar({
   // ── Phase 2: IDA* tails with iterative threshold ────────────────────────
 
   let threshold =
-    initialThreshold ?? heuristic(initial, target, requireFinalJump).total;
+    initialThreshold ?? heuristic(initial, target, requireFinalJump, burdens).total;
 
   while (true) {
     let minNextThreshold = Infinity;
