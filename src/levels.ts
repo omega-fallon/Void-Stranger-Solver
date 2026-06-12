@@ -457,9 +457,9 @@ export const KNOWN_CORRECT_PATHS = {
   "Lev/Lev wings":
     "LZDDLRDLDLDLULLURULURURLR",
   "Lev/Lev endless":
-    "LDDLRDLDLDLULLURURLURURZL",
+    "LZDDLRDLDLDLULLURULURURL",
   "Lev/Lev wings endless":
-    "LZLLLDLRDDLDRRDRURUULRDLU",
+    "LZDDLRDLDLDLULLURULURURLR",
 
   // Cif
   "Cif/Cif":

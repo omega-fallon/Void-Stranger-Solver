@@ -133,6 +133,7 @@ function generateGoalStates(
   target: Board,
   initial: GameState,
   requireFinalJump: boolean,
+  endless: boolean,
 ): GameState[] {
   // Valid cells for entity placement: always non-empty, non-wall.
   const validEntityCells: Array<[number, number]> = [];
@@ -155,9 +156,30 @@ function generateGoalStates(
       }
     }
     validStaffContents = [["stairs"]] as StaffContent[][];
-  } else {
+  } 
+  // Endless Void Rod; not yet implemented.
+  else if (endless) {
+    throw new Error("Not yet implemented.")
+  }
+  // Don't require final jump and subtract tiles that can't originate from the initial state.
+  else {
+    // Any solid tile is valid to stand on.
     validPlayerCells = [...validEntityCells];
-    validStaffContents = ALL_STAFF_CONTENTS;
+    
+    // Any tile that could possibly originate from the initial state is a valid tile to be holding.
+    let tilesInOrigin : StaffContent[] = [];
+    let vscHolder : StaffContent[][] = [];
+    
+    for (const row of initial.board) {
+      for (const col_i in row) {
+        if (row[col_i] !== "empty" && row[col_i] !== "wall" && !tilesInOrigin.includes(row[col_i]!)) {
+          tilesInOrigin.push(row[col_i]!);
+          vscHolder.push([row[col_i]!]);
+        }
+      }
+    }
+    
+    validStaffContents = vscHolder;
   }
 
   // Use validEntityCells (not validPlayerCells) for entity placement so
@@ -642,7 +664,7 @@ export async function bidirectionalAStar({
   const bwdOpen = new MinHeap();
   const bwdClosed = new Map<string, SearchNode>();
 
-  const goalStates = generateGoalStates(target, initial, requireFinalJump);
+  const goalStates = generateGoalStates(target, initial, requireFinalJump, burdens.endless);
 
   if (verbose) {
     console.log(`Backward search: ${goalStates.length} initial goal states`);
