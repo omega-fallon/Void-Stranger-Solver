@@ -32,7 +32,7 @@ for (let algorithm of [
       const [brane, brand] = coreName.split("/");
 
       test.suite(
-        `Testing each step of known path for ${brane}/${brand} ${hasWings ? "wings" : ""} ${hasSword ? "sword" : ""} ${hasEndless ? "endless" : ""}`,
+        `Testing each step of known path for ${brane}/${brand}${hasWings ? "wings" : ""}${hasSword ? "sword" : ""}${hasEndless ? "endless" : ""}`,
         async () => {
           let level = BRANES.find((b) => b.name === brane)!;
           let partialSolveStates = applyPath(level, knownCorrectPath, {
@@ -41,7 +41,7 @@ for (let algorithm of [
             endless: hasEndless,
           }).map((v, i) => ({
             ...v,
-            name: `${brane}/${brand} ${hasWings ? "wings" : ""} ${hasSword ? "sword" : ""} ${hasEndless ? "endless" : ""} step ${i}`,
+            name: `${brane}/${brand}${hasWings ? "wings" : ""}${hasSword ? "sword" : ""}${hasEndless ? "endless" : ""} step ${i}`,
             requireFinalJump: false,
           }));
           // replayPath(
