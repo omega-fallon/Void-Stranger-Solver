@@ -1445,7 +1445,7 @@ export function renderState(state: GameState, requiredTiles?: number): string {
     } else if (entities[r]?.[c] === "leech_right") {
       overlayChar = "Ꞁ";
     }
-    let floorChar = renderCellFloor(cell);
+    const floorChar = renderCellFloor(cell);
     return overlayChar ? overlayChar + floorChar.slice(1) : floorChar;
   };
 

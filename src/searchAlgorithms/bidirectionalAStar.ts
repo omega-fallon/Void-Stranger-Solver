@@ -133,6 +133,7 @@ function generateGoalStates(
   target: Board,
   initial: GameState,
   requireFinalJump: boolean,
+  hasWings: boolean,
   endless: boolean,
 ): GameState[] {
   // Valid cells for entity placement: always non-empty, non-wall.
@@ -147,8 +148,12 @@ function generateGoalStates(
   // Valid cells and staff contents for the player depend on the win condition.
   let validPlayerCells: Array<[number, number]>;
   let validStaffContents: StaffContent[][];
-  if (requireFinalJump) {
-    // Player must be in the void (empty cell) holding stairs.
+  // Endless Void Rod; not yet implemented.
+  if (endless) {
+    throw new Error("Not yet implemented.")
+  }
+  // Player must be in the void (empty cell) holding stairs.
+  else if (requireFinalJump) {
     validPlayerCells = [];
     for (let r = 0; r < 6; r++) {
       for (let c = 0; c < 6; c++) {
@@ -156,15 +161,22 @@ function generateGoalStates(
       }
     }
     validStaffContents = [["stairs"]] as StaffContent[][];
-  } 
-  // Endless Void Rod; not yet implemented.
-  else if (endless) {
-    throw new Error("Not yet implemented.")
   }
   // Don't require final jump and subtract tiles that can't originate from the initial state.
   else {
+    // Any non-wall is valid to stand on.
+    if (hasWings) {
+      validPlayerCells = [];
+      for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 6; c++) {
+          if (target[r]![c]! !== "wall") validPlayerCells.push([r, c]);
+        }
+      }
+    }
     // Any solid tile is valid to stand on.
-    validPlayerCells = [...validEntityCells];
+    else {
+      validPlayerCells = [...validEntityCells];
+    }
     
     // Any tile that could possibly originate from the initial state is a valid tile to be holding.
     let tilesInOrigin : StaffContent[] = [];
@@ -664,7 +676,7 @@ export async function bidirectionalAStar({
   const bwdOpen = new MinHeap();
   const bwdClosed = new Map<string, SearchNode>();
 
-  const goalStates = generateGoalStates(target, initial, requireFinalJump, burdens.endless);
+  const goalStates = generateGoalStates(target, initial, requireFinalJump, burdens.wings, burdens.endless);
 
   if (verbose) {
     console.log(`Backward search: ${goalStates.length} initial goal states`);
