@@ -41,7 +41,7 @@ Options:
   -d, --brand <name>              Brand to carve
       --wings                     Enable Void Wings
       --sword                     Enable Void Sword
-      --endless                     Enable Endless Void Rod
+      --endless                   Enable Endless Void Rod
   -v, --verbose <level>           Verbosity level: 1 = log search progress, 2 = replay solution
   -s, --slow                      Add 100ms delay per node during search
       --initialThreshold <n>      Override initial IDA* cost threshold
