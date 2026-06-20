@@ -54,7 +54,7 @@ for (let algorithm of [
             endless: hasEndless,
           }).map((v, i) => ({
             ...v,
-            name: `${brane}/${brand}${hasWings ? " wings" : ""}${hasSword ? " sword" : ""}${hasEndless ? " endless" : ""} step ${i}`,
+            name: `${brane}/${brand}${hasWings ? " wings" : ""}${hasSword ? " sword" : ""}${hasEndless ? " endless" : ""} state ${i}`,
             requireFinalJump: false,
           }));
 
@@ -76,7 +76,7 @@ for (let algorithm of [
             let endState = partialSolveStates[i + 1]!;
 
             TEST_STATE_PAIRS.push({
-              name: endState.name,
+              name: startState.name + " to state "+String(i+1),
               initial: startState,
               target: endState.board,
               requireFinalJump: endState.requireFinalJump,
