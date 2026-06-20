@@ -258,7 +258,7 @@ export async function idaStar({
     const path: Action[] = [];
     
     // Runs idaDfs and returns the result.
-    const result : number | "found" | "continue" = await idaDfs(
+    const result = await idaDfs(
       initial,
       initial,
       0,
