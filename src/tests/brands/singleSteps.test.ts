@@ -125,10 +125,16 @@ for (let algorithm of [
               ]);
 
               // Check for null or empty path.
-              if (path === null) {
-                console.log("Returned path was null.");
-              } else if (path.length === 0) {
-                console.log("Returned path was empty.");
+              if (path === null || path.length === 0) {
+                  if (path === null) {
+                    console.log("Returned path was null.");
+                  } else if (path.length === 0) {
+                    console.log("Returned path was empty.");
+                  }
+
+                  // Print states because it's useful.
+                  console.log(renderState(pair.initial));
+                  console.log(renderBoard(pair.target));
               }
 
               if (t.signal.aborted) return;
