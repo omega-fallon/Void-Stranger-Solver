@@ -113,14 +113,13 @@ export function staffBanned(entities: EntityGrid): boolean {
 // Counts floor tiles in staff
 export function floorInStaff(heldTiles: StaffContent[]): number {
   let counter = 0;
-  for (const x in heldTiles) {
-    // Intentionally double-equals.
+  for (const x of heldTiles) {
     if (
-      x == "floor" ||
-      x == "glass" ||
-      x == "button" ||
-      x == "trap_inactive" ||
-      x == "trap_active"
+      x === "floor" ||
+      x === "glass" ||
+      x === "button" ||
+      x === "trap_inactive" ||
+      x === "trap_active"
     ) {
       counter++;
     }
@@ -185,11 +184,23 @@ export function isPruned(
       console.log("INF: Player is on empty tile but wings are not active");
     return "you have fallen (prematurely)";
   }
-  
+
   // Pre-emptively check for a floor tile discrepancy in branes that lack any breakable tiles. Triggering this means something in our code is wrong, not that a pruning needs to occur.
   const currentTotalFloorTiles = countFloorTilesInState(state);
-  if (!gameStateContainsBreakables(initial) && countFloorTilesInState(initial) !== currentTotalFloorTiles) {
-    throw new Error("Floor tile discrepancy in brane with no breakable tiles.");
+  if (
+    !gameStateContainsBreakables(initial) &&
+    countFloorTilesInState(initial) !== currentTotalFloorTiles
+  ) {
+    return (
+      "Floor tile discrepancy in brane with no breakable tiles: " +
+      String(countFloorTilesInState(initial)) +
+      " " +
+      String(currentTotalFloorTiles) +
+      "\n" +
+      renderState(initial) +
+      "\n" +
+      renderState(state)
+    );
   }
 
   // Not enough floor tiles remaining to satisfy the target.

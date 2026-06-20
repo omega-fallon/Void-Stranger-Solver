@@ -71,7 +71,9 @@ function buildFrontier(
     }
 
     // Dead end — skip entirely.
-    if (isPruned(current.state, target, burdens, numFloorTilesInSolution, initial))
+    if (
+      isPruned(current.state, target, burdens, numFloorTilesInSolution, initial)
+    )
       continue;
 
     for (const action of actions) {

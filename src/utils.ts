@@ -182,21 +182,17 @@ export function gameStateContainsBreakables(state: GameState) {
       return true;
     }
   }
-  
+
   // Check the board.
   for (let row of state.board) {
     for (let cell of row) {
       // Intentionally double-equals.
-      if (
-        cell == "glass" ||
-        cell == "trap_inactive" ||
-        cell == "trap_active"
-      ) {
+      if (cell == "glass" || cell == "trap_inactive" || cell == "trap_active") {
         return true;
       }
     }
   }
-  
+
   // None found.
   return false;
 }

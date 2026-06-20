@@ -150,7 +150,7 @@ function generateGoalStates(
   let validStaffContents: StaffContent[][];
   // Endless Void Rod; not yet implemented.
   if (endless) {
-    throw new Error("Not yet implemented.")
+    throw new Error("Not yet implemented.");
   }
   // Player must be in the void (empty cell) holding stairs.
   else if (requireFinalJump) {
@@ -177,20 +177,24 @@ function generateGoalStates(
     else {
       validPlayerCells = [...validEntityCells];
     }
-    
+
     // Any tile that could possibly originate from the initial state is a valid tile to be holding.
-    let tilesInOrigin : StaffContent[] = [];
-    let vscHolder : StaffContent[][] = [];
-    
+    let tilesInOrigin: StaffContent[] = [];
+    let vscHolder: StaffContent[][] = [];
+
     for (const row of initial.board) {
       for (const col_i in row) {
-        if (row[col_i] !== "empty" && row[col_i] !== "wall" && !tilesInOrigin.includes(row[col_i]!)) {
+        if (
+          row[col_i] !== "empty" &&
+          row[col_i] !== "wall" &&
+          !tilesInOrigin.includes(row[col_i]!)
+        ) {
           tilesInOrigin.push(row[col_i]!);
           vscHolder.push([row[col_i]!]);
         }
       }
     }
-    
+
     validStaffContents = vscHolder;
   }
 
@@ -676,7 +680,13 @@ export async function bidirectionalAStar({
   const bwdOpen = new MinHeap();
   const bwdClosed = new Map<string, SearchNode>();
 
-  const goalStates = generateGoalStates(target, initial, requireFinalJump, burdens.wings, burdens.endless);
+  const goalStates = generateGoalStates(
+    target,
+    initial,
+    requireFinalJump,
+    burdens.wings,
+    burdens.endless,
+  );
 
   if (verbose) {
     console.log(`Backward search: ${goalStates.length} initial goal states`);
@@ -768,7 +778,15 @@ export async function bidirectionalAStar({
         break;
       }
 
-      if (isPruned(current.state, target, burdens, numFloorTilesInSolution, initial))
+      if (
+        isPruned(
+          current.state,
+          target,
+          burdens,
+          numFloorTilesInSolution,
+          initial,
+        )
+      )
         continue;
 
       for (const action of actions) {

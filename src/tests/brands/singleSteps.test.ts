@@ -16,13 +16,15 @@ for (let algorithm of [
   test.suite(`Testing algorithm: ${algorithm}`, async () => {
     for (let [label, knownCorrectPath] of Object.entries(KNOWN_CORRECT_PATHS)) {
       // Skip these; not actual paths, just markers for being impossible.
-      if (label.includes("universal") || knownCorrectPath === "IMPOSSIBLE" ) {
+      if (label.includes("universal") || knownCorrectPath === "IMPOSSIBLE") {
         continue;
       }
-    
+
       // Establish TEST_STATE_PAIRS, an array of RawLevel data intersected with an initial state of entities and other data.
       // The knownCorrectPath is the known correct path between the two states. Usually just a singular Action.
-      const TEST_STATE_PAIRS: (RawLevel & { initial: { entities: EntityGrid } } & {
+      const TEST_STATE_PAIRS: (RawLevel & {
+        initial: { entities: EntityGrid };
+      } & {
         knownCorrectPath: Action[];
         solutionLength?: number;
         requireFinalJump?: boolean;
@@ -44,7 +46,7 @@ for (let algorithm of [
         `Testing each step of known path for ${brane}/${brand}${hasWings ? " wings" : ""}${hasSword ? " sword" : ""}${hasEndless ? " endless" : ""}`,
         async () => {
           let level = BRANES.find((b) => b.name === brane)!;
-          
+
           // Create an array of all steps along the path of our scenario.
           let partialSolveStates = applyPath(level, knownCorrectPath, {
             wings: hasWings,
@@ -55,7 +57,7 @@ for (let algorithm of [
             name: `${brane}/${brand}${hasWings ? " wings" : ""}${hasSword ? " sword" : ""}${hasEndless ? " endless" : ""} step ${i}`,
             requireFinalJump: false,
           }));
-          
+
           // replayPath(
           //   level,
           //   parseActions(knownCorrectPath),
@@ -63,7 +65,7 @@ for (let algorithm of [
           //   { wings: hasWings, sword: hasSword, endless: hasEndless },
           //   true,
           // );
-          
+
           // Final jump is required for final step.
           partialSolveStates.at(-1)!.requireFinalJump = true;
 
@@ -83,18 +85,18 @@ for (let algorithm of [
           }
 
           // Iterate through each set of state pairs to see if they're individually possible. This will point out errors in our simulation and our algorithms.
-          for (const level of TEST_STATE_PAIRS) {
-            test(`${algorithm} ${level.name}`, { timeout: 300 }, async (t) => {
-              // console.log(`${level.name}`);
+          for (const pair of TEST_STATE_PAIRS) {
+            test(`${algorithm} ${pair.name}`, { timeout: 300 }, async (t) => {
+              // console.log(`${pair.name}`);
               const initial = {
-                board: level.initial.board,
-                entities: level.initial.entities,
-                player: level.initial.player,
+                board: pair.initial.board,
+                entities: pair.initial.entities,
+                player: pair.initial.player,
               };
-              // console.log(renderBoard(level.initial));
-              const target = level.target;
-              const requireFinalJump = level.requireFinalJump ?? false;
-              
+              // console.log(renderBoard(pair.initial));
+              const target = pair.target;
+              const requireFinalJump = pair.requireFinalJump ?? false;
+
               // Run our algorithm to try to find the path.
               const { path } = await Promise.race([
                 search({
@@ -109,9 +111,9 @@ for (let algorithm of [
                     sword: hasSword,
                     endless: hasEndless,
                   },
-                  knownCorrectPath: level.knownCorrectPath,
+                  knownCorrectPath: pair.knownCorrectPath,
                 }),
-                
+
                 // Abort on signal, setting path to null.
                 new Promise<{ path: null }>((resolve) =>
                   t.signal.addEventListener(
@@ -121,22 +123,26 @@ for (let algorithm of [
                   ),
                 ),
               ]);
-              
-              if (!path) {
+
+              // Check for null or empty path.
+              if (path === null) {
                 console.log("Returned path was null.");
+              } else if (path.length === 0) {
+                console.log("Returned path was empty.");
               }
-              
+
               if (t.signal.aborted) return;
-              
-              // if (level.solutionLength) {
-              //   assert.equal(level.solutionLength, path?.length);
+
+              // if (pair.solutionLength) {
+              //   assert.equal(pair.solutionLength, path?.length);
               // }
-              
+
+              // Test is passed if the path is not null, fails otherwise.
               assert.ok(
                 path !== null,
                 `No solution found from \n${renderState(initial)}\nto\n${renderBoard(target)}`,
               );
-              
+
               if (VERBOSE) {
                 if (path)
                   replayPath(
@@ -147,9 +153,9 @@ for (let algorithm of [
                     requireFinalJump,
                   );
                 console.log(
-                  `Solved level "${level.name}" with a path of length ${path.length}${requireFinalJump ? " and jumped into the void" : ""}`,
+                  `Solved pair "${pair.name}" with a path of length ${path.length}${requireFinalJump ? " and jumped into the void" : ""}`,
                 );
-                console.log(level);
+                console.log(pair);
               }
             });
           }
