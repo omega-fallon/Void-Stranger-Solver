@@ -15,7 +15,8 @@ for (let algorithm of [
 ] as const) {
   test.suite(`Testing algorithm: ${algorithm}`, async () => {
     for (let [label, knownCorrectPath] of Object.entries(KNOWN_CORRECT_PATHS)) {
-      if (label.contains("universal") || knownCorrectPath === "IMPOSSIBLE" ) {
+      // Skip these; not actual paths, just markers for being impossible.
+      if (label.includes("universal") || knownCorrectPath === "IMPOSSIBLE" ) {
         continue;
       }
     
