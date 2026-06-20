@@ -392,6 +392,18 @@ export const KNOWN_CORRECT_PATHS = {
     "URUZU",
   "Add/Add wings":
     "URUZUU",
+    
+  "Add/Eus universal":
+    "IMPOSSIBLE",
+    
+  "Add/Bee universal":
+    "IMPOSSIBLE",
+    
+  "Add/Mon universal":
+    "IMPOSSIBLE",
+    
+  "Add/Tan universal":
+    "IMPOSSIBLE",
 
   // Eus
   "Eus/Add wings":

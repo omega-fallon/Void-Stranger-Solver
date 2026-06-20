@@ -84,7 +84,9 @@ const TARGET_BOARD: Board = rawBrand.board;
 const initialThreshold =
   values.initialThreshold ? Number(values.initialThreshold) : undefined;
 
-const scenarioName = `${values.brane}/${values.brand}${values.wings ? " wings" : ""}${values.sword ? " sword" : ""}${values.endless ? " endless" : ""}`;
+const pacifistBranes = ["Add", "Eus", "Mon", "Lev", "Cif"];
+const holdTrueSword = (values.sword && values.brane && pacifistBranes.includes(values.brane)) ? false : values.sword;
+const scenarioName = `${values.brane}/${values.brand}${values.wings ? " wings" : ""}${holdTrueSword ? " sword" : ""}${values.endless ? " endless" : ""}`;
 const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
   .split("")
   .map((l) => {
@@ -102,10 +104,18 @@ async function main() {
   if (
     values.sword &&
     values.brane &&
-    ["Add", "Eus", "Mon", "Lev", "Cif"].includes(values.brane)
+    pacifistBranes.includes(values.brane)
   ) {
     console.log("Sword has no function in a brane with no enemies; disabling.");
     values.sword = false;
+  }
+  
+  // Impossible setup.
+  if (KNOWN_CORRECT_PATHS[scenarioName] === "IMPOSSIBLE" || KNOWN_CORRECT_PATHS[`${values.brane}/${values.brand} universal`] === "IMPOSSIBLE") {
+    console.error(
+        `Scenario marked as impossible.`,
+      );
+    process.exit(1);
   }
 
   // Advance the initial state by applying the first N steps of the known

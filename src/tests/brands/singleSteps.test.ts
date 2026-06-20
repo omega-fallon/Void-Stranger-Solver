@@ -15,6 +15,10 @@ for (let algorithm of [
 ] as const) {
   test.suite(`Testing algorithm: ${algorithm}`, async () => {
     for (let [label, knownCorrectPath] of Object.entries(KNOWN_CORRECT_PATHS)) {
+      if (label.contains("universal") || knownCorrectPath === "IMPOSSIBLE" ) {
+        continue;
+      }
+    
       const TEST_LEVELS: (RawLevel & { initial: { entities: EntityGrid } } & {
         knownCorrectPath: Action[];
         solutionLength?: number;
