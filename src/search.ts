@@ -10,6 +10,7 @@ import type { SearchOptions, SearchResult } from "./searchAlgorithms/shared";
 export {
   allWatchersTriggeredQuestion,
   countFloorTiles,
+  floorInStaff,
   staffBanned,
   type SearchOptions,
   type SearchResult,

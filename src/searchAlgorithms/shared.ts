@@ -9,6 +9,7 @@ import type {
   Entity,
 } from "../types";
 import { renderState } from "../gameState";
+import { gameStateContainsBreakables, countFloorTilesInState } from "../utils";
 
 const verbose = Number(process.env.VERBOSE);
 
@@ -113,8 +114,13 @@ export function staffBanned(entities: EntityGrid): boolean {
 export function floorInStaff(heldTiles: StaffContent[]): number {
   let counter = 0;
   for (const x in heldTiles) {
+    // Intentionally double-equals.
     if (
-      ["floor", "glass", "button", "trap_inactive", "trap_active"].includes(x)
+      x == "floor" ||
+      x == "glass" ||
+      x == "button" ||
+      x == "trap_inactive" ||
+      x == "trap_active"
     ) {
       counter++;
     }
@@ -138,6 +144,7 @@ export function isPruned(
   target: Board,
   burdens: Burdens,
   numFloorTilesInSolution: number,
+  initial: GameState,
 ): boolean | string {
   const { row, col } = state.player;
 
@@ -178,12 +185,15 @@ export function isPruned(
       console.log("INF: Player is on empty tile but wings are not active");
     return "you have fallen (prematurely)";
   }
+  
+  // Pre-emptively check for a floor tile discrepancy in branes that lack any breakable tiles. Triggering this means something in our code is wrong, not that a pruning needs to occur.
+  const currentTotalFloorTiles = countFloorTilesInState(state);
+  if (!gameStateContainsBreakables(initial) && countFloorTilesInState(initial) !== currentTotalFloorTiles) {
+    throw new Error("Floor tile discrepancy in brane with no breakable tiles.");
+  }
 
   // Not enough floor tiles remaining to satisfy the target.
-  if (
-    countFloorTiles(state.board) + floorInStaff(state.player.staffContent) <
-    numFloorTilesInSolution
-  ) {
+  if (currentTotalFloorTiles < numFloorTilesInSolution) {
     return "not enough tiles remain";
   }
 

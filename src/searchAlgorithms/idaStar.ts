@@ -14,6 +14,7 @@ import { actionsToString } from "../utils";
 import {
   countFloorTiles,
   isPruned,
+  floorInStaff,
   type DfsCounters,
   type SearchOptions,
   type SearchResult,
@@ -31,6 +32,7 @@ const verbose = Number(process.env.VERBOSE);
  * to stop and preserve the path; return "continue" to recurse into children.
  */
 export async function idaDfs(
+  initial: GameState,
   state: GameState,
   g: number,
   path: Action[],
@@ -85,8 +87,9 @@ export async function idaDfs(
   // flying and landing in the solution IS accounted for.
   const nodeDecision = await onNode(state, path, g, h);
   if (nodeDecision === "found") return "found";
-
-  let pruneReason = isPruned(state, target, burdens, numFloorTilesInSolution);
+  
+  // Processing prunings.
+  let pruneReason = isPruned(state, target, burdens, numFloorTilesInSolution, initial);
   if (pruneReason) {
     const amountOfPathFound = (() => {
       for (let i = 0; i < knownCorrectPath.length; i++) {
@@ -121,6 +124,7 @@ export async function idaDfs(
     path.push(action);
 
     const result = await idaDfs(
+      initial,
       next,
       g + 1,
       path,
@@ -172,6 +176,7 @@ async function sampleProgressCheckpoints(
   };
 
   await idaDfs(
+    initial,
     initial,
     0,
     [],
@@ -251,7 +256,10 @@ export async function idaStar({
 
   while (true) {
     const path: Action[] = [];
-    const result = await idaDfs(
+    
+    // Runs idaDfs and returns the result.
+    const result : number | "found" | "continue" = await idaDfs(
+      initial,
       initial,
       0,
       path,
@@ -264,6 +272,8 @@ export async function idaStar({
       counters,
       actions,
       knownCorrectPath,
+      
+      // Feeds the result of this async function into idaDfs's onNode parameter.
       async (state, path, g, h) => {
         const f = g + h;
 
@@ -280,6 +290,11 @@ export async function idaStar({
             for (let i = 0; i < knownCorrectPath.length; i++) {
               if (knownCorrectPath[i] != path[i]) return i;
             }
+            
+            if (!knownCorrectPath) {
+              throw new Error("Unknown knownCorrectPath.");
+            }
+            
             return knownCorrectPath.length;
           })();
 
@@ -318,10 +333,16 @@ export async function idaStar({
       );
     }
 
-    if (result === "found")
+    if (result === "found") {
+      if (!path) {
+        console.log("uh oh null path");
+      }
       return { path, nodesExplored: counters.nodesExplored, elapsedMs };
-    if (result === Infinity)
+    }
+    if (result === Infinity) {
+      console.log("uh oh infinite result, null path");
       return { path: null, nodesExplored: counters.nodesExplored, elapsedMs };
+    }
 
     threshold = result;
   }

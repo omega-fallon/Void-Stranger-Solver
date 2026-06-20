@@ -169,3 +169,39 @@ export function parseEntities(rows: string[]): EntityGrid {
 export function emptyEntityGrid(): EntityGrid {
   return Array.from({ length: 6 }, () => Array<Entity>(6).fill("empty"));
 }
+
+export function gameStateContainsBreakables(state: GameState) {
+  // Check player's staffContents.
+  for (let content of state.player.staffContent) {
+    // Intentionally double-equals.
+    if (
+      content == "glass" ||
+      content == "trap_inactive" ||
+      content == "trap_active"
+    ) {
+      return true;
+    }
+  }
+  
+  // Check the board.
+  for (let row of state.board) {
+    for (let cell of row) {
+      // Intentionally double-equals.
+      if (
+        cell == "glass" ||
+        cell == "trap_inactive" ||
+        cell == "trap_active"
+      ) {
+        return true;
+      }
+    }
+  }
+  
+  // None found.
+  return false;
+}
+
+import { countFloorTiles, floorInStaff } from "./search";
+export function countFloorTilesInState(state: GameState) {
+  return countFloorTiles(state.board) + floorInStaff(state.player.staffContent);
+}

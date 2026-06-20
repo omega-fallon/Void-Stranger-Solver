@@ -71,7 +71,7 @@ function buildFrontier(
     }
 
     // Dead end — skip entirely.
-    if (isPruned(current.state, target, burdens, numFloorTilesInSolution))
+    if (isPruned(current.state, target, burdens, numFloorTilesInSolution, initial))
       continue;
 
     for (const action of actions) {
@@ -245,6 +245,7 @@ export async function aStarThenIdaStar({
       // idaDfs backtracks cleanly on failure, leaving prefixVisited unchanged.
       const subPath: Action[] = [];
       const result = await idaDfs(
+        initial,
         node.state,
         0,
         subPath,

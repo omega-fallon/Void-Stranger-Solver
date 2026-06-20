@@ -102,7 +102,7 @@ export async function aStar({
       return { path: reconstructPath(current), nodesExplored, elapsedMs };
     }
 
-    if (isPruned(current.state, target, burdens, numFloorTilesInSolution))
+    if (isPruned(current.state, target, burdens, numFloorTilesInSolution, initial))
       continue;
 
     for (const action of actions) {

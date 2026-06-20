@@ -38,6 +38,7 @@ import {
  *   number   — the minimum f-value seen in this subtree (Infinity = dead end).
  */
 async function rbfsDfs(
+  initial: GameState,
   state: GameState,
   g: number,
   f: number,
@@ -74,7 +75,7 @@ async function rbfsDfs(
   const nodeDecision = await onNode(state, path, g, h);
   if (nodeDecision === "found") return "found";
 
-  if (isPruned(state, target, burdens, numFloorTilesInSolution))
+  if (isPruned(state, target, burdens, numFloorTilesInSolution, initial))
     return Infinity;
 
   // Build the successor list, computing each child's f up-front so we can sort.
@@ -119,6 +120,7 @@ async function rbfsDfs(
     path.push(best.action);
 
     const result = await rbfsDfs(
+      initial,
       best.state,
       g + 1,
       best.f,
@@ -182,6 +184,7 @@ export async function rbfs({
   const initialH = heuristic(initial, target, requireFinalJump, burdens).total;
 
   const result = await rbfsDfs(
+    initial,
     initial,
     0,
     initialH,

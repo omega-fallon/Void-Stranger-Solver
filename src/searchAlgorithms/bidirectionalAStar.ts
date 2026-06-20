@@ -768,7 +768,7 @@ export async function bidirectionalAStar({
         break;
       }
 
-      if (isPruned(current.state, target, burdens, numFloorTilesInSolution))
+      if (isPruned(current.state, target, burdens, numFloorTilesInSolution, initial))
         continue;
 
       for (const action of actions) {

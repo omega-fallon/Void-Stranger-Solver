@@ -1,7 +1,6 @@
 import { heuristic } from "./heuristic";
-import { countFloorTiles } from "./search";
+import { countFloorTiles, floorInStaff } from "./search";
 import { NO_BURDENS } from "./types";
-import { floorInStaff } from "./searchAlgorithms/shared";
 import type {
   Action,
   Board,
