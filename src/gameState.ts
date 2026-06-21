@@ -1,6 +1,6 @@
 import { heuristic } from "./heuristic";
 import { countFloorTiles, floorInStaff } from "./search";
-import { NO_BURDENS } from "./types";
+import { NO_BURDENS, PlayerState } from "./types";
 import type {
   Action,
   Board,
@@ -15,6 +15,12 @@ import type {
 import { actionsToString } from "./utils";
 
 export const ACTIONS: Action[] = ["left", "up", "right", "down", "staff"];
+
+// Given a PlayerState, returns the index of the tile the player is facing. THIS CAN RETURN OOB COORDINATES!
+export function facedTile(player: PlayerState): [number, number] {
+  const { dr, dc } = DELTAS[player.facing];
+  return [player.row + dr, player.col + dc];
+}
 
 const DELTAS: Record<Direction, { dr: number; dc: number }> = {
   up: { dr: -1, dc: 0 },

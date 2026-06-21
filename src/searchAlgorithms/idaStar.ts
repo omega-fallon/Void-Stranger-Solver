@@ -346,22 +346,9 @@ export async function idaStar({
     }
 
     if (result === "found") {
-      if (path === null) {
-        console.log("uh oh null path");
-      } else if (path.length === 0) {
-        console.log("uh oh empty path");
-      }
-      else {
-        console.log("proper found:",path);
-      }
       return { path, nodesExplored: counters.nodesExplored, elapsedMs };
-    }
-    else if (result === Infinity) {
-      console.log("uh oh infinite result, null path");
+    } else if (result === Infinity) {
       return { path: null, nodesExplored: counters.nodesExplored, elapsedMs };
-    }
-    else {
-      console.log("default case");
     }
 
     threshold = result;
