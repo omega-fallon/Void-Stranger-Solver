@@ -1,7 +1,11 @@
 import type { Board, Cell, GameState, EntityGrid, Burdens } from "./types";
 import { staffBanned } from "./search";
 import { inBounds } from "./gameState";
-import { offByStoodGlass, offByPlacingTile, offByTakingTile } from "./tests/brands/singleSteps.test";
+import {
+  offByStoodGlass,
+  offByPlacingTile,
+  offByTakingTile,
+} from "./tests/brands/singleSteps.test";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -51,23 +55,51 @@ export function heuristic(
   const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
 
   const finalJumpCost =
-    requireFinalJump && board[player.row]![player.col]! !== "empty" ? (burdens.wings ? 2 : 1) : 0;
+    requireFinalJump && board[player.row]![player.col]! !== "empty" ?
+      burdens.wings ?
+        2
+      : 1
+    : 0;
 
   // Trying to fix the heuristic... run these tests first for super simple difs?
   // Some of these wildly underestimate but that's admissible.
   if (board === target) {
-    return { total: finalJumpCost, mismatches: 0, transportCost: 0, travelCost: 0, finalJumpCost: finalJumpCost }
+    return {
+      total: finalJumpCost,
+      mismatches: 0,
+      transportCost: 0,
+      travelCost: 0,
+      finalJumpCost: finalJumpCost,
+    };
   }
   if (offByStoodGlass(board, target, player)) {
-    return { total: finalJumpCost, mismatches: 0, transportCost: 0, travelCost: 0, finalJumpCost: finalJumpCost }
+    return {
+      total: finalJumpCost,
+      mismatches: 0,
+      transportCost: 0,
+      travelCost: 0,
+      finalJumpCost: finalJumpCost,
+    };
   }
-  if (offByPlacingTile(board,target, player)) {
-    return { total: 1+finalJumpCost, mismatches: 0, transportCost: 0, travelCost: 0, finalJumpCost: finalJumpCost }
+  if (offByPlacingTile(board, target, player)) {
+    return {
+      total: 1 + finalJumpCost,
+      mismatches: 0,
+      transportCost: 0,
+      travelCost: 0,
+      finalJumpCost: finalJumpCost,
+    };
   }
-  if (offByTakingTile(board,target, player)) {
-    return { total: 1+finalJumpCost, mismatches: 0, transportCost: 0, travelCost: 0, finalJumpCost: finalJumpCost }
+  if (offByTakingTile(board, target, player)) {
+    return {
+      total: 1 + finalJumpCost,
+      mismatches: 0,
+      transportCost: 0,
+      travelCost: 0,
+      finalJumpCost: finalJumpCost,
+    };
   }
-  
+
   // Function declarations.
   function findMimic(entities: EntityGrid): [number, number] {
     for (let i = 0; i < 6; i++) {
