@@ -8,9 +8,87 @@ import {
 } from "../../gameState";
 import { BRANES, KNOWN_CORRECT_PATHS, RawLevel } from "../../levels";
 import { search } from "../../search";
-import { Board, Action, EntityGrid, Cell, StaffContent } from "../../types";
+import { Board, Action, EntityGrid, Cell, StaffContent, PlayerState } from "../../types";
 import { applyPath, parseActions } from "../../utils";
 const VERBOSE = Number(process.env.VERBOSE);
+
+// Functions for tests.
+export function coordsEqual(a: [number,number], b: [number,number]): boolean {
+return a[0] === b[0] && a[1] === b[1];
+}
+export function tileEqual(a: Cell, b: StaffContent): boolean {
+return String(a) === String(b);
+}
+export function offByStoodGlass(a: Board, b: Board, player: PlayerState): boolean {
+for (let i = 0; i < 6; i++) {
+  for (let i2 = 0; i2 < 6; i2++) {
+    if (
+      a[i]![i2]! === b[i]![i2]! ||
+      (a[i]![i2]! === "glass" &&
+        b[i]![i2]! === "empty" &&
+        player.row === i &&
+        player.col === i2)
+    ) {
+      // pass
+    } else {
+      return false;
+    }
+  }
+}
+return true;
+}
+export function offByPlacingTile(a: Board, b: Board, player: PlayerState): boolean {
+for (let i = 0; i < 6; i++) {
+  for (let i2 = 0; i2 < 6; i2++) {
+    if (
+      a[i]![i2]! === b[i]![i2]! ||
+      // Tile in source is empty,
+      (a[i]![i2]! === "empty" &&
+        // Is the faced tile of the player,
+        coordsEqual(
+          [i, i2],
+          facedTile(player),
+        ) &&
+        // And is the [-1] contents of the player's staff in initial.
+        player.staffContent.length > 0 &&
+        tileEqual(
+          b[i]![i2]!,
+          player.staffContent.at(-1)!,
+        ))
+    ) {
+      // pass
+    } else {
+      return false;
+    }
+  }
+}
+return true;
+}
+export function offByTakingTile(a: Board, b: Board, player: PlayerState): boolean {
+for (let i = 0; i < 6; i++) {
+  for (let i2 = 0; i2 < 6; i2++) {
+    if (
+      a[i]![i2]! === b[i]![i2]! ||
+      // Tile in initial is not empty.
+      (a[i]![i2]! !== "empty" &&
+        // Tile in target is empty,
+        b[i]![i2]! === "empty" &&
+        // Is the faced tile of the player,
+        coordsEqual(
+          [i, i2],
+          facedTile(player),
+        ) &&
+        // And the staff can take.
+        (player.staffContent.length === 0))
+    ) {
+      // pass
+    } else {
+      return false;
+    }
+  }
+}
+return true;
+}
 
 for (let algorithm of [
   "aStar",
@@ -107,87 +185,11 @@ for (let algorithm of [
               const target = pair.target;
               const requireFinalJump = pair.requireFinalJump ?? false;
 
-              // Functions for test.
-              function coordsEqual(a: [number,number], b: [number,number]): boolean {
-                return a[0] === b[0] && a[1] === b[1];
-              }
-              function tileEqual(a: Cell, b: StaffContent): boolean {
-                return String(a) === String(b);
-              }
-              function offByStoodGlass(a: Board, b: Board): boolean {
-                for (let i = 0; i < 6; i++) {
-                  for (let i2 = 0; i2 < 6; i2++) {
-                    if (
-                      a[i]![i2]! === b[i]![i2]! ||
-                      (a[i]![i2]! === "glass" &&
-                        b[i]![i2]! === "empty" &&
-                        pair.initial.player.row === i &&
-                        pair.initial.player.col === i2)
-                    ) {
-                      // pass
-                    } else {
-                      return false;
-                    }
-                  }
-                }
-                return true;
-              }
-              function offByPlacingTile(a: Board, b: Board): boolean {
-                for (let i = 0; i < 6; i++) {
-                  for (let i2 = 0; i2 < 6; i2++) {
-                    if (
-                      a[i]![i2]! === b[i]![i2]! ||
-                      // Tile in source is empty,
-                      (a[i]![i2]! === "empty" &&
-                        // Is the faced tile of the player,
-                        coordsEqual(
-                          [i, i2],
-                          facedTile(pair.initial.player),
-                        ) &&
-                        // And is the [-1] contents of the player's staff in initial.
-                        pair.initial.player.staffContent.length > 0 &&
-                        tileEqual(
-                          b[i]![i2]!,
-                          pair.initial.player.staffContent.at(-1)!,
-                        ))
-                    ) {
-                      // pass
-                    } else {
-                      return false;
-                    }
-                  }
-                }
-                return true;
-              }
-              function offByTakingTile(a: Board, b: Board): boolean {
-                for (let i = 0; i < 6; i++) {
-                  for (let i2 = 0; i2 < 6; i2++) {
-                    if (
-                      a[i]![i2]! === b[i]![i2]! ||
-                      // Tile in initial is not empty.
-                      (a[i]![i2]! !== "empty" &&
-                        // Tile in target is empty,
-                        b[i]![i2]! === "empty" &&
-                        // Is the faced tile of the player,
-                        coordsEqual(
-                          [i, i2],
-                          facedTile(pair.initial.player),
-                        ) &&
-                        // And the staff can take.
-                        (pair.name.includes("endless") ||
-                          pair.initial.player.staffContent.length === 0))
-                    ) {
-                      // pass
-                    } else {
-                      return false;
-                    }
-                  }
-                }
-                return true;
-              }
+              // Flag for if we do filters.
+              const doFilters = false;
 
               // Test? special case for initial -> target is same
-              if (pair.initial.board == pair.target) {
+              if (doFilters && pair.initial.board == pair.target) {
                 console.log("Filtering identical boards.");
                 assert.ok(
                   true,
@@ -195,7 +197,7 @@ for (let algorithm of [
                 );
               }
               // Catch case where the only difference is the tile the player is standing on.
-              else if (offByStoodGlass(pair.initial.board, pair.target)) {
+              else if (doFilters && offByStoodGlass(pair.initial.board, pair.target, pair.initial.player)) {
                 console.log("Filtering off-by-stood-glass boards.");
                 assert.ok(
                   true,
@@ -203,7 +205,7 @@ for (let algorithm of [
                 );
               }
               // Catch case where the only difference is the placing of a tile we're holding.
-              else if (offByPlacingTile(pair.initial.board, pair.target)) {
+              else if (doFilters && offByPlacingTile(pair.initial.board, pair.target, pair.initial.player)) {
                 console.log("Filtering off-by-placing-tile boards.");
                 assert.ok(
                   true,
@@ -211,7 +213,7 @@ for (let algorithm of [
                 );
               }
               // Catch case where the only difference taking the tile in front of us.
-              else if (offByTakingTile(pair.initial.board, pair.target)) {
+              else if (doFilters && offByTakingTile(pair.initial.board, pair.target, pair.initial.player)) {
                 console.log("Filtering off-by-taking-tile boards.");
                 assert.ok(
                   true,
