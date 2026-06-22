@@ -1226,22 +1226,29 @@ export function applyAction(
 
 export function stateKey(state: GameState): string {
   // We wrap these in IIFEs so the profiler names each part individually
-  function cellChar(c: Cell) {
-    return (
-      c === "empty" ? " "
-      : c === "floor" ? "#"
-      : c === "glass" ? "G"
-      : c === "wall" ? "W"
-      : c === "button" ? "B"
-      : c === "stairs" ? "S"
-      : c === "trap_active" ? "A"
-      : c === "trap_inactive" ? "T"
-      : "?"
-    );
-  }
   const boardStr = (function getBoardStr() {
     let str = "";
-    state.board.forEach((row) => row.forEach((c) => (str += cellChar(c))));
+    state.board.forEach((row) =>
+      row.forEach(
+        (c) =>
+          (str +=
+            c === "empty" ? " "
+            : c === "floor" ? "#"
+            : c === "glass" ? "G"
+            : c === "wall" ? "W"
+            : c === "button" ? "B"
+            : c === "stairs" ? "S"
+            : c === "trap_active" ? "A"
+            : c === "trap_inactive" ? "T"
+            : "?"),
+      ),
+    );
+
+    // Unsure about RLE here.
+    for (let i = 36; i > 2; i--) {
+      str = str.replace("#".repeat(i),"@"+String(i)).replace(" ".repeat(i),"_"+String(i)).replace("G".repeat(i),"g"+String(i));
+    }
+
     return str;
   })();
   const entityStr = (function getEntityStr() {
@@ -1261,6 +1268,12 @@ export function stateKey(state: GameState): string {
             : " "),
       ),
     );
+
+    // RLE for storage space? RLE empties with just a number, don't RLE anything else.
+    for (let i = 36; i > 1; i--) {
+      str = str.replace(" ".repeat(i),String(i));
+    }
+
     return str;
   })();
   const { row, col, facing, staffContent, wingsActive } =
@@ -1273,7 +1286,6 @@ export function stateKey(state: GameState): string {
     }
 
     let str = "";
-
     for (const x of staffContent) {
       str +=
         x === "floor" ? "f"
@@ -1286,6 +1298,9 @@ export function stateKey(state: GameState): string {
     return str;
   })();
   const wingsStr = wingsActive ? "W" : "0";
+  
+  //console.log("Characters saved by RLE: "+String(36-boardStr.length) + " & " + String(36-entityStr.length));
+
   // "so burdens aren't kept as part of the state bc they don't change in a run, so we don't need to store a lot of copies of them"
   return (function combineString() {
     return `${boardStr}|${entityStr}|${row},${col},${facing},${staffStr},${wingsStr}`;
