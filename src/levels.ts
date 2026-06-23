@@ -405,6 +405,29 @@ export const KNOWN_CORRECT_PATHS = {
   "Add/Tan universal":
     "IMPOSSIBLE",
 
+  "Add/Gor":
+    "IMPOSSIBLE",
+  "Add/Gor wings":
+    "IMPOSSIBLE",
+
+  "Add/Lev":
+    "IMPOSSIBLE",
+  "Add/Lev wings":
+    "IMPOSSIBLE",
+
+  "Add/Cif":
+    "IMPOSSIBLE",
+  "Add/Cif wings":
+    "IMPOSSIBLE",
+
+  "Add/Trailer":
+    "IMPOSSIBLE",
+  "Add/Trailer wings":
+    "IMPOSSIBLE",
+    
+  "Add/DIS universal":
+    "IMPOSSIBLE",
+
   // Eus
   "Eus/Add wings":
     "DLLDDRDRZRRURULUULLDLZRURRLZLRZRZDZUZUDZLLDLZRURRZLLRZLDLZLDUZUDZRRLZRURZLZDLDZURURZLZDLUZDZRUZLUDZRRLZRZUDRZRR",
@@ -458,7 +481,7 @@ export const KNOWN_CORRECT_PATHS = {
   // Gor/Add
   
   // Gor/Eus
-  
+   
   "Gor/Bee":
     "DLLDZUUDZDUULZRRZLZDZDUZDZDLZRRULZDDUZDDRUZULDZLRZRRLLZRZRUUDZLUZRDLZURDZLUZU",
     

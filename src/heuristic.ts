@@ -1,14 +1,105 @@
-import type { Board, Cell, GameState, EntityGrid, Burdens } from "./types";
+import type { Board, Cell, GameState, EntityGrid, Burdens, PlayerState, StaffContent } from "./types";
 import { staffBanned } from "./search";
-import { inBounds } from "./gameState";
-import {
-  offByStoodGlass,
-  offByPlacingTile,
-  offByTakingTile,
-} from "./tests/brands/singleSteps.test";
+import { inBounds, facedTile } from "./gameState";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+}
+
+export function naiveBoardDifference(state: Board, brand: Board): number {
+  let counter = 0;
+
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < 6; c++) {
+      // Brand has empty while state does not OR brand has non-empty while state has empty.
+      if ((brand[r]![c]! === "empty" && state[r]![c]! !== "empty") || (brand[r]![c]! !== "empty" && state[r]![c]! === "empty")) {
+        counter++;
+      }
+    }
+  }
+
+  return counter;
+}
+
+// Functions for tests.
+export function coordsEqual(a: [number, number], b: [number, number]): boolean {
+  return a[0] === b[0] && a[1] === b[1];
+}
+export function tileEqual(a: Cell, b: StaffContent): boolean {
+  return String(a) === String(b);
+}
+export function offByStoodGlass(
+  a: Board,
+  b: Board,
+  player: PlayerState,
+): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (
+        a[i]![i2]! === b[i]![i2]! ||
+        (a[i]![i2]! === "glass" &&
+          b[i]![i2]! === "empty" &&
+          player.row === i &&
+          player.col === i2)
+      ) {
+        // pass
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+export function offByPlacingTile(
+  a: Board,
+  b: Board,
+  player: PlayerState,
+): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (
+        a[i]![i2]! === b[i]![i2]! ||
+        // Tile in source is empty,
+        (a[i]![i2]! === "empty" &&
+          // Is the faced tile of the player,
+          coordsEqual([i, i2], facedTile(player)) &&
+          // And is the [-1] contents of the player's staff in initial.
+          player.staffContent.length > 0 &&
+          tileEqual(b[i]![i2]!, player.staffContent.at(-1)!))
+      ) {
+        // pass
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+export function offByTakingTile(
+  a: Board,
+  b: Board,
+  player: PlayerState,
+): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (
+        a[i]![i2]! === b[i]![i2]! ||
+        // Tile in initial is not empty.
+        (a[i]![i2]! !== "empty" &&
+          // Tile in target is empty,
+          b[i]![i2]! === "empty" &&
+          // Is the faced tile of the player,
+          coordsEqual([i, i2], facedTile(player)) &&
+          // And the staff can take.
+          player.staffContent.length === 0)
+      ) {
+        // pass
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 // Glass and floor are interchangeable for goal satisfaction.
@@ -63,7 +154,8 @@ export function heuristic(
 
   // Trying to fix the heuristic... run these tests first for super simple difs?
   // Some of these wildly underestimate but that's admissible.
-  if (board === target) {
+  const doFilters = false;
+  if (doFilters && board === target) {
     return {
       total: finalJumpCost,
       mismatches: 0,
@@ -72,7 +164,7 @@ export function heuristic(
       finalJumpCost: finalJumpCost,
     };
   }
-  if (offByStoodGlass(board, target, player)) {
+  if (doFilters && offByStoodGlass(board, target, player)) {
     return {
       total: finalJumpCost,
       mismatches: 0,
@@ -81,7 +173,7 @@ export function heuristic(
       finalJumpCost: finalJumpCost,
     };
   }
-  if (offByPlacingTile(board, target, player)) {
+  if (doFilters && offByPlacingTile(board, target, player)) {
     return {
       total: 1 + finalJumpCost,
       mismatches: 0,
@@ -90,7 +182,7 @@ export function heuristic(
       finalJumpCost: finalJumpCost,
     };
   }
-  if (offByTakingTile(board, target, player)) {
+  if (doFilters && offByTakingTile(board, target, player)) {
     return {
       total: 1 + finalJumpCost,
       mismatches: 0,
@@ -134,6 +226,7 @@ export function heuristic(
       for (let c = 0; c < 6; c++) {
         const cur = board[r]![c]!;
         const tgt = target[r]![c]!;
+
         // Glass the player is standing on will break for free on their next move.
         // If the target wants that cell empty, the mismatch resolves at no extra cost —
         // and crucially, the glass cannot be transported (it simply breaks), so it must
@@ -419,6 +512,12 @@ export function heuristic(
       travelCost = 0;
     }
   })();
+
+  // FINAL SANITY CHECK: is our total LESS than the naive difference?
+  if (mismatches + transportCost + travelCost + finalJumpCost < naiveBoardDifference(board, target)) {
+    console.log("Massive undershoot:",mismatches + transportCost + travelCost + finalJumpCost,naiveBoardDifference(board, target));
+    process.exit(1);
+  }
 
   return {
     total: mismatches + transportCost + travelCost + finalJumpCost,

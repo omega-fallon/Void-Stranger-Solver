@@ -27,6 +27,7 @@ const { values } = parseArgs({
     slow: { type: "boolean", short: "s" },
     algorithm: { type: "string", short: "a" },
     frontierDepth: { type: "string" },
+    naiveDifference: { type: "boolean" },
   },
 });
 
@@ -102,7 +103,14 @@ const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
     }[l] as Action;
   });
 
+import { naiveBoardDifference } from "./heuristic";
 async function main() {
+  // Testing.
+  if (values.naiveDifference) {
+    console.log(naiveBoardDifference(INITIAL_STATE.board, TARGET_BOARD));
+    process.exit(1);
+  }
+
   // Disable sword if we're in an enemy-less brane.
   if (values.sword && values.brane && pacifistBranes.includes(values.brane)) {
     console.log("Sword has no function in a brane with no enemies; disabling.");

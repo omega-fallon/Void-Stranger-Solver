@@ -18,87 +18,12 @@ import {
 } from "../../types";
 import { applyPath, parseActions } from "../../utils";
 const VERBOSE = Number(process.env.VERBOSE);
+import {
+  offByStoodGlass,
+  offByPlacingTile,
+  offByTakingTile,
+} from "./heuristic";
 
-// Functions for tests.
-export function coordsEqual(a: [number, number], b: [number, number]): boolean {
-  return a[0] === b[0] && a[1] === b[1];
-}
-export function tileEqual(a: Cell, b: StaffContent): boolean {
-  return String(a) === String(b);
-}
-export function offByStoodGlass(
-  a: Board,
-  b: Board,
-  player: PlayerState,
-): boolean {
-  for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i2 < 6; i2++) {
-      if (
-        a[i]![i2]! === b[i]![i2]! ||
-        (a[i]![i2]! === "glass" &&
-          b[i]![i2]! === "empty" &&
-          player.row === i &&
-          player.col === i2)
-      ) {
-        // pass
-      } else {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-export function offByPlacingTile(
-  a: Board,
-  b: Board,
-  player: PlayerState,
-): boolean {
-  for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i2 < 6; i2++) {
-      if (
-        a[i]![i2]! === b[i]![i2]! ||
-        // Tile in source is empty,
-        (a[i]![i2]! === "empty" &&
-          // Is the faced tile of the player,
-          coordsEqual([i, i2], facedTile(player)) &&
-          // And is the [-1] contents of the player's staff in initial.
-          player.staffContent.length > 0 &&
-          tileEqual(b[i]![i2]!, player.staffContent.at(-1)!))
-      ) {
-        // pass
-      } else {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-export function offByTakingTile(
-  a: Board,
-  b: Board,
-  player: PlayerState,
-): boolean {
-  for (let i = 0; i < 6; i++) {
-    for (let i2 = 0; i2 < 6; i2++) {
-      if (
-        a[i]![i2]! === b[i]![i2]! ||
-        // Tile in initial is not empty.
-        (a[i]![i2]! !== "empty" &&
-          // Tile in target is empty,
-          b[i]![i2]! === "empty" &&
-          // Is the faced tile of the player,
-          coordsEqual([i, i2], facedTile(player)) &&
-          // And the staff can take.
-          player.staffContent.length === 0)
-      ) {
-        // pass
-      } else {
-        return false;
-      }
-    }
-  }
-  return true;
-}
 
 for (let algorithm of [
   "aStar",
@@ -196,7 +121,7 @@ for (let algorithm of [
               const requireFinalJump = pair.requireFinalJump ?? false;
 
               // Flag for if we do filters.
-              const doFilters = false;
+              const doFilters = true;
 
               // Test? special case for initial -> target is same
               if (doFilters && pair.initial.board == pair.target) {
