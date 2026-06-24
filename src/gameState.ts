@@ -1246,7 +1246,10 @@ export function stateKey(state: GameState): string {
 
     // Unsure about RLE here.
     for (let i = 36; i > 2; i--) {
-      str = str.replace("#".repeat(i),"@"+String(i)).replace(" ".repeat(i),"_"+String(i)).replace("G".repeat(i),"g"+String(i));
+      str = str
+        .replace("#".repeat(i), "@" + String(i))
+        .replace(" ".repeat(i), "_" + String(i))
+        .replace("G".repeat(i), "g" + String(i));
     }
 
     return str;
@@ -1271,7 +1274,7 @@ export function stateKey(state: GameState): string {
 
     // RLE for storage space? RLE empties with just a number, don't RLE anything else.
     for (let i = 36; i > 1; i--) {
-      str = str.replace(" ".repeat(i),String(i));
+      str = str.replace(" ".repeat(i), String(i));
     }
 
     return str;
@@ -1298,7 +1301,7 @@ export function stateKey(state: GameState): string {
     return str;
   })();
   const wingsStr = wingsActive ? "W" : "0";
-  
+
   //console.log("Characters saved by RLE: "+String(36-boardStr.length) + " & " + String(36-entityStr.length));
 
   // "so burdens aren't kept as part of the state bc they don't change in a run, so we don't need to store a lot of copies of them"

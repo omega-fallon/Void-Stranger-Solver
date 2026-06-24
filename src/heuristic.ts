@@ -1,4 +1,12 @@
-import type { Board, Cell, GameState, EntityGrid, Burdens, PlayerState, StaffContent } from "./types";
+import type {
+  Board,
+  Cell,
+  GameState,
+  EntityGrid,
+  Burdens,
+  PlayerState,
+  StaffContent,
+} from "./types";
 import { staffBanned } from "./search";
 import { inBounds, facedTile } from "./gameState";
 
@@ -12,7 +20,10 @@ export function naiveBoardDifference(state: Board, brand: Board): number {
   for (let r = 0; r < 6; r++) {
     for (let c = 0; c < 6; c++) {
       // Brand has empty while state does not OR brand has non-empty while state has empty.
-      if ((brand[r]![c]! === "empty" && state[r]![c]! !== "empty") || (brand[r]![c]! !== "empty" && state[r]![c]! === "empty")) {
+      if (
+        (brand[r]![c]! === "empty" && state[r]![c]! !== "empty") ||
+        (brand[r]![c]! !== "empty" && state[r]![c]! === "empty")
+      ) {
         counter++;
       }
     }
@@ -514,8 +525,15 @@ export function heuristic(
   })();
 
   // FINAL SANITY CHECK: is our total LESS than the naive difference?
-  if (mismatches + transportCost + travelCost + finalJumpCost < naiveBoardDifference(board, target)) {
-    console.log("Massive undershoot:",mismatches + transportCost + travelCost + finalJumpCost,naiveBoardDifference(board, target));
+  if (
+    mismatches + transportCost + travelCost + finalJumpCost <
+    naiveBoardDifference(board, target)
+  ) {
+    console.log(
+      "Massive undershoot:",
+      mismatches + transportCost + travelCost + finalJumpCost,
+      naiveBoardDifference(board, target),
+    );
     process.exit(1);
   }
 

@@ -17,6 +17,7 @@ export interface DfsCounters {
   nodesExplored: number;
   loopsPrevented: number;
   pathsTrimmed: number;
+  nullEquivalencesLogged: number;
 }
 
 export interface SearchResult {

@@ -169,6 +169,7 @@ export async function aStarThenIdaStar({
     nodesExplored: 0,
     loopsPrevented: 0,
     pathsTrimmed: 0,
+    nullEquivalencesLogged: 0,
   };
   const start = performance.now();
   let lastLogTime = 0;

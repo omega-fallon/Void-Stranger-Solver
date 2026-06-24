@@ -24,7 +24,6 @@ import {
   offByTakingTile,
 } from "./heuristic";
 
-
 for (let algorithm of [
   "aStar",
   // "aStarThenIdaStar", // This algorithm is messed up in some situations, so disabling for now

@@ -172,6 +172,7 @@ export async function rbfs({
     nodesExplored: 0,
     loopsPrevented: 0,
     pathsTrimmed: 0,
+    nullEquivalencesLogged: 0,
   };
   const start = performance.now();
   // Initialised to 0 so the first log fires immediately rather than waiting 3s.

@@ -6,10 +6,11 @@ import {
   renderState,
   replayPath,
   stateKey,
+  inBounds,
 } from "../gameState";
 import { heuristic } from "../heuristic";
 import type { Action, Board, Burdens, GameState } from "../types";
-import { NO_BURDENS } from "../types";
+import { NO_BURDENS, Direction } from "../types";
 import { actionsToString } from "../utils";
 import {
   countFloorTiles,
@@ -133,6 +134,78 @@ export async function idaDfs(
     }
     visited.add(nextKey);
 
+    // BIG LONG FUNCTIONALLY EQUIVALENT PATHS OPTIMIZATION... STARTO!
+    // Look at each direction we could face. If there is no 'Z' action available for any given direction, the state is equivalent to any other facing direction for which that is true.
+    const directions: [Direction, Direction, Direction, Direction] = [
+      "up",
+      "right",
+      "down",
+      "left",
+    ];
+
+    const directionCoords : [[number,number],[number,number],[number,number],[number,number]] = [
+      [next.player.row - 1, next.player.col],
+      [next.player.row, next.player.col + 1],
+      [next.player.row + 1, next.player.col],
+      [next.player.row, next.player.col - 1],
+    ]
+
+    function isZInvalid(direction_i: number): boolean {
+      //const coords = directionCoords[direction_i];
+
+      //return (
+      //  // Coordinate is OOB or wall
+      //  !isInbounds(coords[0],coords[1]) ||
+      //  next.board[coords[0]]![coords[1]]! === "wall" ||
+
+      //  // Coordinate is empty and we have nothing to place.
+      //  (next.board[coords[0]]![coords[1]]! === "empty" && next.player.staffContent.length === 0)
+      //)
+
+      let nextModifiedFacing = structuredClone(next!);
+      nextModifiedFacing.player.facing! = directions[direction_i]!;
+
+      return applyAction(nextModifiedFacing, "staff", burdens) === null;
+    }
+
+    // Iterate through directions
+    for (let i = 0; i < 4; i++) {
+      let facedFound = false;
+
+      // Is player facing this direction...
+      if (next.player.facing === directions[i]) {
+        // Mark this as true so once we're done with the second loop, we exit the first one for efficiency.
+        facedFound = true;
+        //...and is it marked as Z invalid?
+        if (isZInvalid(i)) {
+          // Iterate through the directions again.
+          for (let i2 = 0; i2 < 4; i2++) {
+            // Skip the one we're already facing.
+            if (i === i2) {
+              continue;
+            }
+
+            // If this direction is Z invalid, increase the counter and log it as visited, since it is equivalent to the direction the player is facing.
+            if (isZInvalid(i2)) {
+              counters.nullEquivalencesLogged++;
+              visited.add(
+                nextKey.replace(
+                  "," + String(directions[i]) + ",",
+                  "," + String(directions[i2]) + ",",
+                ),
+              );
+            }
+          }
+        }
+      }
+
+      // Having found the faced direction, exit the loop.
+      if (facedFound) {
+        break;
+      }
+    }
+    // EQUIVALENT PATHS TRIMS DONE!
+
     path.push(action);
 
     const result = await idaDfs(
@@ -185,6 +258,7 @@ async function sampleProgressCheckpoints(
     nodesExplored: 0,
     loopsPrevented: 0,
     pathsTrimmed: 0,
+    nullEquivalencesLogged: 0,
   };
 
   await idaDfs(
@@ -256,6 +330,7 @@ export async function idaStar({
     nodesExplored: 0,
     loopsPrevented: 0,
     pathsTrimmed: 0,
+    nullEquivalencesLogged: 0,
   };
   const start = performance.now();
   // Initialized to 0 so the first log fires immediately rather than waiting 3s.
@@ -311,7 +386,7 @@ export async function idaStar({
           })();
 
           console.log(
-            `Threshold: ${threshold} | Explored: ${counters.nodesExplored} | ${counters.loopsPrevented} loops prevented | ${counters.pathsTrimmed} paths trimmed | ` +
+            `Threshold: ${threshold} | Explored: ${counters.nodesExplored} | ${counters.loopsPrevented} loops prevented | ${counters.pathsTrimmed} paths trimmed | ${counters.nullEquivalencesLogged} null equivalences logged\n` +
               `${(elapsedMs / 1000).toFixed(0)}s | ${nodesPerSec} nodes/sec\n` +
               `Path: ${g} | f=${f} (${g}g+${h}h) | ${amountOfPathFound} correct: ${actionsToString(
                 path,
