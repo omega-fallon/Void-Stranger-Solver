@@ -208,21 +208,21 @@ export const BRANES: RawBraneInitial[] = [
     name: "Cif",
     // prettier-ignore
     board: parseBoard([
-      "W#   W",
+      "##   #",
       " # # #",
       " #  # ",
       "# #   ",
       "#  #  ",
-      "W# S W",
+      "## S #",
     ]),
     // prettier-ignore
     entities: parseEntities([
+      "R    R",
       "      ",
       "      ",
       "      ",
       "      ",
-      "      ",
-      "      ",
+      "R    R",
     ]),
     player: { row: 4, col: 3, facing: "down", staffContent: [] },
   },

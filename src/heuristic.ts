@@ -552,7 +552,7 @@ export function heuristic(
   })();
 
   return {
-    total: mismatches + transportCost + travelCost + finalJumpCost,
+    total: Math.floor((mismatches + transportCost + travelCost + finalJumpCost) * (burdens.endless ? 0.5 : 1)),
     mismatches: mismatches,
     transportCost: transportCost,
     travelCost: travelCost,
