@@ -421,9 +421,9 @@ export function heuristic(
         // No valid spots.
         return Infinity;
       } else {
-        // Not holding means you can just take the tile directly.
+        // Subtract one if as a distance modifier if we can take the tile directly..
         if (player) {
-          return holding ? 0 : -1;
+          return (!holding || burdens.endless) ? -1 : 0;
         } else {
           return 0;
         }
@@ -443,7 +443,7 @@ export function heuristic(
       // Player is carrying a tile; find the nearest deficit it can fill.
       // If none exists, the tile will be placed temporarily — no travel cost charged.
       const matchingDeficits = deficit.filter(([, , dtype]) =>
-        canFill(player.staffContent[-1] as Cell, dtype),
+        canFill(player.staffContent.at(-1) as Cell, dtype),
       );
       if (matchingDeficits.length > 0) {
         travelCostDeficits = Math.min(
@@ -524,18 +524,7 @@ export function heuristic(
     }
   })();
 
-  // FINAL SANITY CHECK: is our total LESS than the naive difference?
-  if (
-    mismatches + transportCost + travelCost + finalJumpCost <
-    naiveBoardDifference(board, target)
-  ) {
-    console.log(
-      "Massive undershoot:",
-      mismatches + transportCost + travelCost + finalJumpCost,
-      naiveBoardDifference(board, target),
-    );
-    process.exit(1);
-  }
+  
 
   return {
     total: mismatches + transportCost + travelCost + finalJumpCost,

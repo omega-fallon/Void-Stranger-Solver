@@ -162,6 +162,11 @@ export async function idaDfs(
       //  (next.board[coords[0]]![coords[1]]! === "empty" && next.player.staffContent.length === 0)
       //)
 
+      // Speed up: don't duplicate if not needed.
+      if (next!.player.facing === directions[direction_i]!) {
+        return applyAction(next!, "staff", burdens) === null;
+      }
+
       let nextModifiedFacing = structuredClone(next!);
       nextModifiedFacing.player.facing! = directions[direction_i]!;
 

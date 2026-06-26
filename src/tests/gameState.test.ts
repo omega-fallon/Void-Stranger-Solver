@@ -104,7 +104,7 @@ test("standing on glass and using staff does not break glass", () => {
   );
   const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.board[0]![0], "glass"); // glass intact
-  assert.equal(r.player.staffContent, "floor");
+  assert.equal(r.player.staffContent[0], "floor");
   assert.equal(r.board[0]![1], "empty");
 });
 
@@ -122,7 +122,7 @@ test("store floor into empty staff", () => {
     ],
   );
   const r = applyAction(s, "staff", NO_BURDENS)!;
-  assert.equal(r.player.staffContent, "floor");
+  assert.equal(r.player.staffContent[0], "floor");
   assert.equal(r.board[0]![0], "empty");
   assert.equal(r.player.row, 1); // player did not move
 });
@@ -139,7 +139,7 @@ test("store stairs into empty staff", () => {
     ],
   );
   const r = applyAction(s, "staff", NO_BURDENS)!;
-  assert.equal(r.player.staffContent, "stairs");
+  assert.equal(r.player.staffContent[0], "stairs");
   assert.equal(r.board[0]![0], "empty");
 });
 
@@ -147,7 +147,7 @@ test("place floor from staff onto empty cell", () => {
   const s = makeState(1, 0, "up", ["floor"], [[1, 0, "floor"]]);
   const r = applyAction(s, "staff", NO_BURDENS)!;
   assert.equal(r.board[0]![0], "floor");
-  assert.equal(r.player.staffContent, "empty");
+  assert.equal(r.player.staffContent.length, 0);
 });
 
 test("staff full + front occupied returns null", () => {
@@ -194,7 +194,7 @@ test("step off glass then store front floor", () => {
   assert.equal(s1.player.col, 1);
   // Step 2: store (0,2) floor
   const s2 = applyAction(s1, "staff", NO_BURDENS)!;
-  assert.equal(s2.player.staffContent, "floor");
+  assert.equal(s2.player.staffContent[0], "floor");
   assert.equal(s2.board[0]![2], "empty");
   assert.equal(s2.board[0]![0], "empty"); // glass still gone
 });
@@ -353,7 +353,7 @@ test("staff action preserves wingsActive state", () => {
     endless: false,
   })!;
   assert.equal(r.player.wingsActive, true); // still airborne
-  assert.equal(r.player.staffContent, "floor");
+  assert.equal(r.player.staffContent[0], "floor");
   assert.equal(r.board[1]![0], "empty");
 });
 

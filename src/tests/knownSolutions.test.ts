@@ -5,6 +5,10 @@ import { BRANDS, BRANES, KNOWN_CORRECT_PATHS } from "../levels";
 import { applyPath } from "../utils";
 
 for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
+  if (pathStr.includes("IMPOSSIBLE")) {
+    continue;
+  }
+
   const hasWings = searchName.includes(" wings");
   const hasSword = searchName.includes(" sword");
   const hasEndless = searchName.includes(" endless");

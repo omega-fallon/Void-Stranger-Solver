@@ -493,6 +493,8 @@ export const KNOWN_CORRECT_PATHS = {
     "DZLUDDLLLRZDRRDRLDLRZU",
   "Gor/Gor wings sword":
     "DZLUDDLLLRZDRRDRLDLRZU",
+  "Gor/Gor wings sword endless":
+    "DZLUDLLLDRDRDDRZUUZDRLU",
 
   // Lev
   "Lev/Lev":
