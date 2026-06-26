@@ -7,15 +7,25 @@ import {
   replayPath,
   stateKey,
   inBounds,
+  facedTile,
 } from "../gameState";
 import { heuristic } from "../heuristic";
-import type { Action, Board, Burdens, GameState } from "../types";
+import type {
+  Action,
+  Board,
+  Burdens,
+  GameState,
+  Entity,
+  EntityGrid,
+} from "../types";
 import { NO_BURDENS, Direction } from "../types";
 import { actionsToString } from "../utils";
 import {
   countFloorTiles,
   isPruned,
   floorInStaff,
+  readBoardCouplet,
+  readEntityCouplet,
   type DfsCounters,
   type SearchOptions,
   type SearchResult,
@@ -118,6 +128,27 @@ export async function idaDfs(
   let min = Infinity;
 
   for (const action of actions) {
+    if (burdens.endless) {
+      // No need to ever place the stairs if we have the EVR.
+      if (
+        action === "staff" &&
+        state.player.staffContent.length > 0 &&
+        state.player.staffContent.at(-1) === "stairs" &&
+        readEntityCouplet(state.entities, facedTile(state.player)) === "empty"
+      ) {
+        continue;
+      }
+
+      // Obvious optimization that mostly only matters for Cif brane. Always take the stairs if we're empty-handed and have EVR.
+      if (
+        action !== "staff" &&
+        state.player.staffContent.length === 0 &&
+        readBoardCouplet(state.board, facedTile(state.player)) === "stairs"
+      ) {
+        continue;
+      }
+    }
+
     const next = applyAction(state, action, burdens);
     if (!next) continue;
 
@@ -143,12 +174,17 @@ export async function idaDfs(
       "left",
     ];
 
-    const directionCoords : [[number,number],[number,number],[number,number],[number,number]] = [
+    const directionCoords: [
+      [number, number],
+      [number, number],
+      [number, number],
+      [number, number],
+    ] = [
       [next.player.row - 1, next.player.col],
       [next.player.row, next.player.col + 1],
       [next.player.row + 1, next.player.col],
       [next.player.row, next.player.col - 1],
-    ]
+    ];
 
     function isZInvalid(direction_i: number): boolean {
       //const coords = directionCoords[direction_i];

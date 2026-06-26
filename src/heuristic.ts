@@ -314,7 +314,10 @@ export function heuristic(
     for (const [dr, dc, dtype] of deficit) {
       // Account for us already holding a tile.
       let heldCandidate = Infinity;
-      if (player.staffContent.length > 0 && canFill(player.staffContent.at(-1)!, dtype)) {
+      if (
+        player.staffContent.length > 0 &&
+        canFill(player.staffContent.at(-1)!, dtype)
+      ) {
         heldCandidate = manhattan(player.row, player.col, dr, dc) - 1;
       }
 
@@ -338,7 +341,7 @@ export function heuristic(
       }
 
       // Between the held tile and our filtered list, which distance is shortest for this deficit?
-      transportCost += Math.min(heldCandidate,filterListCandidate);
+      transportCost += Math.min(heldCandidate, filterListCandidate);
     }
   })();
 
@@ -444,7 +447,7 @@ export function heuristic(
       } else {
         // Subtract one if as a distance modifier if we can take the tile directly..
         if (player) {
-          return (!holding || burdens.endless) ? -1 : 0;
+          return !holding || burdens.endless ? -1 : 0;
         } else {
           return 0;
         }
@@ -534,25 +537,26 @@ export function heuristic(
     }
 
     // Return the least.
-    travelCost = Math.max(0,Math.min(travelCostDeficits, travelCostExcess));
+    travelCost = Math.max(0, Math.min(travelCostDeficits, travelCostExcess));
 
     // I forget what situations triggers this. Probably just a failsafe.
     if (travelCost === Infinity) {
       travelCost = 0;
+    } else {
+      // Account for player walking over excess glass on the way there. Currently this assumes we hit every single piece of excess glass and no useful and necessary ones. This is a massive subtraction. Fix this.
+      travelCost -= countExcessGlass(excess);
+      // This is a slightly quick-and-dirty fix to handle edge cases of non-admissibility.
+      travelCost -= mismatches;
+      // Cap the value.
+      travelCost = Math.max(0, travelCost);
     }
-    else {
-        // Account for player walking over excess glass on the way there. Currently this assumes we hit every single piece of excess glass and no useful and necessary ones. This is a massive subtraction. Fix this.
-        travelCost -= countExcessGlass(excess)
-        // This is a slightly quick-and-dirty fix to handle edge cases of non-admissibility.
-        travelCost -= mismatches;
-        // Cap the value.
-        travelCost = Math.max(0,travelCost);
-    }
-    
   })();
 
   return {
-    total: Math.floor((mismatches + transportCost + travelCost + finalJumpCost) * (burdens.endless ? 0.5 : 1)),
+    total: Math.floor(
+      (mismatches + transportCost + travelCost + finalJumpCost) *
+        (burdens.endless ? 0.5 : 1),
+    ),
     mismatches: mismatches,
     transportCost: transportCost,
     travelCost: travelCost,

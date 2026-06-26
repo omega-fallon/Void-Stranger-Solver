@@ -8,7 +8,7 @@ import type {
   Cell,
   Entity,
 } from "../types";
-import { renderState } from "../gameState";
+import { renderState, inBounds } from "../gameState";
 import { gameStateContainsBreakables, countFloorTilesInState } from "../utils";
 
 const verbose = Number(process.env.VERBOSE);
@@ -126,6 +126,29 @@ export function floorInStaff(heldTiles: StaffContent[]): number {
     }
   }
   return counter;
+}
+
+// Utility functions for stair stuff.
+export function readBoardCouplet(
+  board: Board,
+  couplet: [number, number],
+): Cell {
+  if (!inBounds(couplet[0], couplet[1])) {
+    return "empty";
+  }
+
+  return board[couplet[0]]![couplet[1]]!;
+}
+
+export function readEntityCouplet(
+  entities: EntityGrid,
+  couplet: [number, number],
+): Entity {
+  if (!inBounds(couplet[0], couplet[1])) {
+    return "empty";
+  }
+
+  return entities[couplet[0]]![couplet[1]]!;
 }
 
 /**
