@@ -8,6 +8,7 @@ import {
   stateKey,
   inBounds,
   facedTile,
+  stairsActive,
 } from "../gameState";
 import { heuristic } from "../heuristic";
 import type {
@@ -128,26 +129,26 @@ export async function idaDfs(
   let min = Infinity;
 
   for (const action of actions) {
-    if (burdens.endless) {
-      // No need to ever place the stairs if we have the EVR.
-      if (
-        action === "staff" &&
-        state.player.staffContent.length > 0 &&
-        state.player.staffContent.at(-1) === "stairs" &&
-        readBoardCouplet(state.board, facedTile(state.player)) === "empty"
-      ) {
-        continue;
-      }
+    // Isolated here so it can be used twice.
+    function staffTrims(state: GameState) {
+      return (
+        burdens.endless &&
+        // No need to ever place the stairs if we have the EVR.
+        ((action === "staff" &&
+          state.player.staffContent.length > 0 &&
+          state.player.staffContent.at(-1) === "stairs" &&
+          readBoardCouplet(state.board, facedTile(state.player)) === "empty" &&
+          stairsActive(state.player.staffContent, state.board, state.entities)) ||
+          // Obvious optimization that mostly only matters for Cif brane. Always take the stairs if we're empty-handed and have EVR.
+          (actions.includes("staff") &&
+            action !== "staff" &&
+            state.player.staffContent.length === 0 &&
+            readBoardCouplet(state.board, facedTile(state.player)) === "stairs"))
+      );
+    }
 
-      // Obvious optimization that mostly only matters for Cif brane. Always take the stairs if we're empty-handed and have EVR.
-      if (
-        actions.includes("staff") &&
-        action !== "staff" &&
-        state.player.staffContent.length === 0 &&
-        readBoardCouplet(state.board, facedTile(state.player)) === "stairs"
-      ) {
-        continue;
-      }
+    if (staffTrims(state)) {
+      continue;
     }
 
     const next = applyAction(state, action, burdens);
@@ -188,26 +189,25 @@ export async function idaDfs(
     ];
 
     function isZInvalid(direction_i: number): boolean {
-      //const coords = directionCoords[direction_i];
-
-      //return (
-      //  // Coordinate is OOB or wall
-      //  !isInbounds(coords[0],coords[1]) ||
-      //  next.board[coords[0]]![coords[1]]! === "wall" ||
-
-      //  // Coordinate is empty and we have nothing to place.
-      //  (next.board[coords[0]]![coords[1]]! === "empty" && next.player.staffContent.length === 0)
-      //)
-
       // Speed up: don't duplicate if not needed.
       if (next!.player.facing === directions[direction_i]!) {
+        if (staffTrims(next!)) {
+          return true;
+        }
+
         return applyAction(next!, "staff", burdens) === null;
       }
+      // Alter facing direction
+      else {
+        let nextModifiedFacing = structuredClone(next!);
+        nextModifiedFacing.player.facing! = directions[direction_i]!;
 
-      let nextModifiedFacing = structuredClone(next!);
-      nextModifiedFacing.player.facing! = directions[direction_i]!;
+        if (staffTrims(nextModifiedFacing)) {
+          return true;
+        }
 
-      return applyAction(nextModifiedFacing, "staff", burdens) === null;
+        return applyAction(nextModifiedFacing, "staff", burdens) === null;
+      }
     }
 
     // Iterate through directions

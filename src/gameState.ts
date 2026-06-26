@@ -64,7 +64,11 @@ function setEntity(
   );
 }
 
-function stairsActive(board: Board, grid: EntityGrid): boolean {
+export function stairsActive(staffContent: staffContent[], board: Board, grid: EntityGrid): boolean {
+  if (staffContent.includes("button")) {
+    return false;
+  }
+
   for (let i = 0; i < 6; i++) {
     for (let i2 = 0; i2 < 6; i2++) {
       // Check if the cell is a button and doesn't have an entity on it.
@@ -76,6 +80,7 @@ function stairsActive(board: Board, grid: EntityGrid): boolean {
       }
     }
   }
+
   return true;
 }
 
@@ -720,7 +725,7 @@ export function applyAction(
       dest === "stairs"
     ) {
       // ...are impassable.
-      if (stairsActive(board, entities)) {
+      if (stairsActive(staffContent, board, entities)) {
         return null;
       }
       // ...are walkable
