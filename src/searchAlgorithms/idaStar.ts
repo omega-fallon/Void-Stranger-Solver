@@ -134,13 +134,14 @@ export async function idaDfs(
         action === "staff" &&
         state.player.staffContent.length > 0 &&
         state.player.staffContent.at(-1) === "stairs" &&
-        readEntityCouplet(state.entities, facedTile(state.player)) === "empty"
+        readBoardCouplet(state.board, facedTile(state.player)) === "empty"
       ) {
         continue;
       }
 
       // Obvious optimization that mostly only matters for Cif brane. Always take the stairs if we're empty-handed and have EVR.
       if (
+        actions.includes("staff") &&
         action !== "staff" &&
         state.player.staffContent.length === 0 &&
         readBoardCouplet(state.board, facedTile(state.player)) === "stairs"
