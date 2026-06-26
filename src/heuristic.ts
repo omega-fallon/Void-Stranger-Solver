@@ -546,7 +546,7 @@ export function heuristic(
       // Account for player walking over excess glass on the way there. Currently this assumes we hit every single piece of excess glass and no useful and necessary ones. This is a massive subtraction. Fix this.
       travelCost -= countExcessGlass(excess);
       // This is a slightly quick-and-dirty fix to handle edge cases of non-admissibility.
-      travelCost -= mismatches;
+      //travelCost -= mismatches;
       // Cap the value.
       travelCost = Math.max(0, travelCost);
     }
@@ -555,7 +555,7 @@ export function heuristic(
   return {
     total: Math.floor(
       (mismatches + transportCost + travelCost + finalJumpCost) *
-        (burdens.endless ? 0.5 : 1),
+        (burdens.endless ? 1 : 1),
     ),
     mismatches: mismatches,
     transportCost: transportCost,

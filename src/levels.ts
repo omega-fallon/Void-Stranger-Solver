@@ -248,6 +248,28 @@ export const BRANES: RawBraneInitial[] = [
     ]),
     player: { row: 0, col: 0, facing: "down", staffContent: [] },
   },
+  {
+    name: "Full",
+    // prettier-ignore
+    board: parseBoard([
+      "######",
+      "######",
+      "######",
+      "######",
+      "######",
+      "######",
+    ]),
+    // prettier-ignore
+    entities: parseEntities([
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+    ]),
+    player: { row: 0, col: 0, facing: "down", staffContent: [] },
+  },
 ];
 
 export const BRANDS: RawBrand[] = [
@@ -491,8 +513,16 @@ export const KNOWN_CORRECT_PATHS = {
     "DZLDLUURLDZDDLDRDRZURUULL",
   "Gor/Gor wings":
     "DZLUDDLLLRZDRRDRLDLRZU",
+  "Gor/Gor sword":
+    "DZLDLUURLDZDDLDRDRZURUULL",
+  "Gor/Gor endless":
+    "DZLDLUURLDZDDLDRDRZUZRL",
   "Gor/Gor wings sword":
     "DZLUDDLLLRZDRRDRLDLRZU",
+  "Gor/Gor wings endless":
+    "DZLUDLLLDRDRDDRZUUZDRLU",
+  "Gor/Gor sword endless":
+    "DZLDLUURLDZDDLDRDRZUZRL",
   "Gor/Gor wings sword endless":
     "DZLUDLLLDRDRDDRZUUZDRLU",
 
@@ -500,11 +530,11 @@ export const KNOWN_CORRECT_PATHS = {
   "Lev/Lev":
     "LZDDLRDLDLDLULLURULURURL",
   "Lev/Lev wings":
-    "LZDDLRDLDLDLULLURULURURLR",
+    "LZLLLDLRDDLDRRDRURUULRDLU",
   "Lev/Lev endless":
     "LZDDLRDLDLDLULLURULURURL",
   "Lev/Lev wings endless":
-    "LZDDLRDLDLDLULLURULURURLR",
+    "LZLLLDLRDDLDRRDRURUULRDLU",
 
   // Cif
   "Cif/Cif":

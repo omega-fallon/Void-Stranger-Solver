@@ -262,7 +262,7 @@ export function isPruned(
         console.log(
           "INF: cornered rock covering excess tile: " + String(coord),
         );
-        return "There's a rock covering a that that must be removed in a corner";
+        return "There's a rock covering a tile that must be removed in a corner";
       }
     }
   }
