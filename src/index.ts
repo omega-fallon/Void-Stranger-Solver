@@ -28,6 +28,7 @@ const { values } = parseArgs({
     algorithm: { type: "string", short: "a" },
     frontierDepth: { type: "string" },
     naiveDifference: { type: "boolean" },
+    naiveDifferenceRank: { type: "boolean" },
   },
 });
 
@@ -61,14 +62,14 @@ Board encoding: " " empty  "#" floor  "G" glass  "S" stairs  "W" wall  "B" butto
   process.exit(0);
 }
 
-const rawLevel = BRANES.find((l) => l.name === values.brane);
+const rawLevel = values.naiveDifferenceRank ? BRANES.find((l) => true) : BRANES.find((l) => l.name === values.brane);
 
 if (!rawLevel) {
   console.error(`Unknown brane: "${values.brane}"`);
   process.exit(1);
 }
 
-const rawBrand = BRANDS.find((l) => l.name === values.brand);
+const rawBrand = values.naiveDifferenceRank ? BRANDS.find((l) => true) : BRANDS.find((l) => l.name === values.brand);
 
 if (!rawBrand) {
   console.error(`Unknown brand: "${values.brand}"`);
@@ -106,6 +107,20 @@ const knownCorrectPath = (KNOWN_CORRECT_PATHS[scenarioName] || "")
 import { naiveBoardDifference } from "./heuristic";
 async function main() {
   // Testing.
+  if (values.naiveDifferenceRank) {
+    let ndSet : [string,number][] = [];
+
+    for (const brane of BRANES) {
+      for (const brand of BRANDS) {
+        ndSet.push([brane.name + "/" + brand.name, naiveBoardDifference(brane.board, brand.board)]);
+      }
+    }
+    
+    ndSet.sort((a, b) => a[1] - b[1]);
+
+    console.log("Naive difference ranking:",ndSet);
+    process.exit(1);
+  }
   if (values.naiveDifference) {
     console.log(naiveBoardDifference(INITIAL_STATE.board, TARGET_BOARD));
     process.exit(1);

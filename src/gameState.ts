@@ -64,7 +64,7 @@ function setEntity(
   );
 }
 
-export function stairsActive(staffContent: staffContent[], board: Board, grid: EntityGrid): boolean {
+export function stairsActive(staffContent: StaffContent[], board: Board, grid: EntityGrid): boolean {
   if (staffContent.includes("button")) {
     return false;
   }

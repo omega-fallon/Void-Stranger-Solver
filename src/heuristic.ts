@@ -19,11 +19,16 @@ export function naiveBoardDifference(state: Board, brand: Board): number {
 
   for (let r = 0; r < 6; r++) {
     for (let c = 0; c < 6; c++) {
-      // Brand has empty while state does not OR brand has non-empty while state has empty.
-      if (
-        (brand[r]![c]! === "empty" && state[r]![c]! !== "empty") ||
-        (brand[r]![c]! !== "empty" && state[r]![c]! === "empty")
-      ) {
+      // Excess tiles. Half-count glass..
+      if (state[r]![c]! !== "empty" && brand[r]![c]! === "empty") {
+        counter++;
+        if (state[r]![c]! === "glass") {
+          counter -= 0.5;
+        }
+      }
+
+      // Deficit tiles.
+      if (state[r]![c]! === "empty" && brand[r]![c]! !== "empty") {
         counter++;
       }
     }
