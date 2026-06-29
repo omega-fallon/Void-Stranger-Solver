@@ -652,6 +652,7 @@ function generatePredecessors(
  * the existing forward applyAction oracle.
  */
 export async function bidirectionalAStar({
+  braneName,
   initial,
   target,
   verbose = 0,
@@ -671,7 +672,7 @@ export async function bidirectionalAStar({
   fwdOpen.push({
     state: initial,
     gCost: 0,
-    hCost: heuristic(initial, target, requireFinalJump, burdens).total,
+    hCost: heuristic(braneName, initial, target, requireFinalJump, burdens).total,
     action: null,
     parent: null,
   });
@@ -714,7 +715,7 @@ export async function bidirectionalAStar({
     bwdOpen.push({
       state: goalState,
       gCost: 0,
-      hCost: heuristic(goalState, initial.board, false, burdens).total,
+      hCost: heuristic(braneName, goalState, initial.board, false, burdens).total,
       action: null,
       parent: null,
     });
@@ -797,7 +798,7 @@ export async function bidirectionalAStar({
         fwdOpen.push({
           state: next,
           gCost: current.gCost + 1,
-          hCost: heuristic(next, target, requireFinalJump, burdens).total,
+          hCost: heuristic(braneName, next, target, requireFinalJump, burdens).total,
           action,
           parent: current,
         });
@@ -835,7 +836,7 @@ export async function bidirectionalAStar({
         bwdOpen.push({
           state: predecessor,
           gCost: current.gCost + 1,
-          hCost: heuristic(predecessor, initial.board, false, burdens).total,
+          hCost: heuristic(braneName, predecessor, initial.board, false, burdens).total,
           action,
           parent: current,
         });

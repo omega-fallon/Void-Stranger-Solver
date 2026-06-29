@@ -44,6 +44,7 @@ const verbose = Number(process.env.VERBOSE);
  * to stop and preserve the path; return "continue" to recurse into children.
  */
 export async function idaDfs(
+  braneName: string,
   initial: GameState,
   state: GameState,
   g: number,
@@ -64,7 +65,7 @@ export async function idaDfs(
     h: number,
   ) => Promise<"found" | "continue">,
 ): Promise<"found" | number> {
-  const h = heuristic(state, target, requireFinalJump, burdens).total;
+  const h = heuristic(braneName, state, target, requireFinalJump, burdens).total;
   const f = g + h;
 
   if (f > threshold) {
@@ -81,7 +82,7 @@ export async function idaDfs(
       console.warn(
         `Pruning state from correct path (above threshold): ${g} + ${h} > ${threshold}\n` +
           `${actionsToString(path)} / ${actionsToString(knownCorrectPath)}\n` +
-          JSON.stringify(heuristic(state, target, requireFinalJump, burdens)) +
+          JSON.stringify(heuristic(braneName, state, target, requireFinalJump, burdens)) +
           "\n" +
           renderState(state),
       );
@@ -251,6 +252,7 @@ export async function idaDfs(
     path.push(action);
 
     const result = await idaDfs(
+      braneName,
       initial,
       next,
       g + 1,
@@ -285,6 +287,7 @@ export async function idaDfs(
  * accurate progress estimates for the main search.
  */
 async function sampleProgressCheckpoints(
+  braneName: string,
   initial: GameState,
   target: Board,
   burdens: Burdens,
@@ -304,6 +307,7 @@ async function sampleProgressCheckpoints(
   };
 
   await idaDfs(
+    braneName,
     initial,
     initial,
     0,
@@ -335,6 +339,7 @@ async function sampleProgressCheckpoints(
 }
 
 export async function idaStar({
+  braneName,
   initial,
   target,
   verbose = 0, // TODO: Clean up whether I pass this as variable vs use env variable everywhere
@@ -357,6 +362,7 @@ export async function idaStar({
   const progressSamples =
     showProgress ?
       await sampleProgressCheckpoints(
+        braneName,
         initial,
         target,
         burdens,
@@ -367,7 +373,7 @@ export async function idaStar({
 
   let threshold =
     initialThreshold ??
-    heuristic(initial, target, requireFinalJump, burdens).total;
+    heuristic(braneName, initial, target, requireFinalJump, burdens).total;
   const counters: DfsCounters = {
     nodesExplored: 0,
     loopsPrevented: 0,
@@ -388,6 +394,7 @@ export async function idaStar({
 
     // Runs idaDfs and returns the result.
     const result = await idaDfs(
+      braneName,
       initial,
       initial,
       0,

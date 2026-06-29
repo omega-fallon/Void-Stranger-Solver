@@ -27,6 +27,7 @@ export interface SearchResult {
 }
 
 export interface SearchOptions {
+  braneName: string;
   initial: GameState;
   target: Board;
   verbose?: number;

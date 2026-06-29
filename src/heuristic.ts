@@ -8,7 +8,7 @@ import type {
   StaffContent,
 } from "./types";
 import { staffBanned } from "./search";
-import { inBounds, facedTile } from "./gameState";
+import { inBounds, facedTile, anyEntities } from "./gameState";
 
 function manhattan(r1: number, c1: number, r2: number, c2: number): number {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2);
@@ -118,7 +118,7 @@ export function offByTakingTile(
   return true;
 }
 
-// Glass and floor are interchangeable for goal satisfaction.
+// Returns true if a tile is valid for being the "white" of a carved brand.
 // Defined locally to avoid a circular import with gameState.ts.
 const isSolid = (c: Cell) =>
   c === "floor" ||
@@ -149,7 +149,8 @@ export interface HeuristicResult {
   finalJumpCost: number;
 }
 
-export function heuristic(
+// Add brane heuristic.
+export function addHeuristic(
   state: GameState,
   target: Board,
   requireFinalJump: boolean,
@@ -168,10 +169,23 @@ export function heuristic(
       : 1
     : 0;
 
-  // Trying to fix the heuristic... run these tests first for super simple difs?
-  // Some of these wildly underestimate but that's admissible.
-  const doFilters = false;
-  if (doFilters && board === target) {
+  // We wrap these in IIFEs so the profiler names each part individually
+  (function calculateBoardDiff() {
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 6; c++) {
+        const cur = board[r]![c]!;
+        const tgt = target[r]![c]!;
+
+        if (!cellMatchesTarget(cur, tgt)) {
+          mismatches++;
+          if (cur !== "empty") excess.push([r, c, cur]);
+          else if (tgt !== "empty") deficit.push([r, c, tgt]);
+        }
+      }
+    }
+  })();
+
+  if (mismatches === 0)
     return {
       total: finalJumpCost,
       mismatches: 0,
@@ -179,34 +193,142 @@ export function heuristic(
       travelCost: 0,
       finalJumpCost: finalJumpCost,
     };
+
+  let transportCost = 0;
+  (function calculateTransportCost() {
+    // --- Transportation lower bound ---
+    // Each deficit cell needs a compatible tile delivered to it.
+    // Solid deficits (floor/glass) can be filled by any solid excess tile.
+    // For each deficit, find the nearest compatible excess tile.
+    // Min movement to carry a tile from S to D: max(0, manhattan(S, D) − 2).
+    // Proof: player starts adjacent to S (dist 1) and ends adjacent to D (dist 1),
+    // so movement ≥ manhattan(S, D) − 2. Matching each deficit to its nearest
+    // compatible source is admissible: the optimal assignment can only pair it to
+    // a same-or-farther source.
+
+    // Run for each deficit.
+    for (const [dr, dc, dtype] of deficit) {
+      // Account for us already holding a tile.
+      let heldCandidate = Infinity;
+      if (
+        player.staffContent.length > 0 &&
+        canFill(player.staffContent.at(-1)!, dtype)
+      ) {
+        heldCandidate = manhattan(player.row, player.col, dr, dc) - 1;
+      }
+
+      // Filter a list of excess tiles which can be used to fill that deficit.
+      const sources = excess.filter(([, , etype]) => canFill(etype, dtype));
+
+      // If any are applicable...
+      let filterListCandidate = Infinity;
+      if (sources.length > 0) {
+        // Add to our total the moving distance between the applicable excess and our currently-viewed deficit.
+        filterListCandidate = Math.min(
+          ...sources.map(([er, ec]) =>
+            Math.max(0, manhattan(er, ec, dr, dc) - 2),
+          ),
+        );
+      }
+
+      // Quit early.
+      if (heldCandidate === Infinity && filterListCandidate === Infinity) {
+        continue;
+      }
+
+      // Between the held tile and our filtered list, which distance is shortest for this deficit?
+      transportCost += Math.min(heldCandidate, filterListCandidate);
+    }
+  })();
+
+  let travelCost = Infinity;
+  (function calculateTravelCost() {
+    // --- Player travel to first work item ---
+    // Min movement to be adjacent to cell C: max(0, manhattan(player, C) − 1).
+    const holding = player.staffContent.length > 0;
+
+    // Two variables: add the lowest?
+    let travelCostDeficits = Infinity;
+    let travelCostExcess = Infinity;
+
+    // Filling deficits.
+    if (holding) {
+      // Player is carrying a tile; find the nearest deficit it can fill.
+      // If none exists, the tile will be placed temporarily — no travel cost charged.
+      const matchingDeficits = deficit.filter(([, , dtype]) =>
+        canFill(player.staffContent.at(-1) as Cell, dtype),
+      );
+      if (matchingDeficits.length > 0) {
+        travelCostDeficits = Math.min(
+          ...matchingDeficits.map(([dr, dc]) =>
+            Math.max(0, manhattan(player.row, player.col, dr, dc) - 1),
+          ),
+        );
+      }
+    }
+
+    // Removing excess. This is only possible if we can take with the Void Rod or if we have glass in the excess.
+    if (
+      excess.length > 0 &&
+      (!holding || burdens.endless)
+    ) {
+      // Player needs to reach adjacent to an excess tile to remove it.
+      travelCostExcess = Math.min(
+        ...excess.map(([er, ec]) => (
+          manhattan(player.row, player.col, er, ec) - 1
+        ),
+      ));
+    }
+
+    // Return the least.
+    travelCost = Math.max(0, Math.min(travelCostDeficits, travelCostExcess));
+
+    // I forget what situations triggers this. Probably just a failsafe.
+    if (travelCost === Infinity) {
+      travelCost = 0;
+    } else {
+      travelCost = Math.max(0, travelCost);
+    }
+  })();
+
+  return {
+    total: (mismatches + transportCost + travelCost + finalJumpCost),
+    mismatches: mismatches,
+    transportCost: transportCost,
+    travelCost: travelCost,
+    finalJumpCost: finalJumpCost,
+  };
+}
+
+export function heuristic(
+  braneName: string,
+  state: GameState,
+  target: Board,
+  requireFinalJump: boolean,
+  burdens: Burdens,
+): HeuristicResult {
+  if (braneName === "Add") {
+    return addHeuristic(state,target,requireFinalJump,burdens);
   }
-  if (doFilters && offByStoodGlass(board, target, player)) {
-    return {
-      total: finalJumpCost,
-      mismatches: 0,
-      transportCost: 0,
-      travelCost: 0,
-      finalJumpCost: finalJumpCost,
-    };
-  }
-  if (doFilters && offByPlacingTile(board, target, player)) {
-    return {
-      total: 1 + finalJumpCost,
-      mismatches: 0,
-      transportCost: 0,
-      travelCost: 0,
-      finalJumpCost: finalJumpCost,
-    };
-  }
-  if (doFilters && offByTakingTile(board, target, player)) {
-    return {
-      total: 1 + finalJumpCost,
-      mismatches: 0,
-      transportCost: 0,
-      travelCost: 0,
-      finalJumpCost: finalJumpCost,
-    };
-  }
+
+  const { board, player, entities } = state;
+
+  // Using this to detect some... stuff?
+  // 0 - no entities, just floor & stair tiles
+  let simplifyState = -1
+
+  const peaceful = anyEntities(entities);
+
+  let mismatches = 0;
+  const excess: [number, number, Cell][] = []; // cells with tiles that shouldn't be there
+  const deficit: [number, number, Cell][] = []; // cells that need a tile delivered
+
+  const finalJumpCost =
+    requireFinalJump && board[player.row]![player.col]! !== "empty" ?
+      burdens.wings ?
+        2
+      : 1
+    : 0;
 
   // Function declarations.
   function findMimic(entities: EntityGrid): [number, number] {

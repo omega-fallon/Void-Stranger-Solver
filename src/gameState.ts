@@ -64,7 +64,11 @@ function setEntity(
   );
 }
 
-export function stairsActive(staffContent: StaffContent[], board: Board, grid: EntityGrid): boolean {
+export function stairsActive(
+  staffContent: StaffContent[],
+  board: Board,
+  grid: EntityGrid,
+): boolean {
   if (staffContent.includes("button")) {
     return false;
   }
@@ -238,6 +242,17 @@ export function anyMovers(ent: EntityGrid): boolean {
         getEntity(ent, i, i2) === "leech_left" ||
         getEntity(ent, i, i2) === "leech_right"
       ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+export function anyEntities(ent: EntityGrid): boolean {
+  for (let i = 0; i < 6; i++) {
+    for (let i2 = 0; i2 < 6; i2++) {
+      if (getEntity(ent, i, i2) !== "empty") {
         return true;
       }
     }
@@ -1370,7 +1385,7 @@ export function replayPath(
     }
     console.log(
       `Step ${i + 1}: ${action} | h: ${
-        heuristic(state, target, requireFinalJump, burdens).total
+        heuristic("???", state, target, requireFinalJump, burdens).total
       }\n${renderState(state)}\n`,
     );
     if (isGoal(state, target, requireFinalJump)) {

@@ -31,6 +31,7 @@ import {
  * without an external threshold.
  */
 export async function aStar({
+  braneName,
   initial,
   target,
   verbose = 0,
@@ -48,7 +49,7 @@ export async function aStar({
   const closed = new Set<string>();
   let nodesExplored = 0;
 
-  const initialH = heuristic(initial, target, requireFinalJump, burdens).total;
+  const initialH = heuristic(braneName, initial, target, requireFinalJump, burdens).total;
   open.push({
     state: initial,
     gCost: 0,
@@ -112,7 +113,7 @@ export async function aStar({
       if (!next) continue;
       if (closed.has(stateKey(next))) continue;
 
-      const nextH = heuristic(next, target, requireFinalJump, burdens).total;
+      const nextH = heuristic(braneName, next, target, requireFinalJump, burdens).total;
       open.push({
         state: next,
         gCost: current.gCost + 1,
