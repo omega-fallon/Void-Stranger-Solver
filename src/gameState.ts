@@ -22,7 +22,7 @@ export function facedTile(player: PlayerState): [number, number] {
   return [player.row + dr, player.col + dc];
 }
 
-const DELTAS: Record<Direction, { dr: number; dc: number }> = {
+export const DELTAS: Record<Direction, { dr: number; dc: number }> = {
   up: { dr: -1, dc: 0 },
   down: { dr: 1, dc: 0 },
   left: { dr: 0, dc: -1 },

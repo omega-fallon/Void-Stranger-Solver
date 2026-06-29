@@ -178,6 +178,7 @@ export function addHeuristic(
 
         if (!cellMatchesTarget(cur, tgt)) {
           mismatches++;
+          
           if (cur !== "empty") excess.push([r, c, cur]);
           else if (tgt !== "empty") deficit.push([r, c, tgt]);
         }
@@ -267,7 +268,7 @@ export function addHeuristic(
       }
     }
 
-    // Removing excess. This is only possible if we can take with the Void Rod or if we have glass in the excess.
+    // Removing excess. Must be able to take with the Void Rod.
     if (
       excess.length > 0 &&
       (!holding || burdens.endless)
@@ -275,7 +276,17 @@ export function addHeuristic(
       // Player needs to reach adjacent to an excess tile to remove it.
       travelCostExcess = Math.min(
         ...excess.map(([er, ec]) => (
-          manhattan(player.row, player.col, er, ec) - 1
+          // If we're ON the tile, we would have to move to be able to be able to pick it up, taking a minimum of 3 moves to do so.
+          (player.row === er && player.col === ec) ? 3 :
+
+          // If we're DIRECTLY NEXT TO the tile but not facing it, it will take a minimum of 2 moves to do so.
+          (manhattan(player.row, player.col, er, ec) === 1 && !(facedTile(player)[0] === er && facedTile(player)[1] === ec) ? 2 : 
+
+          // If it's DIRECTLY DIAGONAL to us, it will take 3 moves to reposition correctly.
+          (manhattan(player.row, player.col, er, ec) === 2 ? 3 :
+
+          // Our default case.
+          manhattan(player.row, player.col, er, ec) - 1))
         ),
       ));
     }

@@ -184,6 +184,7 @@ for (let algorithm of [
                 // Run our algorithm to try to find the path.
                 const { path } = await Promise.race([
                   search({
+                    brane,
                     initial,
                     target,
                     verbose: VERBOSE,

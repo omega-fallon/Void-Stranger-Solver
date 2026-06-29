@@ -218,6 +218,7 @@ for (const {
     assert.ok(after !== null, `Action "${action}" was unexpectedly invalid`);
     const targetBoard = parseBoard(target);
     const hBefore = heuristic(
+      name.split("/")[0] ?? name,
       before,
       targetBoard,
       requireFinalJump,
@@ -279,6 +280,7 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
       } as GameState;
       const target = parseBoard(targetLevel.board);
       const heuristicValues = heuristic(
+        "Eus",
         state,
         target,
         level.requireFinalJump ?? false,
@@ -318,7 +320,7 @@ test("Heuristic + steps should not exceed target level for all state pairs (admi
         }, transportCost: ${heuristicValues.transportCost}, travelCost: ${
           heuristicValues.travelCost
         }\n${JSON.stringify(
-          heuristic(state, target, level.requireFinalJump ?? false, NO_BURDENS),
+          heuristic("Eus", state, target, level.requireFinalJump ?? false, NO_BURDENS),
           null,
           2,
         )}\n${renderState(state)}`,
@@ -352,7 +354,7 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
     for (const [iStr, state] of Object.entries(statesOnPath)) {
       const stepsTaken = Number(iStr);
       const stepsRemaining = pathStr.length - stepsTaken;
-      const h = heuristic(state, brand.board, true, burdens);
+      const h = heuristic(braneName!, state, brand.board, true, burdens);
       const nextState = statesOnPath[Number(iStr) + 1];
       assert.ok(
         h.total <= stepsRemaining,
@@ -388,6 +390,7 @@ for (const [searchName, pathStr] of Object.entries(KNOWN_CORRECT_PATHS)) {
         const initial = statesOnPath[startStepI]!;
         const stepsBack = endStepI - startStepI;
         const h = heuristic(
+          braneName!,
           initial,
           target.board,
           endStepI === statesOnPath.length - 1,

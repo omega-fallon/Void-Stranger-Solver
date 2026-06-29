@@ -38,6 +38,7 @@ export function boardToStrings(board: Board): string[] {
 }
 
 type TestLevel = Omit<RawLevel, "name"> & {
+  braneName?: string;
   name?: string;
   solutionLength?: number;
   requireFinalJump?: boolean;
@@ -55,6 +56,7 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
   const target = level.target;
   const requireFinalJump = level.requireFinalJump ?? true;
   const { path } = await search({
+    braneName: level.braneName ?? "UNKNOWN",
     initial,
     target,
     requireFinalJump,
@@ -96,7 +98,7 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
   // Forward: state at index i has i steps taken, path.length - i remaining.
   for (let i = 0; i < statesOnPath.length; i++) {
     const stepsRemaining = path.length - i;
-    const h = heuristic(statesOnPath[i]!, target, requireFinalJump, burdens);
+    const h = heuristic(level.braneName ?? "UNKNOWN", statesOnPath[i]!, target, requireFinalJump, burdens);
     assert.ok(
       h.total <= stepsRemaining,
       `Forward step ${i}/${path.length}: h=${h.total} > ${stepsRemaining} steps remaining. ` +
@@ -106,7 +108,7 @@ async function runSearchTest(t: TestContext, level: TestLevel) {
   // Backward: same states, iterated from the end to make failure messages clearer.
   for (let i = statesOnPath.length - 1; i >= 0; i--) {
     const stepsRemaining = path.length - i;
-    const h = heuristic(statesOnPath[i]!, target, requireFinalJump, burdens);
+    const h = heuristic(level.braneName ?? "UNKNOWN", statesOnPath[i]!, target, requireFinalJump, burdens);
     assert.ok(
       h.total <= stepsRemaining,
       `Backward step ${i}/${path.length}: h=${h.total} > ${stepsRemaining} steps remaining. ` +
@@ -124,6 +126,7 @@ async function assertSearchFailure(t: TestContext, level: TestLevel) {
   const target = level.target;
   const requireFinalJump = level.requireFinalJump ?? true;
   const { path } = await search({
+    braneName: level.braneName ?? "UNKNOWN",
     initial,
     target,
     requireFinalJump,
