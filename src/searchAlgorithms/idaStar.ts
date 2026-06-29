@@ -132,13 +132,13 @@ export async function idaDfs(
     // Isolated here so it can be used twice.
     function staffTrims(state: GameState) {
       return (
-        burdens.endless &&
-        // No need to ever place the stairs if we have the EVR.
+        // EVR and stairs aren't sealed.
+        burdens.endless && stairsActive(state.player.staffContent, state.board, state.entities) &&
+        // No need to ever place the stairs if we have the EVR. (Exception made if we have more tiles behind the stairs in the queue.)
         ((action === "staff" &&
-          state.player.staffContent.length > 0 &&
-          state.player.staffContent.at(-1) === "stairs" &&
-          readBoardCouplet(state.board, facedTile(state.player)) === "empty" &&
-          stairsActive(state.player.staffContent, state.board, state.entities)) ||
+          state.player.staffContent.length === 1 &&
+          state.player.staffContent[0] === "stairs" &&
+          readBoardCouplet(state.board, facedTile(state.player)) === "empty") ||
           // Obvious optimization that mostly only matters for Cif brane. Always take the stairs if we're empty-handed and have EVR.
           (actions.includes("staff") &&
             action !== "staff" &&
